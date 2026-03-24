@@ -1,118 +1,142 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
-function Login() {
-  const [role, setRole] = useState("admin");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-
+export default function Login() {
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    // Reset error
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+    remember: false,
+  });
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  // 🔥 Role Logic
+  const getUserRole = (email) => {
+    if (email === "superadmin@test.com") return "SUPER_ADMIN";
+    if (email === "admin@test.com") return "BUSINESS_ADMIN";
+    if (email === "manager@test.com") return "MARKETING_MANAGER";
+    if (email === "viewer@test.com") return "VIEWER";
+    return null;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
     setError("");
 
-    // ✅ Admin Validation
-    if (
-      role === "admin" &&
-      email === "admin@gmail.com" &&
-      password === "4321"
-    ) {
-      navigate("/admin-dashboard");
+    if (!form.email || !form.password) {
+      setError("Email आणि Password भरा.");
+      return;
     }
 
-    // ✅ Customer Validation
-    else if (
-      role === "customer" &&
-      email === "customer@gmail.com" &&
-      password === "4321"
-    ) {
-      navigate("/customer-dashboard");
+    // 🔥 Password check
+    if (form.password !== "123456") {
+      setError("Wrong password");
+      return;
     }
 
-    // ❌ Invalid
-    else {
-      setError("Invalid email or password!");
-    }
+    setLoading(true);
+
+    setTimeout(() => {
+      const role = getUserRole(form.email);
+
+      if (!role) {
+        setError("User not found");
+        setLoading(false);
+        return;
+      }
+
+      // ✅ Save user
+      localStorage.setItem("user", JSON.stringify({
+        email: form.email,
+        role: role
+      }));
+
+      // 🔥 Role-based redirect
+      if (role === "SUPER_ADMIN") {
+        navigate("/super-admin");
+      } else if (role === "BUSINESS_ADMIN") {
+        navigate("/admin-dashboard");
+      } else if (role === "MARKETING_MANAGER") {
+        navigate("/manager-dashboard");
+      } else {
+        navigate("/viewer-dashboard");
+      }
+
+      setLoading(false);
+    }, 1000);
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="flex min-h-screen items-center justify-center bg-slate-100">
+      <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
 
-      {/* LEFT */}
-      <div className="hidden md:flex w-1/2 bg-blue-700 text-white items-center justify-center p-10">
-        <h1 className="text-3xl font-bold">
-          A few more clicks to <br /> Sign in to your account.
-        </h1>
-      </div>
+        <h2 className="text-2xl font-bold mb-6 text-center">
+          Login
+        </h2>
 
-      {/* RIGHT */}
-      <div className="w-full md:w-1/2 flex items-center justify-center bg-gray-100 p-6">
-        <div className="w-full max-w-md bg-white p-6 rounded-xl shadow-md">
-
-          {/* Role Switch */}
-          <div className="flex mb-4 gap-2">
-            <button
-              onClick={() => setRole("admin")}
-              className={`flex-1 py-2 rounded ${
-                role === "admin"
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200"
-              }`}
-            >
-              Admin
-            </button>
-
-            <button
-              onClick={() => setRole("customer")}
-              className={`flex-1 py-2 rounded ${
-                role === "customer"
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200"
-              }`}
-            >
-              Customer
-            </button>
+        {error && (
+          <div className="bg-red-100 text-red-600 p-2 mb-4 rounded">
+            {error}
           </div>
+        )}
 
-          <h2 className="text-xl font-semibold mb-4">Sign In</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
 
-          {/* Email */}
           <input
             type="email"
+            name="email"
             placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full mb-3 p-2 border rounded"
+            value={form.email}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
           />
 
-          {/* Password */}
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
+            name="password"
             placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full mb-3 p-2 border rounded"
+            value={form.password}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
           />
 
-          {/* Error Message */}
-          {error && (
-            <p className="text-red-500 text-sm mb-3">{error}</p>
-          )}
-
-          {/* Login Button */}
           <button
-            onClick={handleLogin}
-            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="text-sm text-blue-500"
           >
-            Login
+            {showPassword ? "Hide" : "Show"} Password
           </button>
 
-        </div>
+          <button
+            type="submit"
+            className="w-full bg-indigo-600 text-white p-2 rounded"
+          >
+            {loading ? "Signing in..." : "Login"}
+          </button>
+
+        </form>
+
+        <p className="text-sm mt-4 text-center">
+          Don't have account?{" "}
+          <Link to="/register" className="text-blue-500">
+            Register
+          </Link>
+        </p>
+
       </div>
     </div>
   );
 }
-
-export default Login;

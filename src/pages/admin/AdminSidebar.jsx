@@ -35,11 +35,11 @@ export default function AdminSidebar({ activePage, onNavigate, darkMode }) {
 
   return (
     <aside
-      className={`w-56 min-w-[224px] flex flex-col h-screen sticky top-0 overflow-y-auto transition-colors duration-300
+      className={`w-56 min-w-[224px] flex flex-col h-screen sticky top-0 overflow-hidden transition-colors duration-300
         ${darkMode ? "bg-[#0a0919]" : "bg-[#0d0c1d]"}`}
     >
       {/* ── Logo ── */}
-      <div className="flex items-center gap-3 px-5 py-4 border-b border-white/10">
+      <div className="flex-shrink-0 flex items-center gap-3 px-5 py-4 border-b border-white/10">
         <div className="w-9 h-9 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-xl flex items-center justify-center font-black text-white text-sm shadow-lg">
           M
         </div>
@@ -52,7 +52,7 @@ export default function AdminSidebar({ activePage, onNavigate, darkMode }) {
       </div>
 
       {/* ── Nav ── */}
-      <nav className="flex-1 py-2 overflow-y-auto">
+      <nav className="flex-1 py-2 overflow-hidden">
         {groups.map((group) => {
           const items = SIDEBAR_ITEMS.filter(i => i.group === group);
           const isOpen = openGroups[group] !== false;
@@ -101,8 +101,8 @@ export default function AdminSidebar({ activePage, onNavigate, darkMode }) {
         })}
       </nav>
 
-      {/* ── Footer: Language only (Logout is in Navbar dropdown) ── */}
-      <div className="px-4 py-3 border-t border-white/10">
+      {/* ── Footer ── */}
+      <div className="flex-shrink-0 px-4 py-3 border-t border-white/10">
         <select className="w-full bg-white/10 text-white/60 text-xs rounded-lg px-3 py-2 border border-white/15 outline-none cursor-pointer">
           <option>Select Language</option>
           <option>English</option>

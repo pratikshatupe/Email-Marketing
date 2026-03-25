@@ -1,457 +1,190 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-} from "recharts";
-import { useAuth } from "../auth/AuthContext";
+// src/admin/AdminDashboard.jsx
+import React from "react";
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { Users, Mail, Send, BarChart3, TrendingUp, ArrowUpRight } from "lucide-react";
+import { useLanguage } from "../admin/Languagecontext";
 
-// ── Dashboard Data (एकच — सगळ्यांसाठी same) ───────────
-const campaignReportData = [
-  { name: "Recipients",   value: 151 },
-  { name: "Delivered",    value: 134 },
-  { name: "Click",        value: 8   },
-  { name: "Unique Click", value: 7   },
-  { name: "Failed",       value: 17  },
-  { name: "Open",         value: 7   },
-  { name: "Bounce",       value: 17  },
+const lineData = [
+  { month: "Jan", emails: 5, sms: 2 }, { month: "Feb", emails: 12, sms: 5 },
+  { month: "Mar", emails: 24, sms: 8 }, { month: "Apr", emails: 18, sms: 12 },
+  { month: "May", emails: 30, sms: 18 },
 ];
-const earningsData = [{ month: "Jan", earnings: 2 }, { month: "Feb", earnings: 8 }, { month: "Mar", earnings: 12 }];
-const pieEmailData = [{ name: "Sent", value: 24 }, { name: "Available", value: 76 }];
-const pieSMSData   = [{ name: "Sent", value: 0  }, { name: "Available", value: 100 }];
-const PIE_COLORS   = ["#6366f1", "#10b981"];
-const gatewayData  = [
-  { name: "Free",   value: 2, color: "#6366f1" },
-  { name: "PayPal", value: 0, color: "#10b981" },
-  { name: "Stripe", value: 0, color: "#f59e0b" },
+const barData = [
+  { name: "Recipients", value: 151 }, { name: "Delivered", value: 134 },
+  { name: "Clicked", value: 8 }, { name: "Failed", value: 17 }, { name: "Bounced", value: 17 },
 ];
-const purchaseHistory = [
-  { id: "#20268987", plan: "FREE", date: "2026-03-13", status: "PAID", color: "#84cc16" },
-  { id: "#20252438", plan: "FREE", date: "2026-03-01", status: "PAID", color: "#6366f1" },
-];
-const lastSentMails = [
-  { id: 1, email: "sheetgv@gmail.com",            date: "15 Mar, 2026", color: "#ef4444" },
-  { id: 2, email: "shihabhossain639@aol.com",     date: "15 Mar, 2026", color: "#ec4899" },
-  { id: 3, email: "mdshihabhossain639@gmail.com", date: "15 Mar, 2026", color: "#6366f1" },
-  { id: 4, email: "mprince2k16@gmail.com",        date: "15 Mar, 2026", color: "#84cc16" },
-  { id: 5, email: "queenbks.new@gmail.com",       date: "15 Mar, 2026", color: "#f97316" },
-];
-const lastCampaigns = [
-  { id: 1, name: "Spring Sale 2026", color: "#6366f1" },
-  { id: 2, name: "Newsletter March", color: "#10b981" },
-  { id: 3, name: "Homepage",         color: "#84cc16" },
-  { id: 4, name: "Re-engagement",    color: "#f59e0b" },
-];
-const sentMailData = [{ month: "Jan", sent: 5 }, { month: "Feb", sent: 12 }, { month: "Mar", sent: 24 }];
-const sentSMSData  = [{ month: "Jan", sms: 0 }, { month: "Feb", sms: 0 }, { month: "Mar", sms: 0 }];
-
-// ── Sidebar Items ───────────────────────────────────────
-const SIDEBAR_ITEMS = [
-  { id: "dashboard",   label: "Dashboard",          icon: "⊞", permKey: null },
-  { id: "subscribers", label: "Subscribers",         icon: "👥", permKey: "sidebar_subscribers" },
-  { id: "templates",   label: "Templates",           icon: "⑂",  permKey: "sidebar_templates" },
-  { id: "reports",     label: "Reports",             icon: "📊", permKey: "sidebar_reports" },
-  { id: "settings",    label: "Settings",            icon: "⚙️", permKey: "sidebar_settings" },
-  { id: "roles",       label: "Roles & Permissions", icon: "🔐", permKey: "sidebar_roles" },
+const statusStyle = { Sent: "bg-emerald-100 text-emerald-700", Draft: "bg-slate-100 text-slate-500", Sending: "bg-blue-100 text-blue-600" };
+const campaigns = [
+  { name: "Spring Sale 2026", status: "Sent",    open: "68%", click: "24%", color: "#6366f1" },
+  { name: "Newsletter March", status: "Sent",    open: "54%", click: "18%", color: "#10b981" },
+  { name: "Product Launch",   status: "Draft",   open: "—",   click: "—",   color: "#f59e0b" },
+  { name: "Re-engagement",    status: "Sending", open: "32%", click: "11%", color: "#ec4899" },
 ];
 
-// ── UI Helpers ──────────────────────────────────────────
-function Card({ children, className = "", dark }) {
-  return (
-    <div className={`rounded-2xl p-5 shadow-sm border transition-colors
-      ${dark ? "bg-[#16142e] border-white/10" : "bg-white border-slate-100"} ${className}`}>
-      {children}
-    </div>
-  );
-}
-function STitle({ title, dark }) {
-  return <h2 className={`text-[11px] font-bold uppercase tracking-widest mb-4 ${dark ? "text-white/30" : "text-slate-400"}`}>{title}</h2>;
-}
-function StatCard({ icon, value, label, dark }) {
-  return (
-    <div className={`rounded-2xl p-4 border flex flex-col gap-1.5 hover:shadow-md transition-all
-      ${dark ? "bg-[#16142e] border-white/10" : "bg-white border-slate-100"}`}>
-      <span className="text-xl">{icon}</span>
-      <div className={`text-lg font-bold ${dark ? "text-white/85" : "text-slate-800"}`}>{value}</div>
-      <div className={`text-[10px] ${dark ? "text-white/30" : "text-slate-400"}`}>{label}</div>
-    </div>
-  );
-}
-function VMBtn({ dark }) {
-  return (
-    <button className={`w-full py-2 mt-2 text-xs border border-dashed rounded-xl bg-transparent cursor-pointer
-      ${dark ? "text-white/25 border-white/10 hover:bg-white/5" : "text-slate-400 border-slate-200 hover:bg-slate-50"}`}>
-      View More
-    </button>
-  );
-}
-// 🔒 Permission नसल्यावर दाखवायचा block
-function Locked({ label, dark }) {
-  return (
-    <div className={`flex flex-col items-center justify-center py-7 gap-2 rounded-2xl border border-dashed mb-4
-      ${dark ? "border-white/10 text-white/20" : "border-slate-200 text-slate-300"}`}>
-      <span className="text-2xl">🔒</span>
-      <span className="text-xs">{label} — permission नाही</span>
-    </div>
-  );
-}
+export default function AdminDashboard() {
+  const { t } = useLanguage();
 
-// ══════════════════════════════════════════════════════════
-// DASHBOARD CONTENT — hasPerm() वापरून sections show/hide
-// ══════════════════════════════════════════════════════════
-function DashboardContent({ dark }) {
-  const { hasPerm } = useAuth(); // ← Context मधून
+  const cards = [
+    { titleKey: "total_users",       value: "1,245", icon: Users,    color: "from-indigo-500 to-indigo-600",   bg: "bg-indigo-50",  text: "text-indigo-600"  },
+    { titleKey: "total_contacts",    value: "8,932", icon: Mail,     color: "from-pink-500 to-pink-600",      bg: "bg-pink-50",    text: "text-pink-600"    },
+    { titleKey: "total_campaigns",   value: "342",   icon: BarChart3, color: "from-purple-500 to-purple-600", bg: "bg-purple-50",  text: "text-purple-600"  },
+    { titleKey: "emails_sent_today", value: "1,876", icon: Send,     color: "from-emerald-500 to-emerald-600", bg: "bg-emerald-50", text: "text-emerald-600" },
+  ];
 
-  const cs  = dark ? "#1e1c3a" : "#f8fafc";
-  const at  = { fontSize: 10, fill: dark ? "#5a5880" : "#94a3b8" };
-  const tip = { background: dark ? "#1e1b3a" : "#fff", border: "none", borderRadius: 8, color: dark ? "#e2e8f0" : "#334155" };
+  const quickStats = [
+    { labelKey: "sent_this_month", value: "24", accent: "bg-indigo-500"  },
+    { labelKey: "bounced",         value: "0",  accent: "bg-red-400"     },
+    { labelKey: "subscribers",     value: "1",  accent: "bg-emerald-500" },
+    { labelKey: "sms_sent",        value: "0",  accent: "bg-amber-400"   },
+  ];
 
   return (
-    <div>
-      {/* Stats */}
-      {hasPerm("view_stats") ? (
-        <>
-          <STitle title="General Report" dark={dark} />
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 mb-5">
-            <StatCard dark={dark} icon="✉️" value="1,009" label="Total Emails"      />
-            <StatCard dark={dark} icon="▦"  value="6"     label="Email Campaigns"   />
-            <StatCard dark={dark} icon="▦"  value="0"     label="SMS Campaigns"     />
-            <StatCard dark={dark} icon="👥" value="4"     label="Email Groups"      />
-            <StatCard dark={dark} icon="👥" value="0"     label="SMS Groups"        />
-            <StatCard dark={dark} icon="⑂"  value="17"   label="Email Templates"   />
-            <StatCard dark={dark} icon="⑂"  value="1"    label="SMS Templates"     />
-            <StatCard dark={dark} icon="✉️" value="24"   label="Sent Emails"       />
-            <StatCard dark={dark} icon="💲" value="$0.00" label="Total Expense"     />
-            <StatCard dark={dark} icon="⏱" value="0"     label="Bounced"           />
-            <StatCard dark={dark} icon="👤" value="2"     label="Total Customer"    />
-            <StatCard dark={dark} icon="💳" value="2"     label="Total Purchased"   />
-            <StatCard dark={dark} icon="⏱" value="24"    label="Total Sent Emails" />
-            <StatCard dark={dark} icon="⏱" value="0"     label="Total Sent SMS"    />
-            <StatCard dark={dark} icon="👤" value="1"     label="Subscribed"        />
-            <StatCard dark={dark} icon="📞" value="1,005" label="Total Phone No."   />
-          </div>
-        </>
-      ) : <Locked label="General Stats" dark={dark} />}
+    <div className="p-4 sm:p-6 space-y-5 bg-slate-50 min-h-screen">
+
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-800">{t("dashboard_overview")}</h1>
+          <p className="text-xs text-slate-400 mt-0.5">{t("welcome_msg")}</p>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-slate-500 bg-white border border-slate-200 px-3 py-2 rounded-xl self-start sm:self-auto">
+          <TrendingUp size={13} className="text-indigo-500" />
+          <span>March 2026</span>
+        </div>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
+        {cards.map((card, i) => {
+          const Icon = card.icon;
+          return (
+            <div key={i} className={`p-3.5 sm:p-5 rounded-2xl border shadow-sm ${card.bg} hover:shadow-md transition-all`}>
+              <div className="flex justify-between items-start mb-3">
+                <div className={`p-2 rounded-xl bg-gradient-to-br ${card.color} text-white shadow-sm`}>
+                  <Icon size={15} />
+                </div>
+                <span className={`text-[10px] font-bold ${card.text} bg-white px-1.5 py-0.5 rounded-lg flex items-center gap-0.5`}>
+                  <ArrowUpRight size={9} />+12%
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 font-medium leading-tight">{t(card.titleKey)}</p>
+              <h2 className="text-lg sm:text-2xl font-bold text-slate-800 mt-0.5">{card.value}</h2>
+              <div className="mt-3 h-1 w-full bg-white/70 rounded-full overflow-hidden">
+                <div className={`h-full w-3/4 bg-gradient-to-r ${card.color} rounded-full`} />
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
       {/* Charts */}
-      {hasPerm("view_charts") ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-          {[
-            { title: "Sent Mail Report", key: "sent", val: 24, data: sentMailData, dm: [0, 30] },
-            { title: "Sent SMS Report",  key: "sms",  val: 0,  data: sentSMSData,  dm: [0, 5]  },
-          ].map(r => (
-            <Card key={r.title} dark={dark}>
-              <STitle title={r.title} dark={dark} />
-              <div className="flex gap-6 mb-4">
-                <div><div className="text-xl font-bold text-indigo-400">{r.val}</div>
-                  <div className={`text-xs ${dark ? "text-white/25" : "text-slate-400"}`}>This Month</div></div>
-                <div><div className={`text-xl font-bold ${dark ? "text-white/20" : "text-slate-300"}`}>0</div>
-                  <div className={`text-xs ${dark ? "text-white/25" : "text-slate-400"}`}>Last Month</div></div>
-              </div>
-              <ResponsiveContainer width="100%" height={120}>
-                <LineChart data={r.data}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={cs} />
-                  <XAxis dataKey="month" tick={at} />
-                  <YAxis tick={at} domain={r.dm} />
-                  <Tooltip contentStyle={tip} />
-                  <Line type="monotone" dataKey={r.key} stroke="#6366f1" strokeWidth={2} dot={{ r: 4, fill: "#6366f1" }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </Card>
-          ))}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h2 className="text-sm font-bold text-slate-700">{t("email_analytics")}</h2>
+              <p className="text-[11px] text-slate-400">{t("last_5_months")}</p>
+            </div>
+            <div className="flex gap-3 text-[10px] text-slate-500">
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-indigo-500 inline-block"></span>Email</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>SMS</span>
+            </div>
+          </div>
+          <ResponsiveContainer width="100%" height={185}>
+            <LineChart data={lineData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+              <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#94a3b8" }} />
+              <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} />
+              <Tooltip contentStyle={{ borderRadius: 10, border: "none", fontSize: 12 }} />
+              <Line type="monotone" dataKey="emails" stroke="#6366f1" strokeWidth={2.5} dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="sms" stroke="#10b981" strokeWidth={2.5} dot={{ r: 3 }} />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
-      ) : <Locked label="Mail & SMS Charts" dark={dark} />}
 
-      {/* Campaign Report */}
-      {hasPerm("view_campaigns") ? (
-        <Card dark={dark} className="mb-4">
-          <STitle title="Campaign Report" dark={dark} />
-          <ResponsiveContainer width="100%" height={230}>
-            <BarChart data={campaignReportData} layout="vertical" margin={{ left: 20 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={cs} horizontal={false} />
-              <XAxis type="number" tick={at} domain={[0, 160]} ticks={[0, 40, 80, 120, 160]} />
-              <YAxis type="category" dataKey="name" tick={at} width={85} />
-              <Tooltip contentStyle={tip} />
-              <Bar dataKey="value" fill="#6366f1" radius={[0, 6, 6, 0]}
-                label={{ position: "insideLeft", fill: "white", fontSize: 10, fontWeight: 700 }} />
+        <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border">
+          <div className="mb-4">
+            <h2 className="text-sm font-bold text-slate-700">{t("campaign_report")}</h2>
+            <p className="text-[11px] text-slate-400">{t("last_campaign_stats")}</p>
+          </div>
+          <ResponsiveContainer width="100%" height={185}>
+            <BarChart data={barData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+              <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#94a3b8" }} />
+              <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} />
+              <Tooltip contentStyle={{ borderRadius: 10, border: "none", fontSize: 12 }} />
+              <Bar dataKey="value" fill="#6366f1" radius={[5, 5, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
-        </Card>
-      ) : <Locked label="Campaign Report" dark={dark} />}
+        </div>
+      </div>
 
-      {/* Limit Report */}
-      {hasPerm("view_limit_report") && (
-        <Card dark={dark} className="mb-4">
-          <STitle title="Limit Report" dark={dark} />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[
-              { title: "Email Usage", data: pieEmailData, legend: ["Sent", "Available"] },
-              { title: "SMS Usage",   data: pieSMSData,   legend: ["Sent", "Available"] },
-            ].map(p => (
-              <div key={p.title} className="flex flex-col items-center">
-                <ResponsiveContainer width={160} height={160}>
-                  <PieChart>
-                    <Pie data={p.data} cx="50%" cy="50%" outerRadius={70} dataKey="value"
-                      label={({ percent }) => `${(percent * 100).toFixed(1)}%`} labelLine={false}>
-                      {p.data.map((_, i) => <Cell key={i} fill={PIE_COLORS[i]} />)}
-                    </Pie>
-                    <Tooltip contentStyle={tip} />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="flex gap-3 text-[10px] mt-1">
-                  {PIE_COLORS.map((c, i) => (
-                    <span key={i} className={`flex items-center gap-1 ${dark ? "text-white/45" : ""}`}>
-                      <span className="w-2 h-2 rounded-full inline-block" style={{ background: c }}></span>
-                      {p.legend[i]}
-                    </span>
+      {/* Quick Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {quickStats.map((s, i) => (
+          <div key={i} className="bg-white rounded-2xl border shadow-sm p-3.5 sm:p-4">
+            <div className={`w-1 h-7 rounded-full ${s.accent} mb-2.5`}></div>
+            <div className="text-xl font-bold text-slate-800">{s.value}</div>
+            <div className="text-[11px] text-slate-400 mt-0.5">{t(s.labelKey)}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Recent Campaigns */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wider">{t("recent_campaigns")}</h2>
+          <span className="text-xs text-indigo-500 cursor-pointer hover:underline">{t("view_all")}</span>
+        </div>
+        <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
+          {/* Desktop */}
+          <div className="hidden sm:block overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-100 bg-slate-50/50">
+                  {[t("campaign_col"), t("status"), t("open_rate"), t("click_rate")].map(h => (
+                    <th key={h} className="text-left py-3 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">{h}</th>
                   ))}
+                </tr>
+              </thead>
+              <tbody>
+                {campaigns.map((c, i) => (
+                  <tr key={i} className="border-b border-slate-50 hover:bg-slate-50 last:border-0 transition-colors">
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs flex-shrink-0"
+                          style={{ background: c.color + "20", color: c.color }}>✉</div>
+                        <span className="font-medium text-slate-700 text-[13px]">{c.name}</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${statusStyle[c.status]}`}>{c.status}</span>
+                    </td>
+                    <td className="py-3 px-4 text-slate-600 font-semibold text-[13px]">{c.open}</td>
+                    <td className="py-3 px-4 text-slate-600 font-semibold text-[13px]">{c.click}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {/* Mobile */}
+          <div className="sm:hidden divide-y divide-slate-50">
+            {campaigns.map((c, i) => (
+              <div key={i} className="p-4 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm flex-shrink-0"
+                  style={{ background: c.color + "20", color: c.color }}>✉</div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-slate-700 text-sm truncate">{c.name}</div>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${statusStyle[c.status]}`}>{c.status}</span>
+                    {c.open !== "—" && <span className="text-[10px] text-slate-400">Open: {c.open}</span>}
+                  </div>
                 </div>
-                <div className={`text-[11px] mt-1 ${dark ? "text-white/25" : "text-slate-400"}`}>{p.title}</div>
+                {c.click !== "—" && <div className="text-xs font-bold text-indigo-500 flex-shrink-0">{c.click}</div>}
               </div>
             ))}
           </div>
-        </Card>
-      )}
-
-      {/* Purchase + Gateway */}
-      {hasPerm("view_purchase") && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-          <Card dark={dark}>
-            <STitle title="Purchase History" dark={dark} />
-            <div className="space-y-3">
-              {purchaseHistory.map(item => (
-                <div key={item.id}
-                  className={`flex items-center justify-between p-3 rounded-xl border
-                    ${dark ? "border-white/10 hover:bg-white/5" : "border-slate-100 hover:bg-slate-50"}`}>
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold"
-                      style={{ background: item.color }}>{item.plan[0]}</div>
-                    <div>
-                      <div className={`text-sm font-bold ${dark ? "text-white/80" : "text-slate-800"}`}>{item.id}</div>
-                      <div className={`text-xs ${dark ? "text-white/40" : "text-slate-500"}`}>{item.plan}</div>
-                      <div className={`text-[11px] ${dark ? "text-white/25" : "text-slate-400"}`}>{item.date}</div>
-                    </div>
-                  </div>
-                  <span className="text-[11px] font-bold text-emerald-400">{item.status}</span>
-                </div>
-              ))}
-              <VMBtn dark={dark} />
-            </div>
-          </Card>
-          {hasPerm("view_gateway") && (
-            <Card dark={dark}>
-              <STitle title="Most Used Gateway" dark={dark} />
-              <ResponsiveContainer width="100%" height={150}>
-                <PieChart>
-                  <Pie data={gatewayData} cx="50%" cy="50%" outerRadius={65} dataKey="value"
-                    startAngle={90} endAngle={-270}>
-                    {gatewayData.map((e, i) => <Cell key={i} fill={e.color} />)}
-                  </Pie>
-                  <Tooltip contentStyle={tip} />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="flex gap-4 justify-center text-[11px] mb-2">
-                {gatewayData.map(g => (
-                  <span key={g.name} className={`flex items-center gap-1 ${dark ? "text-white/45" : ""}`}>
-                    <span className="w-2 h-2 rounded-full inline-block" style={{ background: g.color }}></span>
-                    {g.name}
-                  </span>
-                ))}
-              </div>
-              {gatewayData.map(g => (
-                <div key={g.name} className={`flex justify-between text-sm py-0.5 ${dark ? "text-white/45" : "text-slate-500"}`}>
-                  <span>{g.name}</span><span className="font-bold">{g.value}</span>
-                </div>
-              ))}
-            </Card>
-          )}
         </div>
-      )}
-
-      {/* Earnings */}
-      {hasPerm("view_earnings") ? (
-        <Card dark={dark} className="mb-4">
-          <STitle title="Total Earnings ($12.00)" dark={dark} />
-          <ResponsiveContainer width="100%" height={150}>
-            <LineChart data={earningsData}>
-              <CartesianGrid strokeDasharray="3 3" stroke={cs} />
-              <XAxis dataKey="month" tick={at} />
-              <YAxis tick={at} />
-              <Tooltip contentStyle={tip} />
-              <Line type="monotone" dataKey="earnings" stroke="#10b981" strokeWidth={2} dot={{ r: 4, fill: "#10b981" }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </Card>
-      ) : <Locked label="Earnings" dark={dark} />}
-
-      {/* Last Mails + SMS + Campaigns */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {hasPerm("view_last_mails") ? (
-          <Card dark={dark}>
-            <STitle title="Last Sent Mail" dark={dark} />
-            <div className="space-y-2">
-              {lastSentMails.map(item => (
-                <div key={item.id} className={`flex items-center gap-3 p-2.5 rounded-xl border
-                  ${dark ? "border-white/10 hover:bg-white/5" : "border-slate-100 hover:bg-slate-50"}`}>
-                  <div className="w-7 h-7 rounded-full flex-shrink-0" style={{ background: item.color }}></div>
-                  <div>
-                    <div className={`text-[11px] font-semibold truncate max-w-[150px] ${dark ? "text-white/65" : "text-slate-800"}`}>{item.email}</div>
-                    <div className={`text-[10px] ${dark ? "text-white/25" : "text-slate-400"}`}>{item.date}</div>
-                  </div>
-                </div>
-              ))}
-              <VMBtn dark={dark} />
-            </div>
-          </Card>
-        ) : <Locked label="Last Sent Mails" dark={dark} />}
-
-        {hasPerm("view_last_sms") ? (
-          <Card dark={dark}>
-            <STitle title="Last Sent SMS" dark={dark} />
-            <div className={`flex flex-col items-center py-10 ${dark ? "text-white/20" : "text-slate-300"}`}>
-              <div className="text-5xl mb-3">💬</div>
-              <div className="text-sm">No SMS sent yet</div>
-            </div>
-            <VMBtn dark={dark} />
-          </Card>
-        ) : <Locked label="Last Sent SMS" dark={dark} />}
-
-        {hasPerm("view_last_campaigns") ? (
-          <Card dark={dark}>
-            <STitle title="Last Campaign" dark={dark} />
-            <div className="space-y-2">
-              {lastCampaigns.map(item => (
-                <div key={item.id} className={`flex items-center gap-3 p-2.5 rounded-xl border
-                  ${dark ? "border-white/10 hover:bg-white/5" : "border-slate-100 hover:bg-slate-50"}`}>
-                  <div className="w-7 h-7 rounded-full flex-shrink-0" style={{ background: item.color }}></div>
-                  <div className={`text-sm font-semibold ${dark ? "text-white/65" : "text-slate-800"}`}>{item.name}</div>
-                </div>
-              ))}
-              <VMBtn dark={dark} />
-            </div>
-          </Card>
-        ) : <Locked label="Last Campaigns" dark={dark} />}
-      </div>
-    </div>
-  );
-}
-
-// ══════════════════════════════════════════════════════════
-// MAIN LAYOUT
-// ══════════════════════════════════════════════════════════
-export default function AdminDashboard() {
-  const navigate                           = useNavigate();
-  const { user, logout, hasPerm, getRoleInfo } = useAuth();
-  const [activePage, setActivePage]        = useState("dashboard");
-  const [dark, setDark]                    = useState(false);
-
-  if (!user) { navigate("/login"); return null; }
-
-  const roleInfo  = getRoleInfo();
-  const roleColor = roleInfo?.color || "#6366f1";
-  const roleLabel = roleInfo?.label || user.role;
-
-  // Sidebar — permission नुसार filter
-  const visibleItems = SIDEBAR_ITEMS.filter(i => i.permKey === null || hasPerm(i.permKey));
-  const activeItem   = SIDEBAR_ITEMS.find(i => i.id === activePage) || SIDEBAR_ITEMS[0];
-
-  return (
-    <div className={`flex min-h-screen font-sans transition-colors duration-300
-      ${dark ? "bg-[#0b0a1e]" : "bg-slate-100"}`}>
-
-      {/* Sidebar */}
-      <div className={`w-52 flex-shrink-0 flex flex-col py-5 px-3 border-r transition-colors
-        ${dark ? "bg-[#0f0d26] border-white/10" : "bg-white border-slate-100"}`}>
-
-        <div className="flex items-center gap-2 px-3 mb-5">
-          <div className="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center text-white text-sm">✉️</div>
-          <span className={`font-bold text-sm ${dark ? "text-white/75" : "text-slate-700"}`}
-            style={{ fontFamily: "Georgia, serif" }}>MailAdmin</span>
-        </div>
-
-        {/* User card */}
-        <div className={`mx-1 mb-4 p-3 rounded-xl border ${dark ? "bg-white/5 border-white/10" : "bg-slate-50 border-slate-100"}`}>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px] font-bold"
-              style={{ background: roleColor }}>
-              {user.email.slice(0, 2).toUpperCase()}
-            </div>
-            <div className="min-w-0">
-              <div className={`text-[11px] font-bold truncate ${dark ? "text-white/75" : "text-slate-700"}`}>
-                {user.email.split("@")[0]}
-              </div>
-              <span className="text-[9px] px-1.5 py-0.5 rounded-md font-bold inline-block mt-0.5"
-                style={{ background: roleColor + "25", color: roleColor }}>{roleLabel}</span>
-            </div>
-          </div>
-        </div>
-
-        <nav className="flex-1 space-y-0.5">
-          {visibleItems.map(item => {
-            const active = activePage === item.id;
-            return (
-              <button key={item.id} onClick={() => setActivePage(item.id)}
-                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left text-xs font-medium
-                  transition-all cursor-pointer border
-                  ${active ? "text-white border-transparent"
-                    : dark ? "text-white/40 border-transparent hover:bg-white/5"
-                    : "text-slate-500 border-transparent hover:bg-slate-50"}`}
-                style={active ? { background: roleColor, boxShadow: `0 4px 12px ${roleColor}35` } : {}}>
-                <span className="text-sm">{item.icon}</span>
-                {item.label}
-              </button>
-            );
-          })}
-        </nav>
-
-        <button onClick={() => { logout(); navigate("/login"); }}
-          className={`mx-1 mt-2 py-2.5 px-3 rounded-xl text-xs font-semibold text-left cursor-pointer border transition-colors
-            ${dark ? "border-red-500/20 text-red-400/60 hover:bg-red-500/10" : "border-red-200 text-red-400 hover:bg-red-50"}`}>
-          ⎋ Logout
-        </button>
-      </div>
-
-      {/* Main */}
-      <div className="flex-1 flex flex-col min-w-0">
-        <div className={`h-14 flex items-center justify-between px-5 border-b flex-shrink-0 transition-colors
-          ${dark ? "bg-[#0f0d26] border-white/10" : "bg-white border-slate-100"}`}>
-          <h1 className={`text-sm font-bold ${dark ? "text-white/60" : "text-slate-600"}`}
-            style={{ fontFamily: "Georgia, serif" }}>{activeItem.label}</h1>
-          <div className="flex items-center gap-3">
-            <button onClick={() => setDark(!dark)}
-              className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm cursor-pointer
-                ${dark ? "bg-white/10 text-white/45" : "bg-slate-100 text-slate-500"}`}>
-              {dark ? "☀️" : "🌙"}
-            </button>
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold"
-                style={{ background: roleColor }}>
-                {user.email.slice(0, 2).toUpperCase()}
-              </div>
-              <div className="hidden sm:block">
-                <div className={`text-xs font-semibold ${dark ? "text-white/55" : "text-slate-600"}`}>
-                  {user.email.split("@")[0]}
-                </div>
-                <div className="text-[9px]" style={{ color: roleColor }}>{roleLabel}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <main className="flex-1 p-5 overflow-y-auto">
-          {activePage === "dashboard"
-            ? <DashboardContent dark={dark} />
-            : (
-              <div className="flex flex-col items-center justify-center h-[55vh] gap-3">
-                <div className="text-5xl">{activeItem.icon}</div>
-                <h1 className={`text-xl font-bold ${dark ? "text-white/70" : "text-slate-700"}`}
-                  style={{ fontFamily: "Georgia, serif" }}>{activeItem.label}</h1>
-                <p className={`text-xs ${dark ? "text-white/25" : "text-slate-400"}`}>हे page लवकरच येईल.</p>
-                <div className="w-10 h-1 rounded-full" style={{ background: roleColor }}></div>
-              </div>
-            )
-          }
-        </main>
       </div>
     </div>
   );

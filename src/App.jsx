@@ -4,6 +4,12 @@ import { useEffect } from "react";
 // ── Auth Context ──
 import { AuthProvider, useAuth } from "./pages/auth/AuthContext";
 
+// ✅ ADD THIS LINE
+import { LanguageProvider } from "./pages/admin/Languagecontext";
+
+// ── Layout ──
+import AdminLayout from "./pages/admin/AdminLayout";
+
 // ── Home / Public Pages ──
 import Home        from "./pages/home/Home";
 import About       from "./pages/home/About";
@@ -18,9 +24,8 @@ import Register       from "./pages/auth/Register";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import VerifyEmail    from "./pages/auth/VerifyMail";
 
-// ── Admin Pages ──
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminUsers     from "./pages/admin/AdminUsers";
+// ── Admin Pages (optional direct use)
+import AdminUsers from "./pages/admin/AdminUsers";
 
 // Dummy dashboards
 const ManagerDashboard = () => <h1>Manager Dashboard</h1>;
@@ -34,7 +39,7 @@ function ProtectedRoute({ children }) {
   return user ? children : <Navigate to="/login" replace />;
 }
 
-// 🔁 Auto Login from localStorage (IMPORTANT FIX)
+// 🔁 Auto Login from localStorage
 function AppWrapper() {
   const { login } = useAuth();
 
@@ -49,7 +54,7 @@ function AppWrapper() {
   return <AppRoutes />;
 }
 
-// 🎯 All Routes
+// 🎯 Routes
 function AppRoutes() {
   return (
     <BrowserRouter>
@@ -69,25 +74,17 @@ function AppRoutes() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/verify-email"    element={<VerifyEmail />} />
 
-        {/* ── Protected Pages ── */}
+        {/* ✅ ADMIN */}
         <Route
-          path="/admin-dashboard"
+          path="/admin/*"
           element={
             <ProtectedRoute>
-              <AdminDashboard />
+              <AdminLayout />
             </ProtectedRoute>
           }
         />
 
-        <Route
-          path="/super-admin"
-          element={
-            <ProtectedRoute>
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
-
+        {/* Other Roles */}
         <Route
           path="/manager-dashboard"
           element={
@@ -115,7 +112,6 @@ function AppRoutes() {
           }
         />
 
-        {/* ❌ Wrong URL → Login */}
         <Route path="*" element={<Navigate to="/login" replace />} />
 
       </Routes>
@@ -127,7 +123,10 @@ function AppRoutes() {
 function App() {
   return (
     <AuthProvider>
-      <AppWrapper />
+      {/* ✅ ADD THIS WRAPPER */}
+      <LanguageProvider>
+        <AppWrapper />
+      </LanguageProvider>
     </AuthProvider>
   );
 }

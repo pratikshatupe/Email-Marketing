@@ -1,30 +1,56 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useEffect } from "react";
+
+// ── Auth Context ──
+import { AuthProvider, useAuth } from "./pages/auth/AuthContext";
 
 // ── Home / Public Pages ──
-import Home        from './pages/home/Home'
-import About       from './pages/home/About'
-import Features    from './pages/home/Features'
-import Pricing     from './pages/home/Pricing'
-import Newsletter  from './pages/home/Newsletter'
-import Marketplace from './pages/home/Marketplace'
+import Home        from "./pages/home/Home";
+import About       from "./pages/home/About";
+import Features    from "./pages/home/Features";
+import Pricing     from "./pages/home/Pricing";
+import Newsletter  from "./pages/home/Newsletter";
+import Marketplace from "./pages/home/Marketplace";
 
 // ── Auth Pages ──
-import Login          from './pages/auth/Login'
-import Register       from './pages/auth/Register'
-import ForgotPassword from './pages/auth/ForgotPassword'
-import VerifyEmail    from './pages/auth/VerifyMail'
+import Login          from "./pages/auth/Login";
+import Register       from "./pages/auth/Register";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import VerifyEmail    from "./pages/auth/VerifyMail";
 
 // ── Admin Pages ──
-import AdminDashboard from './pages/admin/AdminDashboard'
-import AdminUsers     from './pages/admin/AdminUsers'
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers     from "./pages/admin/AdminUsers";
 
-// 🔥 Dummy dashboards (create later properly)
-const ManagerDashboard = () => <h1>Manager Dashboard</h1>
-const ViewerDashboard  = () => <h1>Viewer Dashboard</h1>
+// Dummy dashboards
+const ManagerDashboard = () => <h1>Manager Dashboard</h1>;
+const ViewerDashboard  = () => <h1>Viewer Dashboard</h1>;
 
-import './App.css'
+import "./App.css";
 
-function App() {
+// 🔐 Protected Route
+function ProtectedRoute({ children }) {
+  const { user } = useAuth();
+  return user ? children : <Navigate to="/login" replace />;
+}
+
+// 🔁 Auto Login from localStorage (IMPORTANT FIX)
+function AppWrapper() {
+  const { login } = useAuth();
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      const parsed = JSON.parse(savedUser);
+      login(parsed.email, parsed.role);
+    }
+  }, []);
+
+  return <AppRoutes />;
+}
+
+// 🎯 All Routes
+function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
@@ -43,18 +69,67 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/verify-email"    element={<VerifyEmail />} />
 
-        {/* ── Role आधारित Dashboards ── */}
-        <Route path="/super-admin"      element={<AdminDashboard />} />   {/* ✅ FIX */}
-        <Route path="/admin-dashboard"  element={<AdminDashboard />} />
-        <Route path="/manager-dashboard" element={<ManagerDashboard />} />
-        <Route path="/viewer-dashboard"  element={<ViewerDashboard />} />
+        {/* ── Protected Pages ── */}
+        <Route
+          path="/admin-dashboard"
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
 
-        {/* ── Other ── */}
-        <Route path="/customer-dashboard" element={<AdminUsers />} />
+        <Route
+          path="/super-admin"
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/manager-dashboard"
+          element={
+            <ProtectedRoute>
+              <ManagerDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/viewer-dashboard"
+          element={
+            <ProtectedRoute>
+              <ViewerDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/customer-dashboard"
+          element={
+            <ProtectedRoute>
+              <AdminUsers />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ❌ Wrong URL → Login */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
 
       </Routes>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+// 🧠 Main App
+function App() {
+  return (
+    <AuthProvider>
+      <AppWrapper />
+    </AuthProvider>
+  );
+}
+
+export default App;

@@ -1,191 +1,457 @@
-// src/admin/AdminDashboard.jsx
-import React from "react";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { Users, Mail, Send, BarChart3, TrendingUp, ArrowUpRight } from "lucide-react";
-import { useLanguage } from "../admin/Languagecontext";
+import React, { useState } from "react";
+import { useAuth } from "../auth/AuthContext";
 
-const lineData = [
-  { month: "Jan", emails: 5, sms: 2 }, { month: "Feb", emails: 12, sms: 5 },
-  { month: "Mar", emails: 24, sms: 8 }, { month: "Apr", emails: 18, sms: 12 },
-  { month: "May", emails: 30, sms: 18 },
+// ─── Mock Data ────────────────────────────────────────────────────────────────
+const MOCK_STATS = {
+  SUPER_ADMIN: [
+    { label: "Total Companies",  value: "142",    change: "+12",  up: true,  icon: "🏢", color: "#6366f1" },
+    { label: "Total Users",      value: "3,847",  change: "+234", up: true,  icon: "👥", color: "#10b981" },
+    { label: "Emails Sent Today",value: "1.2M",   change: "+18%", up: true,  icon: "📧", color: "#06b6d4" },
+    { label: "Active Plans",     value: "89",     change: "-3",   up: false, icon: "💳", color: "#f59e0b" },
+    { label: "Monthly Revenue",  value: "₹4.2L",  change: "+22%", up: true,  icon: "💰", color: "#8b5cf6" },
+    { label: "System Uptime",    value: "99.9%",  change: "stable",up: true, icon: "🔧", color: "#ec4899" },
+  ],
+  BUSINESS_ADMIN: [
+    { label: "Campaigns",        value: "24",     change: "+3",   up: true,  icon: "📢", color: "#6366f1" },
+    { label: "Contacts",         value: "12,430", change: "+890", up: true,  icon: "👤", color: "#10b981" },
+    { label: "Emails Sent",      value: "98,210", change: "+12%", up: true,  icon: "📧", color: "#06b6d4" },
+    { label: "Open Rate",        value: "44%",    change: "+6%",  up: true,  icon: "📬", color: "#f59e0b" },
+    { label: "Team Members",     value: "8",      change: "+1",   up: true,  icon: "🧑‍💼", color: "#8b5cf6" },
+    { label: "Automation Active",value: "5",      change: "+2",   up: true,  icon: "⚙️", color: "#ec4899" },
+  ],
+  MARKETING_MANAGER: [
+    { label: "My Campaigns",     value: "9",      change: "+2",   up: true,  icon: "📢", color: "#6366f1" },
+    { label: "Contacts Managed", value: "4,200",  change: "+310", up: true,  icon: "👤", color: "#10b981" },
+    { label: "Emails Sent",      value: "41,000", change: "+8%",  up: true,  icon: "📧", color: "#06b6d4" },
+    { label: "Click Rate",       value: "11%",    change: "+2%",  up: true,  icon: "🖱️", color: "#f59e0b" },
+  ],
+  VIEWER: [
+    { label: "Campaigns Viewed", value: "24",     change: "",     up: true,  icon: "📊", color: "#6366f1" },
+    { label: "Total Sent",       value: "98,210", change: "",     up: true,  icon: "📧", color: "#06b6d4" },
+    { label: "Avg Open Rate",    value: "44%",    change: "",     up: true,  icon: "📬", color: "#10b981" },
+    { label: "Avg CTR",          value: "11%",    change: "",     up: true,  icon: "🖱️", color: "#f59e0b" },
+  ],
+};
+
+const MOCK_CAMPAIGNS = [
+  { name: "Summer Sale 2026",      status: "Sent",     sent: 12400, opened: 5488, ctr: "11.2%", date: "20 Mar 2026" },
+  { name: "Welcome Series",        status: "Active",   sent: 3200,  opened: 1920, ctr: "8.4%",  date: "18 Mar 2026" },
+  { name: "Product Launch",        status: "Scheduled",sent: 0,     opened: 0,    ctr: "—",     date: "28 Mar 2026" },
+  { name: "Re-engagement Q1",      status: "Draft",    sent: 0,     opened: 0,    ctr: "—",     date: "—"          },
+  { name: "Newsletter March",      status: "Sent",     sent: 8900,  opened: 3916, ctr: "9.8%",  date: "15 Mar 2026" },
 ];
-const barData = [
-  { name: "Recipients", value: 151 }, { name: "Delivered", value: 134 },
-  { name: "Clicked", value: 8 }, { name: "Failed", value: 17 }, { name: "Bounced", value: 17 },
-];
-const statusStyle = { Sent: "bg-emerald-100 text-emerald-700", Draft: "bg-slate-100 text-slate-500", Sending: "bg-blue-100 text-blue-600" };
-const campaigns = [
-  { name: "Spring Sale 2026", status: "Sent",    open: "68%", click: "24%", color: "#6366f1" },
-  { name: "Newsletter March", status: "Sent",    open: "54%", click: "18%", color: "#10b981" },
-  { name: "Product Launch",   status: "Draft",   open: "—",   click: "—",   color: "#f59e0b" },
-  { name: "Re-engagement",    status: "Sending", open: "32%", click: "11%", color: "#ec4899" },
+
+const MOCK_USERS = [
+  { name: "Rahul Sharma",   email: "rahul@acme.com",    role: "BUSINESS_ADMIN",    status: "Active",   joined: "Jan 2026" },
+  { name: "Priya Patil",    email: "priya@acme.com",    role: "MARKETING_MANAGER", status: "Active",   joined: "Feb 2026" },
+  { name: "Amit Desai",     email: "amit@acme.com",     role: "MARKETING_MANAGER", status: "Active",   joined: "Feb 2026" },
+  { name: "Sneha Kulkarni", email: "sneha@acme.com",    role: "VIEWER",            status: "Inactive", joined: "Mar 2026" },
 ];
 
-export default function AdminDashboard() {
-  const { t } = useLanguage();
+const MOCK_AUDIT = [
+  { user: "rahul@acme.com", action: "Campaign Created",      module: "Campaigns",  time: "2 min ago" },
+  { user: "priya@acme.com", action: "Contacts Uploaded",     module: "Contacts",   time: "15 min ago" },
+  { user: "superadmin",     action: "Plan Updated",          module: "Billing",    time: "1 hr ago" },
+  { user: "amit@acme.com",  action: "Template Saved",        module: "Templates",  time: "2 hr ago" },
+  { user: "rahul@acme.com", action: "Automation Activated",  module: "Automation", time: "3 hr ago" },
+  { user: "sneha@acme.com", action: "Report Exported",       module: "Analytics",  time: "5 hr ago" },
+];
 
-  const cards = [
-    { titleKey: "total_users",       value: "1,245", icon: Users,    color: "from-indigo-500 to-indigo-600",   bg: "bg-indigo-50",  text: "text-indigo-600"  },
-    { titleKey: "total_contacts",    value: "8,932", icon: Mail,     color: "from-pink-500 to-pink-600",      bg: "bg-pink-50",    text: "text-pink-600"    },
-    { titleKey: "total_campaigns",   value: "342",   icon: BarChart3, color: "from-purple-500 to-purple-600", bg: "bg-purple-50",  text: "text-purple-600"  },
-    { titleKey: "emails_sent_today", value: "1,876", icon: Send,     color: "from-emerald-500 to-emerald-600", bg: "bg-emerald-50", text: "text-emerald-600" },
-  ];
+const CHART_DATA = [65, 78, 55, 90, 72, 88, 95, 60, 82, 74, 91, 85];
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-  const quickStats = [
-    { labelKey: "sent_this_month", value: "24", accent: "bg-indigo-500"  },
-    { labelKey: "bounced",         value: "0",  accent: "bg-red-400"     },
-    { labelKey: "subscribers",     value: "1",  accent: "bg-emerald-500" },
-    { labelKey: "sms_sent",        value: "0",  accent: "bg-amber-400"   },
-  ];
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+const statusColors = {
+  Sent:      { bg: "#d1fae5", text: "#065f46" },
+  Active:    { bg: "#dbeafe", text: "#1e40af" },
+  Scheduled: { bg: "#fef3c7", text: "#92400e" },
+  Draft:     { bg: "#f1f5f9", text: "#475569" },
+  Inactive:  { bg: "#fee2e2", text: "#991b1b" },
+};
+
+const roleColors = {
+  SUPER_ADMIN:       { bg: "#ede9fe", text: "#5b21b6", label: "Super Admin" },
+  BUSINESS_ADMIN:    { bg: "#d1fae5", text: "#065f46", label: "Business Admin" },
+  MARKETING_MANAGER: { bg: "#fef3c7", text: "#92400e", label: "Marketing Mgr" },
+  VIEWER:            { bg: "#fce7f3", text: "#9d174d", label: "Viewer" },
+};
+
+// ─── Mini Bar Chart ───────────────────────────────────────────────────────────
+function MiniBarChart() {
+  const max = Math.max(...CHART_DATA);
+  return (
+    <div className="flex items-end gap-1 h-16 mt-3">
+      {CHART_DATA.map((v, i) => (
+        <div key={i} className="flex-1 flex flex-col items-center gap-1 group">
+          <div
+            className="w-full rounded-t transition-all duration-300 group-hover:opacity-80"
+            style={{
+              height: `${(v / max) * 100}%`,
+              background: i === new Date().getMonth()
+                ? "linear-gradient(180deg,#6366f1,#8b5cf6)"
+                : "linear-gradient(180deg,#e0e7ff,#c7d2fe)",
+            }}
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Donut Chart ─────────────────────────────────────────────────────────────
+function DonutChart({ opened, sent }) {
+  const pct    = sent > 0 ? Math.round((opened / sent) * 100) : 0;
+  const r      = 36;
+  const circ   = 2 * Math.PI * r;
+  const stroke = (pct / 100) * circ;
+  return (
+    <div className="relative flex items-center justify-center w-24 h-24">
+      <svg viewBox="0 0 88 88" className="absolute inset-0 w-full h-full -rotate-90">
+        <circle cx="44" cy="44" r={r} fill="none" stroke="#e0e7ff" strokeWidth="10" />
+        <circle cx="44" cy="44" r={r} fill="none" stroke="#6366f1" strokeWidth="10"
+          strokeDasharray={`${stroke} ${circ}`} strokeLinecap="round" />
+      </svg>
+      <span className="text-xl font-black text-slate-800">{pct}%</span>
+    </div>
+  );
+}
+
+// ─── Stat Card ────────────────────────────────────────────────────────────────
+function StatCard({ stat }) {
+  return (
+    <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition-shadow duration-200">
+      <div className="flex items-start justify-between mb-3">
+        <div className="w-11 h-11 rounded-xl flex items-center justify-center text-xl"
+          style={{ background: stat.color + "18" }}>
+          {stat.icon}
+        </div>
+        {stat.change && (
+          <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+            stat.up ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"
+          }`}>
+            {stat.up ? "↑" : "↓"} {stat.change}
+          </span>
+        )}
+      </div>
+      <p className="text-2xl font-black text-slate-800 mb-0.5">{stat.value}</p>
+      <p className="text-xs text-slate-400 font-medium">{stat.label}</p>
+    </div>
+  );
+}
+
+// ─── Role Banner ─────────────────────────────────────────────────────────────
+const roleBanners = {
+  SUPER_ADMIN: {
+    title: "Platform Overview",
+    subtitle: "You have full control over the entire MailDoll platform.",
+    gradient: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
+    icon: "👑",
+  },
+  BUSINESS_ADMIN: {
+    title: "Business Dashboard",
+    subtitle: "Manage your company's campaigns, contacts, and team.",
+    gradient: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+    icon: "🏢",
+  },
+  MARKETING_MANAGER: {
+    title: "Campaign Hub",
+    subtitle: "Create, schedule, and track your marketing campaigns.",
+    gradient: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+    icon: "🎯",
+  },
+  VIEWER: {
+    title: "Analytics View",
+    subtitle: "Read-only access to reports and campaign analytics.",
+    gradient: "linear-gradient(135deg, #ec4899 0%, #be185d 100%)",
+    icon: "📊",
+  },
+};
+
+// ═════════════════════════════════════════════════════════════════════════════
+// MAIN DASHBOARD COMPONENT
+// ═════════════════════════════════════════════════════════════════════════════
+export default function Dashboard() {
+  const { user, hasPerm } = useAuth();
+  const role   = user?.role || "VIEWER";
+  const banner = roleBanners[role];
+  const stats  = MOCK_STATS[role] || [];
+
+  // Which campaigns to show
+  const campaigns = role === "MARKETING_MANAGER"
+    ? MOCK_CAMPAIGNS.slice(0, 3)
+    : MOCK_CAMPAIGNS;
 
   return (
-    <div className="p-4 sm:p-6 space-y-5 bg-slate-50 min-h-screen">
+    <div className="space-y-6 p-1">
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-800">{t("dashboard_overview")}</h1>
-          <p className="text-xs text-slate-400 mt-0.5">{t("welcome_msg")}</p>
+      {/* ── Role Banner ───────────────────────────────────────────── */}
+      <div className="relative rounded-2xl overflow-hidden p-6 text-white"
+        style={{ background: banner.gradient }}>
+        <div className="absolute right-6 top-1/2 -translate-y-1/2 text-6xl opacity-20 select-none">
+          {banner.icon}
         </div>
-        <div className="flex items-center gap-2 text-xs text-slate-500 bg-white border border-slate-200 px-3 py-2 rounded-xl self-start sm:self-auto">
-          <TrendingUp size={13} className="text-indigo-500" />
-          <span>March 2026</span>
-        </div>
+        <p className="text-xs font-semibold uppercase tracking-widest opacity-70 mb-1">
+          {roleColors[role]?.label}
+        </p>
+        <h1 className="text-2xl font-black mb-1">{banner.title}</h1>
+        <p className="text-sm opacity-75">{banner.subtitle}</p>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
-        {cards.map((card, i) => {
-          const Icon = card.icon;
-          return (
-            <div key={i} className={`p-3.5 sm:p-5 rounded-2xl border shadow-sm ${card.bg} hover:shadow-md transition-all`}>
-              <div className="flex justify-between items-start mb-3">
-                <div className={`p-2 rounded-xl bg-gradient-to-br ${card.color} text-white shadow-sm`}>
-                  <Icon size={15} />
-                </div>
-                <span className={`text-[10px] font-bold ${card.text} bg-white px-1.5 py-0.5 rounded-lg flex items-center gap-0.5`}>
-                  <ArrowUpRight size={9} />+12%
-                </span>
+      {/* ── Stat Cards ────────────────────────────────────────────── */}
+      <div className={`grid gap-4 ${
+        stats.length <= 4
+          ? "grid-cols-2 md:grid-cols-4"
+          : "grid-cols-2 md:grid-cols-3 lg:grid-cols-6"
+      }`}>
+        {stats.map((s, i) => <StatCard key={i} stat={s} />)}
+      </div>
+
+      {/* ── Charts Row ────────────────────────────────────────────── */}
+      {hasPerm("view_charts") && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+          {/* Email Performance Bar Chart */}
+          <div className="md:col-span-2 bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+            <div className="flex items-center justify-between mb-1">
+              <div>
+                <h3 className="font-bold text-slate-800">Email Performance</h3>
+                <p className="text-xs text-slate-400">Monthly emails sent — 2026</p>
               </div>
-              <p className="text-[11px] text-slate-500 font-medium leading-tight">{t(card.titleKey)}</p>
-              <h2 className="text-lg sm:text-2xl font-bold text-slate-800 mt-0.5">{card.value}</h2>
-              <div className="mt-3 h-1 w-full bg-white/70 rounded-full overflow-hidden">
-                <div className={`h-full w-3/4 bg-gradient-to-r ${card.color} rounded-full`} />
-              </div>
+              <span className="text-xs bg-indigo-50 text-indigo-600 font-semibold px-3 py-1 rounded-full">
+                This Year
+              </span>
             </div>
-          );
-        })}
-      </div>
-
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border">
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              <h2 className="text-sm font-bold text-slate-700">{t("email_analytics")}</h2>
-              <p className="text-[11px] text-slate-400">{t("last_5_months")}</p>
-            </div>
-            <div className="flex gap-3 text-[10px] text-slate-500">
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-indigo-500 inline-block"></span>Email</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>SMS</span>
+            <MiniBarChart />
+            <div className="flex gap-4 mt-3">
+              {MONTHS.map((m, i) => (
+                <span key={i} className="flex-1 text-center text-[9px] text-slate-300">{m}</span>
+              ))}
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={185}>
-            <LineChart data={lineData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#94a3b8" }} />
-              <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} />
-              <Tooltip contentStyle={{ borderRadius: 10, border: "none", fontSize: 12 }} />
-              <Line type="monotone" dataKey="emails" stroke="#6366f1" strokeWidth={2.5} dot={{ r: 3 }} />
-              <Line type="monotone" dataKey="sms" stroke="#10b981" strokeWidth={2.5} dot={{ r: 3 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
 
-        <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border">
-          <div className="mb-4">
-            <h2 className="text-sm font-bold text-slate-700">{t("campaign_report")}</h2>
-            <p className="text-[11px] text-slate-400">{t("last_campaign_stats")}</p>
-          </div>
-          <ResponsiveContainer width="100%" height={185}>
-            <BarChart data={barData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#94a3b8" }} />
-              <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} />
-              <Tooltip contentStyle={{ borderRadius: 10, border: "none", fontSize: 12 }} />
-              <Bar dataKey="value" fill="#6366f1" radius={[5, 5, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Quick Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {quickStats.map((s, i) => (
-          <div key={i} className="bg-white rounded-2xl border shadow-sm p-3.5 sm:p-4">
-            <div className={`w-1 h-7 rounded-full ${s.accent} mb-2.5`}></div>
-            <div className="text-xl font-bold text-slate-800">{s.value}</div>
-            <div className="text-[11px] text-slate-400 mt-0.5">{t(s.labelKey)}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Recent Campaigns */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wider">{t("recent_campaigns")}</h2>
-          <span className="text-xs text-indigo-500 cursor-pointer hover:underline">{t("view_all")}</span>
-        </div>
-        <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
-          {/* Desktop */}
-          <div className="hidden sm:block overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/50">
-                  {[t("campaign_col"), t("status"), t("open_rate"), t("click_rate")].map(h => (
-                    <th key={h} className="text-left py-3 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {campaigns.map((c, i) => (
-                  <tr key={i} className="border-b border-slate-50 hover:bg-slate-50 last:border-0 transition-colors">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs flex-shrink-0"
-                          style={{ background: c.color + "20", color: c.color }}>✉</div>
-                        <span className="font-medium text-slate-700 text-[13px]">{c.name}</span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${statusStyle[c.status]}`}>{c.status}</span>
-                    </td>
-                    <td className="py-3 px-4 text-slate-600 font-semibold text-[13px]">{c.open}</td>
-                    <td className="py-3 px-4 text-slate-600 font-semibold text-[13px]">{c.click}</td>
-                  </tr>
+          {/* Open Rate Donut */}
+          <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col">
+            <h3 className="font-bold text-slate-800 mb-1">Open Rate</h3>
+            <p className="text-xs text-slate-400 mb-4">Last campaign average</p>
+            <div className="flex-1 flex flex-col items-center justify-center gap-3">
+              <DonutChart opened={5488} sent={12400} />
+              <div className="w-full space-y-2">
+                {[
+                  { label: "Opened",      value: "5,488", color: "#6366f1" },
+                  { label: "Not Opened",  value: "6,912", color: "#e0e7ff" },
+                ].map((r, i) => (
+                  <div key={i} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ background: r.color }} />
+                      <span className="text-xs text-slate-500">{r.label}</span>
+                    </div>
+                    <span className="text-xs font-bold text-slate-700">{r.value}</span>
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            </div>
           </div>
-          {/* Mobile */}
-          <div className="sm:hidden divide-y divide-slate-50">
-            {campaigns.map((c, i) => (
-              <div key={i} className="p-4 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm flex-shrink-0"
-                  style={{ background: c.color + "20", color: c.color }}>✉</div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-slate-700 text-sm truncate">{c.name}</div>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${statusStyle[c.status]}`}>{c.status}</span>
-                    {c.open !== "—" && <span className="text-[10px] text-slate-400">Open: {c.open}</span>}
+        </div>
+      )}
+
+      {/* ── Campaigns + Audit Row ─────────────────────────────────── */}
+      <div className={`grid gap-4 ${
+        hasPerm("view_last_campaigns") && role === "SUPER_ADMIN"
+          ? "grid-cols-1 lg:grid-cols-3"
+          : "grid-cols-1"
+      }`}>
+
+        {/* Recent Campaigns Table */}
+        {hasPerm("view_last_campaigns") && (
+          <div className={`bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden ${
+            role === "SUPER_ADMIN" ? "lg:col-span-2" : ""
+          }`}>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+              <h3 className="font-bold text-slate-800">Recent Campaigns</h3>
+              <span className="text-xs text-indigo-500 font-semibold cursor-pointer hover:underline">
+                View All →
+              </span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-50">
+                    {["Campaign", "Status", "Sent", "Opened", "CTR", "Date"].map(h => (
+                      <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wide">
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {campaigns.map((c, i) => {
+                    const sc = statusColors[c.status] || statusColors.Draft;
+                    return (
+                      <tr key={i} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                        <td className="px-5 py-3 font-semibold text-slate-700 max-w-[160px] truncate">{c.name}</td>
+                        <td className="px-5 py-3">
+                          <span className="px-2.5 py-1 rounded-full text-xs font-semibold"
+                            style={{ background: sc.bg, color: sc.text }}>
+                            {c.status}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3 text-slate-600">{c.sent.toLocaleString()}</td>
+                        <td className="px-5 py-3 text-slate-600">{c.opened.toLocaleString()}</td>
+                        <td className="px-5 py-3 font-semibold text-indigo-600">{c.ctr}</td>
+                        <td className="px-5 py-3 text-slate-400 text-xs">{c.date}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Audit Log — Super Admin only */}
+        {role === "SUPER_ADMIN" && (
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+              <h3 className="font-bold text-slate-800">Audit Log</h3>
+              <span className="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded-full font-medium">Live</span>
+            </div>
+            <div className="divide-y divide-slate-50">
+              {MOCK_AUDIT.map((log, i) => (
+                <div key={i} className="px-5 py-3 hover:bg-slate-50 transition-colors">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-xs font-semibold text-slate-700">{log.action}</p>
+                      <p className="text-xs text-slate-400 mt-0.5">{log.user}</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <span className="text-[10px] bg-indigo-50 text-indigo-500 px-2 py-0.5 rounded-full font-medium">
+                        {log.module}
+                      </span>
+                      <p className="text-[10px] text-slate-300 mt-1">{log.time}</p>
+                    </div>
                   </div>
                 </div>
-                {c.click !== "—" && <div className="text-xs font-bold text-indigo-500 flex-shrink-0">{c.click}</div>}
-              </div>
-            ))}
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── Team Members — Business Admin only ───────────────────── */}
+      {role === "BUSINESS_ADMIN" && (
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+            <h3 className="font-bold text-slate-800">Team Members</h3>
+            <span className="text-xs text-indigo-500 font-semibold cursor-pointer hover:underline">
+              Manage →
+            </span>
+          </div>
+          <div className="divide-y divide-slate-50">
+            {MOCK_USERS.map((u, i) => {
+              const rc = roleColors[u.role];
+              const sc = statusColors[u.status];
+              return (
+                <div key={i} className="flex items-center justify-between px-5 py-3 hover:bg-slate-50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white"
+                      style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)" }}>
+                      {u.name[0]}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-700">{u.name}</p>
+                      <p className="text-xs text-slate-400">{u.email}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs px-2.5 py-1 rounded-full font-semibold"
+                      style={{ background: rc?.bg, color: rc?.text }}>
+                      {rc?.label}
+                    </span>
+                    <span className="text-xs px-2.5 py-1 rounded-full font-semibold"
+                      style={{ background: sc?.bg, color: sc?.text }}>
+                      {u.status}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
-      </div>
+      )}
+
+      {/* ── Subscription Info — Super Admin / Business Admin ─────── */}
+      {hasPerm("view_purchase") && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+            <h3 className="font-bold text-slate-800 mb-4">Subscription Plans</h3>
+            <div className="space-y-3">
+              {[
+                { plan: "Starter",    companies: 34, color: "#10b981" },
+                { plan: "Growth",     companies: 58, color: "#6366f1" },
+                { plan: "Enterprise", companies: 27, color: "#f59e0b" },
+              ].map((p, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: p.color }} />
+                  <div className="flex-1">
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="font-medium text-slate-600">{p.plan}</span>
+                      <span className="text-slate-400">{p.companies} companies</span>
+                    </div>
+                    <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full rounded-full transition-all duration-700"
+                        style={{ width: `${(p.companies / 119) * 100}%`, background: p.color }} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+            <h3 className="font-bold text-slate-800 mb-4">Revenue Overview</h3>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-3xl font-black text-slate-800">₹4,21,800</p>
+                <p className="text-xs text-slate-400 mt-0.5">Total this month</p>
+              </div>
+              <span className="text-sm font-semibold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full">
+                ↑ +22%
+              </span>
+            </div>
+            <div className="space-y-2">
+              {[
+                { label: "New subscriptions", value: "₹1,84,000", pct: 44 },
+                { label: "Renewals",          value: "₹2,10,000", pct: 50 },
+                { label: "Add-ons",           value: "₹27,800",   pct: 6  },
+              ].map((r, i) => (
+                <div key={i} className="flex items-center gap-3 text-xs">
+                  <div className="w-24 text-slate-500">{r.label}</div>
+                  <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-indigo-400 rounded-full" style={{ width: `${r.pct}%` }} />
+                  </div>
+                  <div className="w-20 text-right font-semibold text-slate-700">{r.value}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Viewer: Read-only notice ──────────────────────────────── */}
+      {role === "VIEWER" && (
+        <div className="bg-pink-50 border border-pink-100 rounded-2xl p-5 flex items-center gap-4">
+          <div className="w-10 h-10 rounded-xl bg-pink-100 flex items-center justify-center text-xl flex-shrink-0">
+            👁️
+          </div>
+          <div>
+            <p className="font-semibold text-pink-800">Read-Only Access</p>
+            <p className="text-sm text-pink-600 mt-0.5">
+              You can view analytics and reports. Contact your Business Admin to request additional permissions.
+            </p>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

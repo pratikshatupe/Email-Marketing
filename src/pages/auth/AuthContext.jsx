@@ -99,7 +99,6 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
-  // 🔥 IMPORTANT: restore user on refresh
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
     if (savedUser) {

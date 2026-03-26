@@ -39,7 +39,7 @@ export default function VerifyEmail() {
   const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
-    if (otp.join("").length < 6) { setError("6-digit OTP पूर्ण भरा."); return; }
+    if (otp.join("").length < 6) { setError("6-digit OTP ."); return; }
     setLoading(true);
     setTimeout(() => { setLoading(false); navigate("/login"); }, 1500);
   };

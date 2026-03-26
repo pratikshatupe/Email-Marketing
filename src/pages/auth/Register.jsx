@@ -32,9 +32,9 @@ export default function Register() {
   const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
-    if (!form.name || !form.email || !form.password || !form.confirm) { setError("सगळे fields भरा."); return; }
-    if (form.password !== form.confirm) { setError("Passwords match होत नाहीत."); return; }
-    if (form.password.length < 8) { setError("Password किमान 8 characters असावा."); return; }
+    if (!form.name || !form.email || !form.password || !form.confirm) { setError("fill all fields ."); return; }
+    if (form.password !== form.confirm) { setError("Passwords match is not match ."); return; }
+    if (form.password.length < 8) { setError("Password min 8 characters ."); return; }
     setLoading(true);
     setTimeout(() => { setLoading(false); navigate("/verify-email"); }, 1500);
   };

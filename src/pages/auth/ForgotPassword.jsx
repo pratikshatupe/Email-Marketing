@@ -10,7 +10,7 @@ export default function ForgotPassword() {
   const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
-    if (!email) { setError("Email address भरा."); return; }
+    if (!email) { setError(" fill Email address ."); return; }
     setLoading(true);
     setTimeout(() => { setLoading(false); setSent(true); }, 1500);
   };

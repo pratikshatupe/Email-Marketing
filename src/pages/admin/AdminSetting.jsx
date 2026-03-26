@@ -4,7 +4,7 @@ import { Save, Eye, EyeOff, Bell, Moon, Globe, Shield } from "lucide-react";
 import { useLanguage } from "../admin/Languagecontext";
 
 export default function AdminSetting() {
-  const { t, lang, setLang } = useLanguage(); // ← lang बदलला की सगळं app बदलतं
+  const { t, lang, setLang } = useLanguage(); 
   const [showPass, setShowPass]       = useState(false);
   const [showNew, setShowNew]         = useState(false);
   const [saved, setSaved]             = useState(false);
@@ -88,14 +88,12 @@ export default function AdminSetting() {
           </div>
         </div>
 
-        {/* Preferences — Language बदलल्यावर सगळं app translate होतं */}
         <div className="bg-white rounded-2xl border shadow-sm p-4 sm:p-5">
           <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-1.5">
             <Globe size={12} /> {t("preferences")}
           </h2>
           <div className="space-y-3.5">
 
-            {/* 🌐 LANGUAGE SELECT — हे बदललं की useLanguage() hook द्वारे सगळं app translate होतं */}
             <div>
               <label className="block text-xs font-semibold text-slate-500 mb-1.5">{t("language")}</label>
               <div className="flex gap-2">
@@ -117,7 +115,7 @@ export default function AdminSetting() {
               </div>
               {lang === "mr" && (
                 <p className="text-[11px] text-indigo-500 mt-1.5 flex items-center gap-1">
-                  ✓ संपूर्ण app मराठीत बदलला आहे
+                  ✓ all app in the marathi language 
                 </p>
               )}
             </div>

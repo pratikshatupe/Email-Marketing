@@ -1,112 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-/* ════════════════════════════════════════
-   VIDEO DEMO MODAL
-════════════════════════════════════════ */
-function VideoDemoModal({ onClose }) {
-  // Email marketing demo video — YouTube embed (no autoplay issues)
-  const VIDEO_ID = 'tU5wPo-FaHk' // Email marketing explainer video
-
-  useEffect(() => {
-    const onKey = e => { if (e.key === 'Escape') onClose() }
-    document.addEventListener('keydown', onKey)
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.removeEventListener('keydown', onKey)
-      document.body.style.overflow = ''
-    }
-  }, [onClose])
-
-  return (
-    <div
-      onClick={e => { if (e.target === e.currentTarget) onClose() }}
-      style={{
-        position:'fixed', inset:0, zIndex:9999,
-        background:'rgba(8,6,30,.85)', backdropFilter:'blur(10px)',
-        display:'flex', alignItems:'center', justifyContent:'center',
-        padding:'16px', animation:'fadeIn .25s ease',
-      }}
-    >
-      <style>{`
-        @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
-        @keyframes slideUp { from{opacity:0;transform:translateY(32px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
-      `}</style>
-
-      <div style={{
-        width:'100%', maxWidth:860, position:'relative',
-        animation:'slideUp .35s ease',
-      }}>
-        {/* Top bar */}
-        <div style={{
-          display:'flex', alignItems:'center', justifyContent:'space-between',
-          marginBottom:14, flexWrap:'wrap', gap:10,
-        }}>
-          <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-            <div style={{
-              width:38, height:38, borderRadius:12,
-              background:'linear-gradient(135deg,#4F46E5,#06B6D4)',
-              display:'flex', alignItems:'center', justifyContent:'center', fontSize:18,
-            }}>▶</div>
-            <div>
-              <div style={{ color:'#fff', fontWeight:700, fontSize:16, fontFamily:"'Clash Display',sans-serif" }}>
-                Maildoll — Product Demo
-              </div>
-              <div style={{ color:'rgba(255,255,255,.45)', fontSize:12, marginTop:1 }}>
-                Email Marketing Platform walkthrough • 3 min
-              </div>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            style={{
-              width:36, height:36, borderRadius:'50%',
-              background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.18)',
-              color:'#fff', fontSize:18, cursor:'pointer', display:'flex',
-              alignItems:'center', justifyContent:'center', transition:'all .2s',
-            }}
-            onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,.22)'}
-            onMouseLeave={e => e.currentTarget.style.background='rgba(255,255,255,.1)'}
-            title="Close (Esc)"
-          >
-            ✕
-          </button>
-        </div>
-
-        {/* Video iframe */}
-        <div style={{
-          position:'relative', paddingBottom:'56.25%', height:0,
-          borderRadius:18, overflow:'hidden',
-          boxShadow:'0 32px 80px rgba(0,0,0,.6)',
-          border:'1px solid rgba(255,255,255,.1)',
-        }}>
-          <iframe
-            src={`https://www.youtube.com/embed/${VIDEO_ID}?autoplay=1&rel=0&modestbranding=1&color=white`}
-            title="Maildoll Email Marketing Demo"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            style={{
-              position:'absolute', top:0, left:0,
-              width:'100%', height:'100%', border:'none',
-            }}
-          />
-        </div>
-
-        {/* Bottom chips */}
-        <div style={{ display:'flex', gap:10, marginTop:14, flexWrap:'wrap', justifyContent:'center' }}>
-          {['📧 Campaign Management','📊 Analytics Dashboard','🤖 Automation Workflows','👥 Contact Segmentation'].map(t => (
-            <span key={t} style={{
-              fontSize:12, color:'rgba(255,255,255,.6)',
-              background:'rgba(255,255,255,.07)', border:'1px solid rgba(255,255,255,.12)',
-              padding:'5px 14px', borderRadius:20, fontFamily:"'Cabinet Grotesk',sans-serif",
-            }}>{t}</span>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
-
 const GLOBAL_STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Clash+Display:wght@500;600;700&family=Cabinet+Grotesk:wght@300;400;500;700;800&display=swap');
 
@@ -121,6 +15,8 @@ const GLOBAL_STYLES = `
   @keyframes floatY   { 0%,100%{transform:translateY(0)}  50%{transform:translateY(-14px)} }
   @keyframes fadeUp   { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
   @keyframes ping     { 0%{transform:scale(1);opacity:.7} 100%{transform:scale(1.9);opacity:0} }
+  @keyframes fadeIn   { from{opacity:0} to{opacity:1} }
+  @keyframes slideUp  { from{opacity:0;transform:translateY(32px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
 
   .float-y  { animation: floatY 5s ease-in-out infinite; }
   .fade-up  { animation: fadeUp .7s ease forwards; }
@@ -205,6 +101,36 @@ const GLOBAL_STYLES = `
   .scroll-top:hover { transform:translateY(-3px) scale(1.08); }
   .nav-underline { height:2px; border-radius:2px; background:#06B6D4; transition:width .3s ease; }
 
+  /* ══ VIDEO MODAL ══ */
+  .video-modal-overlay {
+    position:fixed; inset:0; z-index:9999;
+    background:rgba(8,6,30,.88); backdrop-filter:blur(12px);
+    display:flex; align-items:center; justify-content:center;
+    padding:16px; animation:fadeIn .25s ease;
+  }
+  .video-modal-box {
+    width:100%; max-width:880px; position:relative;
+    animation:slideUp .35s ease;
+  }
+  .video-iframe-wrap {
+    position:relative; padding-bottom:56.25%; height:0;
+    border-radius:18px; overflow:hidden;
+    box-shadow:0 32px 80px rgba(0,0,0,.6);
+    border:1px solid rgba(255,255,255,.1);
+  }
+  .video-iframe-wrap iframe {
+    position:absolute; top:0; left:0;
+    width:100%; height:100%; border:none;
+  }
+  .video-close-btn {
+    width:38px; height:38px; border-radius:50%;
+    background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2);
+    color:#fff; font-size:18px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:all .2s;
+  }
+  .video-close-btn:hover { background:rgba(255,255,255,.25); }
+
   /* ══ DESKTOP NAV ══ */
   .nav-desktop { display:flex; }
   .nav-ham     { display:none !important; }
@@ -218,7 +144,6 @@ const GLOBAL_STYLES = `
   }
 
   @media (max-width:768px) {
-    /* Hero */
     .hero-wrap  { flex-direction:column !important; padding:96px 5% 60px !important; text-align:center; }
     .hero-left  { max-width:100% !important; }
     .hero-btns  { justify-content:center !important; }
@@ -226,7 +151,6 @@ const GLOBAL_STYLES = `
     .hero-card  { max-width:100% !important; width:100% !important; }
     .hero-badge { display:none !important; }
 
-    /* About */
     .about-row  { flex-direction:column !important; padding:60px 5% !important; text-align:center; }
     .about-rev  { flex-direction:column !important; padding:60px 5% !important; text-align:center; }
     .abt-txt    { max-width:100% !important; }
@@ -235,7 +159,6 @@ const GLOBAL_STYLES = `
     .abt-badge  { display:none !important; }
     .donut-row  { flex-direction:column !important; }
 
-    /* CTA */
     .cta-wrap   { flex-direction:column !important; }
     .cta-left   { max-width:100% !important; text-align:center; }
     .cta-left .pill { margin:0 auto 18px !important; }
@@ -243,6 +166,8 @@ const GLOBAL_STYLES = `
     .cta-trust  { justify-content:center !important; }
     .cta-right  { max-width:100% !important; width:100% !important; }
     .cta-box    { margin:0 !important; border-radius:0 !important; }
+
+    .video-modal-box { max-width:100%; }
   }
 
   @media (max-width:640px) {
@@ -278,13 +203,68 @@ const Check = () => (
 )
 
 /* ════════════════════════════════════════
+   VIDEO DEMO MODAL — FIXED (no className)
+════════════════════════════════════════ */
+function VideoDemoModal({ onClose }) {
+  const VIDEO_ID = 'XtvA22PInP8'
+
+  useEffect(() => {
+    const onKey = e => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+    }
+  }, [onClose])
+
+  return (
+    <div
+      className="video-modal-overlay"
+      onClick={e => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <div className="video-modal-box">
+        {/* Top bar */}
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14, flexWrap:'wrap', gap:10 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+            <div style={{ width:38, height:38, borderRadius:12, background:'linear-gradient(135deg,#4F46E5,#06B6D4)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18 }}>▶</div>
+            <div>
+              <div style={{ color:'#fff', fontWeight:700, fontSize:16, fontFamily:"'Clash Display',sans-serif" }}>Maildoll — Product Demo</div>
+              <div style={{ color:'rgba(255,255,255,.45)', fontSize:12, marginTop:1 }}>Email Marketing Platform walkthrough</div>
+            </div>
+          </div>
+          <button className="video-close-btn" onClick={onClose} title="Close (Esc)">✕</button>
+        </div>
+
+        {/* Video iframe */}
+        <div className="video-iframe-wrap">
+          <iframe
+            src={`https://www.youtube.com/embed/${VIDEO_ID}?autoplay=1&rel=0&modestbranding=1&color=white`}
+            title="Maildoll Email Marketing Demo"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+
+        {/* Bottom chips */}
+        <div style={{ display:'flex', gap:10, marginTop:14, flexWrap:'wrap', justifyContent:'center' }}>
+          {['📧 Campaign Management','📊 Analytics Dashboard','🤖 Automation Workflows','👥 Contact Segmentation'].map(t => (
+            <span key={t} style={{ fontSize:12, color:'rgba(255,255,255,.6)', background:'rgba(255,255,255,.07)', border:'1px solid rgba(255,255,255,.12)', padding:'5px 14px', borderRadius:20, fontFamily:"'Cabinet Grotesk',sans-serif" }}>{t}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ════════════════════════════════════════
    NAVBAR
 ════════════════════════════════════════ */
 function Navbar() {
   const navigate = useNavigate()
-  const [scrolled,       setScrolled]       = useState(false)
-  const [activeSection,  setActiveSection]  = useState('home')
-  const [menuOpen,       setMenuOpen]       = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  const [activeSection, setActiveSection] = useState('home')
+  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 40)
@@ -317,14 +297,11 @@ function Navbar() {
   return (
     <nav style={{ position:'fixed',top:0,left:0,right:0,zIndex:999,background:scrolled?'rgba(15,14,42,.96)':'#0F0E2A',backdropFilter:scrolled?'blur(14px)':'none',boxShadow:scrolled?'0 2px 28px rgba(0,0,0,.35)':'none',transition:'all .3s ease' }}>
       <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 5%',height:64 }}>
-
-        {/* Logo */}
         <button onClick={() => go('home')} style={{ display:'flex',alignItems:'center',gap:10,background:'none',border:'none',cursor:'pointer',flexShrink:0 }}>
           <div style={{ width:36,height:36,borderRadius:10,background:'linear-gradient(135deg,#4F46E5,#06B6D4)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:17 }}>✉</div>
           <span className="cd" style={{ color:'#fff',fontWeight:700,fontSize:20,letterSpacing:'-.5px' }}>Mail<span style={{ color:'#06B6D4' }}>Doll</span></span>
         </button>
 
-        {/* Desktop links */}
         <ul className="nav-desktop" style={{ gap:32,listStyle:'none',alignItems:'center' }}>
           {links.map(({ id,label }) => (
             <li key={id}>
@@ -336,13 +313,11 @@ function Navbar() {
           ))}
         </ul>
 
-        {/* Right side */}
         <div style={{ display:'flex',gap:10,alignItems:'center' }}>
           <div className="nav-desktop" style={{ gap:10 }}>
             <button className="btn-amber" onClick={() => navigate('/login')}>Login ›</button>
             <button className="btn-indigo" style={{ padding:'10px 22px',fontSize:13 }} onClick={() => navigate('/register')}>Start Free</button>
           </div>
-          {/* Hamburger */}
           <button className="nav-ham" onClick={() => setMenuOpen(!menuOpen)}
             style={{ background:'none',border:'none',color:'#fff',fontSize:26,cursor:'pointer',lineHeight:1,padding:'2px 4px' }}>
             {menuOpen ? '✕' : '☰'}
@@ -350,7 +325,6 @@ function Navbar() {
         </div>
       </div>
 
-      {/* Mobile menu */}
       {menuOpen && (
         <div style={{ background:'#0F0E2A',padding:'8px 5% 20px',borderTop:'1px solid rgba(255,255,255,.08)' }}>
           {links.map(({ id,label }) => (
@@ -379,8 +353,10 @@ function HeroSection() {
     { val:'44%',   label:'Avg Open Rate',    color:'#06B6D4' },
     { val:'12K+',  label:'Businesses',       color:'#F59E0B' },
   ]
+
   return (
     <section id="home" className="hero-wrap" style={{ minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'space-between',padding:'110px 5% 80px',gap:48,flexWrap:'wrap',position:'relative',overflow:'hidden',background:'linear-gradient(155deg,#F8F9FF 0%,#EEF0FF 55%,#E4E7FF 100%)' }}>
+
       <div style={{ position:'absolute',top:'8%',right:'-4%',width:520,height:520,borderRadius:'50%',background:'radial-gradient(circle,rgba(79,70,229,.14) 0%,transparent 70%)',pointerEvents:'none' }} />
       <div style={{ position:'absolute',bottom:'-5%',left:'-4%',width:360,height:360,borderRadius:'50%',background:'radial-gradient(circle,rgba(6,182,212,.1) 0%,transparent 70%)',pointerEvents:'none' }} />
       <div className="dot-grid" style={{ position:'absolute',inset:0,opacity:.5,pointerEvents:'none' }} />
@@ -388,16 +364,24 @@ function HeroSection() {
       {/* Left */}
       <div className="hero-left fade-up" style={{ flex:'1 1 300px',maxWidth:560,position:'relative',zIndex:2 }}>
         <div className="pill" style={{ marginBottom:22 }}><span className="pill-dot" /> #1 Email & SMS Marketing Platform</div>
+
         <h1 className="cd" style={{ fontSize:'clamp(34px,5.5vw,70px)',fontWeight:700,lineHeight:1.07,color:'#0F0E2A',marginBottom:20,letterSpacing:'-1.5px' }}>
           Email Marketing<br /><span className="grad-text">That Actually Converts</span>
         </h1>
+
         <p style={{ fontSize:16,color:'#6B7280',lineHeight:1.75,marginBottom:32,maxWidth:460 }}>
           Create campaigns, automate sequences, segment your audience, and track performance — all in one platform built for serious marketers.
         </p>
+
         <div className="hero-btns" style={{ display:'flex',gap:12,flexWrap:'wrap' }}>
-          <button className="btn-indigo" onClick={() => navigate('/register')}>Try Free — No Card Needed</button>
-          <button className="btn-ghost" onClick={() => setShowDemo(true)}>Watch Demo ▶</button>
+          <button className="btn-indigo" onClick={() => navigate('/register')}>
+            Try Free — No Card Needed
+          </button>
+          <button className="btn-ghost" onClick={() => setShowDemo(true)}>
+            Watch Demo ▶
+          </button>
         </div>
+
         <div className="hero-stats" style={{ display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10,marginTop:36 }}>
           {stats.map(s => (
             <div key={s.label} className="stat-chip">
@@ -412,7 +396,9 @@ function HeroSection() {
       <div className="hero-card float-y" style={{ flex:'1 1 300px',maxWidth:500,position:'relative',zIndex:2 }}>
         <div className="glass-card" style={{ padding:20 }}>
           <div style={{ display:'flex',gap:7,marginBottom:16 }}>
-            {['#EF4444','#F59E0B','#10B981'].map(c => <div key={c} style={{ width:10,height:10,borderRadius:'50%',background:c }} />)}
+            {['#EF4444','#F59E0B','#10B981'].map(c => (
+              <div key={c} style={{ width:10,height:10,borderRadius:'50%',background:c }} />
+            ))}
           </div>
           <div style={{ display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:10,marginBottom:14 }}>
             {[
@@ -428,27 +414,6 @@ function HeroSection() {
               </div>
             ))}
           </div>
-          <div style={{ background:'#fff',borderRadius:12,padding:'14px 16px',border:'1px solid rgba(79,70,229,.1)' }}>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10,flexWrap:'wrap',gap:6 }}>
-              <span style={{ fontSize:12,fontWeight:700,color:'#0F0E2A' }}>Summer Sale Campaign</span>
-              <span style={{ fontSize:11,color:'#10B981',background:'#ECFDF5',padding:'3px 10px',borderRadius:20,border:'1px solid #D1FAE5' }}>● Live</span>
-            </div>
-            <svg viewBox="0 0 400 75" style={{ width:'100%',height:65 }}>
-              <defs>
-                <linearGradient id="hg1" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#4F46E5" stopOpacity=".25"/>
-                  <stop offset="100%" stopColor="#4F46E5" stopOpacity="0"/>
-                </linearGradient>
-              </defs>
-              <path d="M0,60 C60,52 100,32 160,35 C220,38 260,16 310,20 C350,23 380,12 400,16 L400,75 L0,75Z" fill="url(#hg1)"/>
-              <path d="M0,60 C60,52 100,32 160,35 C220,38 260,16 310,20 C350,23 380,12 400,16" fill="none" stroke="#4F46E5" strokeWidth="2.5" strokeLinecap="round"/>
-              <path d="M0,68 C60,63 100,52 160,55 C220,58 260,44 310,48 C350,51 380,40 400,44" fill="none" stroke="#06B6D4" strokeWidth="1.8" strokeLinecap="round" strokeDasharray="5 4"/>
-            </svg>
-          </div>
-        </div>
-        <div className="hero-badge" style={{ position:'absolute',top:-16,right:-16,background:'linear-gradient(135deg,#4F46E5,#06B6D4)',borderRadius:14,padding:'11px 16px',color:'#fff',boxShadow:'0 10px 32px rgba(79,70,229,.4)' }}>
-          <div style={{ fontSize:10,opacity:.75,marginBottom:2 }}>active users</div>
-          <div className="cd" style={{ fontSize:24,fontWeight:700 }}>1,243</div>
         </div>
       </div>
 
@@ -491,8 +456,8 @@ function AboutSection() {
             </div>
             <div className="donut-row" style={{ display:'flex',gap:12,marginBottom:12 }}>
               {[
-                { label:'Campaigns Sent',      val:'569',   color:'#4F46E5',da:'120 56',do_:'50',note:'68% Delivered' },
-                { label:'Click-Through Rate',  val:'10.8%', color:'#06B6D4',da:'95 81', do_:'50',note:'Industry avg: 3%' },
+                { label:'Campaigns Sent',val:'569',color:'#4F46E5',da:'120 56',do_:'50',note:'68% Delivered' },
+                { label:'Click-Through Rate',val:'10.8%',color:'#06B6D4',da:'95 81',do_:'50',note:'Industry avg: 3%' },
               ].map(m => (
                 <div key={m.label} style={{ flex:1,background:'#fff',borderRadius:14,padding:'14px 10px',textAlign:'center',border:`1px solid ${m.color}18` }}>
                   <div style={{ fontSize:11,color:'#9CA3AF',marginBottom:8 }}>{m.label}</div>
@@ -532,7 +497,6 @@ function AboutSection() {
 
       {/* Part 2 */}
       <div className="about-rev" style={{ display:'flex',flexWrap:'wrap',alignItems:'center',justifyContent:'space-between',padding:'90px 5%',gap:48,background:'#EEF0FF',position:'relative',overflow:'hidden' }}>
-
         <div className="abt-vis float-y" style={{ flex:'1 1 280px',maxWidth:440,position:'relative',zIndex:2 }}>
           <div style={{ background:'#fff',borderRadius:20,overflow:'hidden',boxShadow:'0 12px 48px rgba(79,70,229,.16)',border:'1px solid rgba(79,70,229,.12)' }}>
             <div style={{ background:'#0F0E2A',padding:'10px 16px',display:'flex',gap:7 }}>
@@ -576,39 +540,119 @@ function AboutSection() {
 }
 
 /* ════════════════════════════════════════
-   FEATURES
+   FEATURES — All 8 Modules from docs
 ════════════════════════════════════════ */
 const FEATS = [
-  { emoji:'🚀', title:'Never Get Stuck',      color:'#4F46E5', bg:'#EEF0FF', desc:'Dedicated support and guided onboarding ensure your campaigns always move forward.' },
-  { emoji:'📨', title:'Unlimited Email Sends', color:'#10B981', bg:'#ECFDF5', desc:'Send bulk emails at scale using our Redis + Bull queue. No bottlenecks on higher plans.' },
-  { emoji:'📍', title:'Email Deliverability',  color:'#06B6D4', bg:'#ECFEFF', desc:'98.7% delivery rate powered by SendGrid & Amazon SES with automated bounce handling.' },
-  { emoji:'⭐', title:'Free Migration Service',color:'#F59E0B', bg:'#FFFBEB', desc:'Moving from another platform? We migrate your contacts, templates, and history free.' },
-  { emoji:'🎨', title:'Template Builder',      color:'#8B5CF6', bg:'#F5F3FF', desc:'Drag-and-drop editor with HTML mode, image uploads, and personalization variables.' },
-  { emoji:'📊', title:'Analytics Dashboard',  color:'#EF4444', bg:'#FEF2F2', desc:'Real-time metrics: open rate, CTR, bounce rate, unsubscribes — visualized beautifully.' },
+  {
+    num:'01',
+    emoji:'🔐',
+    title:'Authentication System',
+    color:'#4F46E5',
+    bg:'#EEF0FF',
+    desc:'Secure user registration, login, email verification, password reset, and role-based access control for Admin, Manager, and Analyst roles.',
+    tags:['JWT Auth','Email Verify','RBAC']
+  },
+  {
+    num:'02',
+    emoji:'👥',
+    title:'Contact Management',
+    color:'#10B981',
+    bg:'#ECFDF5',
+    desc:'Add contacts manually, upload via CSV, or import through API. Tag contacts, segment by behavior, source, or activity, and manage unsubscribes automatically.',
+    tags:['CSV Import','API Import','Segmentation']
+  },
+  {
+    num:'03',
+    emoji:'🎨',
+    title:'Email Template Builder',
+    color:'#8B5CF6',
+    bg:'#F5F3FF',
+    desc:'Create reusable email templates with a drag-and-drop editor, HTML mode, image upload, and personalization variables like {{name}} and {{company}}.',
+    tags:['Drag & Drop','HTML Editor','Personalization']
+  },
+  {
+    num:'04',
+    emoji:'📣',
+    title:'Campaign Management',
+    color:'#F59E0B',
+    bg:'#FFFBEB',
+    desc:'Create campaigns with target audience selection, template linking, subject line setup, and flexible scheduling. Manage Draft, Scheduled, Sending, and Sent statuses.',
+    tags:['Scheduling','Audience','Status Tracking']
+  },
+  {
+    num:'05',
+    emoji:'📨',
+    title:'Email Sending Engine',
+    color:'#06B6D4',
+    bg:'#ECFEFF',
+    desc:'Bulk email delivery via Redis + Bull queue system with SendGrid and Amazon SES integration. Worker-based processing for high-volume sends with zero bottlenecks.',
+    tags:['Redis + Bull','SendGrid','Amazon SES']
+  },
+  {
+    num:'06',
+    emoji:'🤖',
+    title:'Automation Workflows',
+    color:'#EF4444',
+    bg:'#FEF2F2',
+    desc:'Build multi-step automated email sequences triggered by user actions — Welcome Email → Product Recommendation → Discount Offer — all on autopilot.',
+    tags:['Trigger-based','Multi-step','Auto-send']
+  },
+  {
+    num:'07',
+    emoji:'📍',
+    title:'Email Tracking System',
+    color:'#EC4899',
+    bg:'#FDF2F8',
+    desc:'Track every engagement event: Email Sent, Opened (pixel tracking), Link Clicked (tracking links), Bounced, and Unsubscribed — all logged in real time.',
+    tags:['Open Tracking','Click Tracking','Bounce Handling']
+  },
+  {
+    num:'08',
+    emoji:'📊',
+    title:'Analytics Dashboard',
+    color:'#0EA5E9',
+    bg:'#F0F9FF',
+    desc:'Visualize campaign performance with charts for open rate, click-through rate, bounce rate, and unsubscribe rate. Audience growth and engagement trends at a glance.',
+    tags:['Chart.js','Real-time','Exportable']
+  },
 ]
 
 function FeaturesSection() {
   return (
     <section id="features" style={{ background:'#F8F9FF' }}>
       <div style={{ padding:'72px 5% 36px',textAlign:'center',background:'linear-gradient(160deg,#EEF0FF 0%,#E4E7FF 55%,#F8F9FF 100%)' }}>
-        <div className="pill" style={{ marginBottom:18 }}>What We Offer</div>
+        <div className="pill" style={{ marginBottom:18 }}>8 Powerful Modules</div>
         <h2 className="cd" style={{ fontSize:'clamp(26px,4vw,50px)',fontWeight:700,color:'#0F0E2A',marginBottom:14,letterSpacing:'-1px' }}>
-          Email Marketing <span className="grad-text">Features</span>
+          Everything You Need for<br /><span className="grad-text">Email Marketing Success</span>
         </h2>
-        <p style={{ fontSize:16,color:'#6B7280',maxWidth:500,margin:'0 auto',lineHeight:1.7 }}>Eight powerful modules — from contact management to automation workflows and real-time analytics.</p>
+        <p style={{ fontSize:16,color:'#6B7280',maxWidth:540,margin:'0 auto',lineHeight:1.7 }}>
+          Eight complete modules — from secure authentication and contact management to automation workflows and real-time analytics.
+        </p>
       </div>
-      <div style={{ padding:'48px 5% 80px',maxWidth:1100,margin:'0 auto' }}>
-        <div className="feat-grid" style={{ display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:20 }}>
+
+      <div style={{ padding:'48px 5% 80px',maxWidth:1160,margin:'0 auto' }}>
+        <div className="feat-grid" style={{ display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:22 }}>
           {FEATS.map(f => (
-            <div key={f.title} className="feature-card">
+            <div key={f.title} className="feature-card" style={{ position:'relative',overflow:'hidden' }}>
+              {/* Module number badge */}
+              <div style={{ position:'absolute',top:20,right:20,fontWeight:800,color:f.color,opacity:.18,fontFamily:"'Clash Display',sans-serif",fontSize:38,lineHeight:1 }}>{f.num}</div>
+
               <div style={{ width:52,height:52,borderRadius:14,background:f.bg,display:'flex',alignItems:'center',justifyContent:'center',fontSize:24,marginBottom:16,border:`1px solid ${f.color}25` }}>{f.emoji}</div>
               <h3 className="cd" style={{ fontSize:17,fontWeight:700,color:'#0F0E2A',marginBottom:8 }}>{f.title}</h3>
-              <p style={{ fontSize:14,color:'#6B7280',lineHeight:1.72 }}>{f.desc}</p>
+              <p style={{ fontSize:14,color:'#6B7280',lineHeight:1.72,marginBottom:16 }}>{f.desc}</p>
+
+              {/* Tags */}
+              <div style={{ display:'flex',flexWrap:'wrap',gap:6 }}>
+                {f.tags.map(t => (
+                  <span key={t} style={{ fontSize:11,fontWeight:700,color:f.color,background:f.bg,padding:'3px 10px',borderRadius:20,border:`1px solid ${f.color}30` }}>{t}</span>
+                ))}
+              </div>
             </div>
           ))}
         </div>
-        <div style={{ textAlign:'center',marginTop:48 }}>
-          <button className="btn-indigo" style={{ fontSize:16,padding:'16px 44px' }}>Get Free Trial Now</button>
+
+        <div style={{ textAlign:'center',marginTop:56 }}>
+          <button className="btn-indigo" style={{ fontSize:16,padding:'16px 44px' }}>Get Free Trial — All 8 Modules Included</button>
         </div>
       </div>
     </section>
@@ -661,8 +705,8 @@ function PricingSection() {
    NEWSLETTER
 ════════════════════════════════════════ */
 function NewsletterSection() {
-  const [form, setForm]         = useState({ name:'', mobile:'', email:'' })
-  const [errors, setErrors]     = useState({})
+  const [form, setForm]           = useState({ name:'', mobile:'', email:'' })
+  const [errors, setErrors]       = useState({})
   const [showPopup, setShowPopup] = useState(false)
 
   const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value })

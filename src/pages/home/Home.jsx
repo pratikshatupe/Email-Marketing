@@ -1,6 +1,112 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+/* ════════════════════════════════════════
+   VIDEO DEMO MODAL
+════════════════════════════════════════ */
+function VideoDemoModal({ onClose }) {
+  // Email marketing demo video — YouTube embed (no autoplay issues)
+  const VIDEO_ID = 'tU5wPo-FaHk' // Email marketing explainer video
+
+  useEffect(() => {
+    const onKey = e => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+    }
+  }, [onClose])
+
+  return (
+    <div
+      onClick={e => { if (e.target === e.currentTarget) onClose() }}
+      style={{
+        position:'fixed', inset:0, zIndex:9999,
+        background:'rgba(8,6,30,.85)', backdropFilter:'blur(10px)',
+        display:'flex', alignItems:'center', justifyContent:'center',
+        padding:'16px', animation:'fadeIn .25s ease',
+      }}
+    >
+      <style>{`
+        @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
+        @keyframes slideUp { from{opacity:0;transform:translateY(32px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+      `}</style>
+
+      <div style={{
+        width:'100%', maxWidth:860, position:'relative',
+        animation:'slideUp .35s ease',
+      }}>
+        {/* Top bar */}
+        <div style={{
+          display:'flex', alignItems:'center', justifyContent:'space-between',
+          marginBottom:14, flexWrap:'wrap', gap:10,
+        }}>
+          <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+            <div style={{
+              width:38, height:38, borderRadius:12,
+              background:'linear-gradient(135deg,#4F46E5,#06B6D4)',
+              display:'flex', alignItems:'center', justifyContent:'center', fontSize:18,
+            }}>▶</div>
+            <div>
+              <div style={{ color:'#fff', fontWeight:700, fontSize:16, fontFamily:"'Clash Display',sans-serif" }}>
+                Maildoll — Product Demo
+              </div>
+              <div style={{ color:'rgba(255,255,255,.45)', fontSize:12, marginTop:1 }}>
+                Email Marketing Platform walkthrough • 3 min
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              width:36, height:36, borderRadius:'50%',
+              background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.18)',
+              color:'#fff', fontSize:18, cursor:'pointer', display:'flex',
+              alignItems:'center', justifyContent:'center', transition:'all .2s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,.22)'}
+            onMouseLeave={e => e.currentTarget.style.background='rgba(255,255,255,.1)'}
+            title="Close (Esc)"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Video iframe */}
+        <div style={{
+          position:'relative', paddingBottom:'56.25%', height:0,
+          borderRadius:18, overflow:'hidden',
+          boxShadow:'0 32px 80px rgba(0,0,0,.6)',
+          border:'1px solid rgba(255,255,255,.1)',
+        }}>
+          <iframe
+            src={`https://www.youtube.com/embed/${VIDEO_ID}?autoplay=1&rel=0&modestbranding=1&color=white`}
+            title="Maildoll Email Marketing Demo"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            style={{
+              position:'absolute', top:0, left:0,
+              width:'100%', height:'100%', border:'none',
+            }}
+          />
+        </div>
+
+        {/* Bottom chips */}
+        <div style={{ display:'flex', gap:10, marginTop:14, flexWrap:'wrap', justifyContent:'center' }}>
+          {['📧 Campaign Management','📊 Analytics Dashboard','🤖 Automation Workflows','👥 Contact Segmentation'].map(t => (
+            <span key={t} style={{
+              fontSize:12, color:'rgba(255,255,255,.6)',
+              background:'rgba(255,255,255,.07)', border:'1px solid rgba(255,255,255,.12)',
+              padding:'5px 14px', borderRadius:20, fontFamily:"'Cabinet Grotesk',sans-serif",
+            }}>{t}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const GLOBAL_STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Clash+Display:wght@500;600;700&family=Cabinet+Grotesk:wght@300;400;500;700;800&display=swap');
 
@@ -265,6 +371,8 @@ function Navbar() {
 ════════════════════════════════════════ */
 function HeroSection() {
   const navigate = useNavigate()
+  const [showDemo, setShowDemo] = useState(false)
+
   const stats = [
     { val:'2.4B+', label:'Emails Delivered', color:'#4F46E5' },
     { val:'98.7%', label:'Delivery Rate',    color:'#10B981' },
@@ -288,7 +396,7 @@ function HeroSection() {
         </p>
         <div className="hero-btns" style={{ display:'flex',gap:12,flexWrap:'wrap' }}>
           <button className="btn-indigo" onClick={() => navigate('/register')}>Try Free — No Card Needed</button>
-          <button className="btn-ghost">Watch Demo ▶</button>
+          <button className="btn-ghost" onClick={() => setShowDemo(true)}>Watch Demo ▶</button>
         </div>
         <div className="hero-stats" style={{ display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10,marginTop:36 }}>
           {stats.map(s => (
@@ -343,6 +451,9 @@ function HeroSection() {
           <div className="cd" style={{ fontSize:24,fontWeight:700 }}>1,243</div>
         </div>
       </div>
+
+      {/* Video Demo Modal */}
+      {showDemo && <VideoDemoModal onClose={() => setShowDemo(false)} />}
     </section>
   )
 }

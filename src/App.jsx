@@ -20,6 +20,10 @@ import VerifyEmail from "./pages/auth/VerifyMail";
 // ── Admin Pages ──
 import AdminUsers from "./pages/admin/AdminUsers";
 
+// ── Campaign Pages ──
+import WhatsAppCampaigns from "./pages/campagins/WhatsappCampagins";
+import EmailCampaigns    from "./pages/campagins/EmailCampagins";
+
 // ── Dummy Role Dashboards ──
 const ManagerDashboard = () => <h1>Manager Dashboard</h1>;
 const ViewerDashboard  = () => <h1>Viewer Dashboard</h1>;
@@ -56,7 +60,7 @@ function AppRoutes() {
 
         <Route path="/" element={<Home />} />
 
-       
+        {/* ── Anchor Redirects ──────────────────────────── */}
         <Route path="/about"       element={<Navigate to="/#about"       replace />} />
         <Route path="/features"    element={<Navigate to="/#features"    replace />} />
         <Route path="/pricing"     element={<Navigate to="/#pricing"     replace />} />
@@ -81,6 +85,29 @@ function AppRoutes() {
               <AdminLayout />
             </ProtectedRoute>
           }
+        />
+
+        {/* ── Protected: Campaign Pages ─────────────────── */}
+        <Route
+          path="/campaigns/whatsapp"
+          element={
+            <ProtectedRoute>
+              <WhatsAppCampaigns />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/campaigns/email"
+          element={
+            <ProtectedRoute>
+              <EmailCampaigns />
+            </ProtectedRoute>
+          }
+        />
+        {/* Default campaigns redirect */}
+        <Route
+          path="/campaigns"
+          element={<Navigate to="/campaigns/email" replace />}
         />
 
         {/* ── Protected: Role Dashboards ────────────────── */}
@@ -116,7 +143,6 @@ function AppRoutes() {
     </BrowserRouter>
   );
 }
-
 
 function App() {
   return (

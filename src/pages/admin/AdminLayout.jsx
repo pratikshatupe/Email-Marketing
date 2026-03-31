@@ -1,17 +1,20 @@
+// frontend/pages/admin/AdminLayout.jsx
+// Settings page is now rendered INSIDE AdminLayout at /admin/settings — not as a separate route.
+
 import React, { useState } from "react";
 import { Routes, Route, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
-// ── Sidebar (वेगळा component) ─────────────────────────────────────────────
 import AdminSidebar, { roleConfig } from "./AdminSidebar";
 
-// ── Campaign Sub-Pages ─────────────────────────────────────────────────────
 import EmailCampaigns    from "../campagins/EmailCampagins";
 import WhatsAppCampaigns from "../campagins/WhatsappCampagins";
 
-// ── Templates Pages ────────────────────────────────────────────────────────
-import EmailTemplates    from "../templates/Tamplates";          // तुमचा existing Email Templates
-import WhatsAppTemplates from "../templates/WhatsappTamplates";  // नवीन WhatsApp Templates
+import EmailTemplates    from "../templates/Tamplates";
+import WhatsAppTemplates from "../templates/WhatsappTamplates";
+
+// ✅ Settings imported here — renders inside AdminLayout
+import Settings from "../settings/Settings";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PLACEHOLDER
@@ -522,7 +525,6 @@ function UserManagementPage() {
         </div>
       </div>
 
-      {/* Add Modal */}
       {showAdd && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(15,14,42,0.6)", backdropFilter:"blur(4px)" }}>
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
@@ -564,7 +566,6 @@ function UserManagementPage() {
         </div>
       )}
 
-      {/* Edit Modal */}
       {editUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(15,14,42,0.6)", backdropFilter:"blur(4px)" }}>
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
@@ -620,7 +621,6 @@ function UserManagementPage() {
         </div>
       )}
 
-      {/* Delete Modal */}
       {deleteId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(15,14,42,0.6)", backdropFilter:"blur(4px)" }}>
           <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center">
@@ -962,7 +962,7 @@ export default function AdminLayout() {
               hasPerm("view_campaigns") ? <WhatsAppCampaigns /> : <AccessDenied />
             } />
 
-            {/* ✅ Templates — /admin/templates → Email Templates redirect */}
+            {/* Templates */}
             <Route path="templates" element={
               hasPerm("sidebar_templates") ? <Navigate to="/admin/templates/email" replace /> : <AccessDenied />
             } />
@@ -979,8 +979,13 @@ export default function AdminLayout() {
             <Route path="users"        element={hasPerm("sidebar_roles")       ? <UserManagementPage />               : <AccessDenied />} />
             <Route path="roles"        element={hasPerm("sidebar_roles")       ? <RolesPermissionsPage />             : <AccessDenied />} />
             <Route path="subscription" element={hasPerm("view_purchase")       ? <PlaceholderPage title="Subscription" icon="💳" /> : <AccessDenied />} />
-            <Route path="settings"     element={hasPerm("sidebar_settings")    ? <PlaceholderPage title="Settings"    icon="🔧" /> : <AccessDenied />} />
-            <Route path="*"            element={<AccessDenied />} />
+
+            {/* ✅ Settings — renders INSIDE AdminLayout, no separate route in App.jsx */}
+            <Route path="settings" element={
+              hasPerm("sidebar_settings") ? <Settings /> : <AccessDenied />
+            } />
+
+            <Route path="*" element={<AccessDenied />} />
           </Routes>
         </main>
       </div>

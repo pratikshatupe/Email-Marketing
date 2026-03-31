@@ -13,7 +13,7 @@ export const roleConfig = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// NAV CONFIG  ← Templates ला children add केले
+// NAV CONFIG (Settings perm = null → सर्व roles साठी visible)
 // ─────────────────────────────────────────────────────────────────────────────
 export const NAV_ITEMS = [
   {
@@ -61,7 +61,12 @@ export const NAV_ITEMS = [
       { label: "Users",        icon: "👤", path: "/admin/users",        perm: "sidebar_roles"    },
       { label: "Roles",        icon: "🔐", path: "/admin/roles",        perm: "sidebar_roles"    },
       { label: "Subscription", icon: "💳", path: "/admin/subscription", perm: "view_purchase"    },
-      { label: "Settings",     icon: "🔧", path: "/admin/settings",     perm: "sidebar_settings" },
+      { 
+        label: "Settings",     // ← ✅ Fixed: perm = null (सर्व roles साठी)
+        icon: "🔧", 
+        path: "/admin/settings",     
+        perm: null 
+      },
     ],
   },
 ];
@@ -87,7 +92,7 @@ export default function AdminSidebar({ collapsed }) {
     location.pathname.startsWith("/admin/templates")
   );
 
-  // Generic toggle helper — item.path वरून open/close state manage करतो
+  // Generic toggle helper
   const isDropdownOpen = (path) => {
     if (path === "/admin/campaigns") return campaignsOpen;
     if (path === "/admin/templates") return templatesOpen;
@@ -282,7 +287,7 @@ export default function AdminSidebar({ collapsed }) {
                   );
                 }
 
-                /* ── Regular nav item ── */
+                /* ── Regular nav item (Settings येथे येईल) ── */
                 return (
                   <NavLink
                     key={item.path}

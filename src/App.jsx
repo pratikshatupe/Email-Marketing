@@ -77,7 +77,7 @@ function AppRoutes() {
         {/* Email Verify */}
         <Route path="/verify-email" element={<VerifyEmail />} />
 
-        {/* ── Protected: Admin ──────────────────────────── */}
+        {/* ── Protected: Admin (सगळे admin sub-routes AdminLayout मध्ये handle होतात) ── */}
         <Route
           path="/admin/*"
           element={
@@ -87,7 +87,7 @@ function AppRoutes() {
           }
         />
 
-        {/* ── Protected: Campaign Pages ─────────────────── */}
+        {/* ── Protected: Standalone Campaign Pages ─────────── */}
         <Route
           path="/campaigns/whatsapp"
           element={

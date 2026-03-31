@@ -1,65 +1,17 @@
 import React, { useState } from "react";
-import { Routes, Route, NavLink, useNavigate, Navigate, useLocation } from "react-router-dom";
+import { Routes, Route, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+
+// ── Sidebar (वेगळा component) ─────────────────────────────────────────────
+import AdminSidebar, { roleConfig } from "./AdminSidebar";
 
 // ── Campaign Sub-Pages ─────────────────────────────────────────────────────
 import EmailCampaigns    from "../campagins/EmailCampagins";
 import WhatsAppCampaigns from "../campagins/WhatsappCampagins";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ROLE CONFIG
-// ─────────────────────────────────────────────────────────────────────────────
-const roleConfig = {
-  SUPER_ADMIN:       { label: "Super Admin",       icon: "👑", color: "#6366f1", bg: "#ede9fe" },
-  BUSINESS_ADMIN:    { label: "Business Admin",    icon: "🏢", color: "#10b981", bg: "#d1fae5" },
-  MARKETING_MANAGER: { label: "Marketing Manager", icon: "🎯", color: "#f59e0b", bg: "#fef3c7" },
-  VIEWER:            { label: "Viewer",            icon: "👁️", color: "#ec4899", bg: "#fce7f3" },
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
-// NAV CONFIG — campaigns ला sub-items आहेत
-// ─────────────────────────────────────────────────────────────────────────────
-const NAV_ITEMS = [
-  {
-    group: "Overview",
-    items: [
-      { label: "Dashboard", icon: "📊", path: "/admin", perm: null, end: true },
-    ],
-  },
-  {
-    group: "Marketing",
-    items: [
-      {
-        label: "Campaigns",
-        icon: "📢",
-        path: "/admin/campaigns",
-        perm: "view_campaigns",
-        children: [
-          { label: "Email Campaigns",    icon: "✉️",  path: "/admin/campaigns/email" },
-          { label: "WhatsApp Campaigns", icon: "💬", path: "/admin/campaigns/whatsapp" },
-        ],
-      },
-      { label: "Templates",  icon: "🎨", path: "/admin/templates",  perm: "sidebar_templates" },
-      { label: "Contacts",   icon: "👥", path: "/admin/contacts",   perm: "sidebar_subscribers" },
-      { label: "Automation", icon: "⚙️", path: "/admin/automation", perm: "view_campaigns" },
-    ],
-  },
-  {
-    group: "Analytics",
-    items: [
-      { label: "Reports", icon: "📈", path: "/admin/reports", perm: "sidebar_reports" },
-    ],
-  },
-  {
-    group: "Administration",
-    items: [
-      { label: "Users",        icon: "👤", path: "/admin/users",        perm: "sidebar_roles" },
-      { label: "Roles",        icon: "🔐", path: "/admin/roles",        perm: "sidebar_roles" },
-      { label: "Subscription", icon: "💳", path: "/admin/subscription", perm: "view_purchase" },
-      { label: "Settings",     icon: "🔧", path: "/admin/settings",     perm: "sidebar_settings" },
-    ],
-  },
-];
+// ── Templates Pages ────────────────────────────────────────────────────────
+import EmailTemplates    from "../templates/Tamplates";          // तुमचा existing Email Templates
+import WhatsAppTemplates from "../templates/WhatsappTamplates";  // नवीन WhatsApp Templates
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PLACEHOLDER
@@ -169,8 +121,9 @@ const roleBanners = {
 };
 
 function DonutChart({ opened, sent }) {
-  const pct = sent > 0 ? Math.round((opened / sent) * 100) : 0;
-  const r = 34, circ = 2 * Math.PI * r;
+  const pct  = sent > 0 ? Math.round((opened / sent) * 100) : 0;
+  const r    = 34;
+  const circ = 2 * Math.PI * r;
   const stroke = (pct / 100) * circ;
   return (
     <div className="relative flex items-center justify-center w-20 h-20">
@@ -186,12 +139,12 @@ function DonutChart({ opened, sent }) {
 
 function DashboardPage() {
   const { user, hasPerm } = useAuth();
-  const role = user?.role || "VIEWER";
-  const banner = roleBanners[role];
-  const stats  = MOCK_STATS[role] || [];
-  const rc     = roleConfig[role] || roleConfig.VIEWER;
+  const role      = user?.role || "VIEWER";
+  const banner    = roleBanners[role];
+  const stats     = MOCK_STATS[role] || [];
+  const rc        = roleConfig[role] || roleConfig.VIEWER;
   const campaigns = role === "MARKETING_MANAGER" ? MOCK_CAMPAIGNS.slice(0, 3) : MOCK_CAMPAIGNS;
-  const navigate = useNavigate();
+  const navigate  = useNavigate();
 
   return (
     <div className="space-y-5">
@@ -274,10 +227,13 @@ function DashboardPage() {
             <div className="flex flex-col items-center gap-4">
               <DonutChart opened={5488} sent={12400} />
               <div className="w-full space-y-2">
-                {[{label:"Opened",value:"5,488",color:"#6366f1"},{label:"Not Opened",value:"6,912",color:"#e0e7ff"}].map((r,i)=>(
+                {[
+                  { label:"Opened",     value:"5,488", color:"#6366f1" },
+                  { label:"Not Opened", value:"6,912", color:"#e0e7ff" },
+                ].map((r,i) => (
                   <div key={i} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="w-2.5 h-2.5 rounded-full" style={{ background:r.color }} />
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ background: r.color }} />
                       <span className="text-xs text-slate-500">{r.label}</span>
                     </div>
                     <span className="text-xs font-bold text-slate-700">{r.value}</span>
@@ -301,14 +257,14 @@ function DashboardPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-50 bg-slate-50">
-                    {["Campaign","Status","Sent","Opened","CTR","Date"].map(h=>(
+                    {["Campaign","Status","Sent","Opened","CTR","Date"].map(h => (
                       <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wide whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {campaigns.map((c,i)=>{
-                    const sc=statusColors[c.status]||statusColors.Draft;
+                  {campaigns.map((c, i) => {
+                    const sc = statusColors[c.status] || statusColors.Draft;
                     return (
                       <tr key={i} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                         <td className="px-5 py-3 font-semibold text-slate-700 max-w-[150px] truncate">{c.name}</td>
@@ -325,14 +281,14 @@ function DashboardPage() {
             </div>
           </div>
         )}
-        {role==="SUPER_ADMIN" && (
+        {role === "SUPER_ADMIN" && (
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-50">
               <h3 className="font-bold text-slate-800">Audit Log</h3>
               <span className="text-[10px] bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-full font-semibold animate-pulse">Live</span>
             </div>
             <div className="divide-y divide-slate-50">
-              {MOCK_AUDIT.map((log,i)=>(
+              {MOCK_AUDIT.map((log, i) => (
                 <div key={i} className="px-5 py-3 hover:bg-slate-50 transition-colors">
                   <div className="flex items-start justify-between gap-2">
                     <div>
@@ -352,20 +308,20 @@ function DashboardPage() {
       </div>
 
       {/* Team — Business Admin */}
-      {role==="BUSINESS_ADMIN" && (
+      {role === "BUSINESS_ADMIN" && (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-slate-50">
             <h3 className="font-bold text-slate-800">Team Members</h3>
           </div>
           <div className="divide-y divide-slate-50">
-            {MOCK_TEAM.map((u,i)=>{
-              const rc2=roleConfig[u.role];
-              const sc2=statusColors[u.status];
+            {MOCK_TEAM.map((u, i) => {
+              const rc2 = roleConfig[u.role];
+              const sc2 = statusColors[u.status];
               return (
                 <div key={i} className="flex items-center justify-between px-5 py-3 hover:bg-slate-50 transition-colors">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
-                      style={{background:"linear-gradient(135deg,#6366f1,#8b5cf6)"}}>
+                      style={{ background:"linear-gradient(135deg,#6366f1,#8b5cf6)" }}>
                       {u.name[0]}
                     </div>
                     <div>
@@ -397,14 +353,14 @@ function DashboardPage() {
           </div>
           <div className="space-y-2">
             {[
-              { label:"New subscriptions",value:"₹1,84,000",pct:44 },
-              { label:"Renewals",         value:"₹2,10,000",pct:50 },
-              { label:"Add-ons",          value:"₹27,800",  pct:6  },
-            ].map((r,i)=>(
+              { label:"New subscriptions", value:"₹1,84,000", pct:44 },
+              { label:"Renewals",          value:"₹2,10,000", pct:50 },
+              { label:"Add-ons",           value:"₹27,800",   pct:6  },
+            ].map((r, i) => (
               <div key={i} className="flex items-center gap-3 text-xs">
                 <div className="w-32 text-slate-500">{r.label}</div>
                 <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-indigo-400 rounded-full" style={{width:`${r.pct}%`}} />
+                  <div className="h-full bg-indigo-400 rounded-full" style={{ width:`${r.pct}%` }} />
                 </div>
                 <div className="w-20 text-right font-semibold text-slate-700">{r.value}</div>
               </div>
@@ -414,7 +370,7 @@ function DashboardPage() {
       )}
 
       {/* Viewer notice */}
-      {role==="VIEWER" && (
+      {role === "VIEWER" && (
         <div className="bg-pink-50 border border-pink-100 rounded-2xl p-5 flex items-center gap-4">
           <div className="w-10 h-10 rounded-xl bg-pink-100 flex items-center justify-center text-xl flex-shrink-0">👁️</div>
           <div>
@@ -443,7 +399,7 @@ const ROLES_LIST = ["SUPER_ADMIN","BUSINESS_ADMIN","MARKETING_MANAGER","VIEWER"]
 function UserManagementPage() {
   const { user: currentUser } = useAuth();
   const role    = currentUser?.role;
-  const canEdit = role==="SUPER_ADMIN" || role==="BUSINESS_ADMIN";
+  const canEdit = role === "SUPER_ADMIN" || role === "BUSINESS_ADMIN";
 
   const [users,    setUsers]    = useState(INITIAL_USERS);
   const [search,   setSearch]   = useState("");
@@ -451,12 +407,12 @@ function UserManagementPage() {
   const [editUser, setEditUser] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
   const [showAdd,  setShowAdd]  = useState(false);
-  const [addForm,  setAddForm]  = useState({name:"",email:"",role:"VIEWER",company:""});
+  const [addForm,  setAddForm]  = useState({ name:"", email:"", role:"VIEWER", company:"" });
 
   const filtered = users.filter(u => {
     const q = search.toLowerCase();
-    return (u.name.toLowerCase().includes(q)||u.email.toLowerCase().includes(q))
-      && (fRole==="ALL"||u.role===fRole);
+    return (u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q))
+      && (fRole === "ALL" || u.role === fRole);
   });
 
   return (
@@ -467,20 +423,20 @@ function UserManagementPage() {
           <p className="text-sm text-slate-400 mt-0.5">{users.length} total users</p>
         </div>
         {canEdit && (
-          <button onClick={()=>setShowAdd(true)}
+          <button onClick={() => setShowAdd(true)}
             className="px-5 py-2.5 rounded-xl text-white text-sm font-bold shadow-lg hover:opacity-90 transition-opacity"
-            style={{background:"linear-gradient(135deg,#6366f1,#8b5cf6)"}}>
+            style={{ background:"linear-gradient(135deg,#6366f1,#8b5cf6)" }}>
             + Add User
           </button>
         )}
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {ROLES_LIST.map(r=>{
-          const rc2=roleConfig[r];
-          const count=users.filter(u=>u.role===r).length;
+        {ROLES_LIST.map(r => {
+          const rc2   = roleConfig[r];
+          const count = users.filter(u => u.role === r).length;
           return (
-            <div key={r} onClick={()=>setFRole(fRole===r?"ALL":r)}
+            <div key={r} onClick={() => setFRole(fRole === r ? "ALL" : r)}
               className={`bg-white rounded-xl p-4 border-2 cursor-pointer transition-all hover:shadow-md ${fRole===r?"border-indigo-400 shadow-md":"border-slate-100"}`}>
               <div className="flex items-center gap-2 mb-1">
                 <span>{rc2.icon}</span>
@@ -493,12 +449,13 @@ function UserManagementPage() {
       </div>
 
       <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4 flex flex-col md:flex-row gap-3">
-        <input type="text" placeholder="Search name or email..." value={search} onChange={e=>setSearch(e.target.value)}
+        <input type="text" placeholder="Search name or email..." value={search}
+          onChange={e => setSearch(e.target.value)}
           className="flex-1 border border-slate-200 bg-slate-50 px-4 py-2 rounded-lg text-sm outline-none focus:border-indigo-400" />
-        <select value={fRole} onChange={e=>setFRole(e.target.value)}
+        <select value={fRole} onChange={e => setFRole(e.target.value)}
           className="border border-slate-200 bg-slate-50 px-4 py-2 rounded-lg text-sm outline-none focus:border-indigo-400">
           <option value="ALL">All Roles</option>
-          {ROLES_LIST.map(r=><option key={r} value={r}>{roleConfig[r].label}</option>)}
+          {ROLES_LIST.map(r => <option key={r} value={r}>{roleConfig[r].label}</option>)}
         </select>
       </div>
 
@@ -507,22 +464,22 @@ function UserManagementPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50">
-                {["User","Role","Company","Status","Joined",canEdit?"Actions":""].filter(Boolean).map(h=>(
+                {["User","Role","Company","Status","Joined", canEdit ? "Actions" : ""].filter(Boolean).map(h => (
                   <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wide whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {filtered.map(u=>{
-                const rc2=roleConfig[u.role];
-                const sc2=statusColors[u.status]||statusColors.Draft;
-                const isSelf=u.email===currentUser?.email;
+              {filtered.map(u => {
+                const rc2  = roleConfig[u.role];
+                const sc2  = statusColors[u.status] || statusColors.Draft;
+                const isSelf = u.email === currentUser?.email;
                 return (
                   <tr key={u.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-white text-xs flex-shrink-0"
-                          style={{background:"linear-gradient(135deg,#6366f1,#8b5cf6)"}}>
+                          style={{ background:"linear-gradient(135deg,#6366f1,#8b5cf6)" }}>
                           {u.name[0]}
                         </div>
                         <div>
@@ -536,22 +493,22 @@ function UserManagementPage() {
                     </td>
                     <td className="px-5 py-3">
                       <span className="flex items-center gap-1.5 w-fit px-2.5 py-1 rounded-full text-xs font-semibold"
-                        style={{background:rc2?.bg,color:rc2?.color}}>
+                        style={{ background:rc2?.bg, color:rc2?.color }}>
                         {rc2?.icon} {rc2?.label}
                       </span>
                     </td>
                     <td className="px-5 py-3 text-slate-500 text-xs">{u.company}</td>
                     <td className="px-5 py-3">
-                      <span className="px-2.5 py-1 rounded-full text-xs font-semibold" style={{background:sc2.bg,color:sc2.text}}>{u.status}</span>
+                      <span className="px-2.5 py-1 rounded-full text-xs font-semibold" style={{ background:sc2.bg, color:sc2.text }}>{u.status}</span>
                     </td>
                     <td className="px-5 py-3 text-slate-400 text-xs">{u.joined}</td>
                     {canEdit && (
                       <td className="px-5 py-3">
                         <div className="flex gap-2">
-                          <button onClick={()=>setEditUser({...u})}
+                          <button onClick={() => setEditUser({...u})}
                             className="text-xs px-3 py-1.5 rounded-lg font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors">Edit</button>
-                          {role==="SUPER_ADMIN" && !isSelf && (
-                            <button onClick={()=>setDeleteId(u.id)}
+                          {role === "SUPER_ADMIN" && !isSelf && (
+                            <button onClick={() => setDeleteId(u.id)}
                               className="text-xs px-3 py-1.5 rounded-lg font-semibold text-red-500 bg-red-50 hover:bg-red-100 transition-colors">Delete</button>
                           )}
                         </div>
@@ -567,34 +524,40 @@ function UserManagementPage() {
 
       {/* Add Modal */}
       {showAdd && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{background:"rgba(15,14,42,0.6)",backdropFilter:"blur(4px)"}}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(15,14,42,0.6)", backdropFilter:"blur(4px)" }}>
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
               <h3 className="font-black text-slate-800">Add New User</h3>
-              <button onClick={()=>setShowAdd(false)} className="text-slate-400 hover:text-slate-600 text-xl">✕</button>
+              <button onClick={() => setShowAdd(false)} className="text-slate-400 hover:text-slate-600 text-xl">✕</button>
             </div>
             <div className="p-6 space-y-4">
-              {[{label:"Full Name",name:"name",type:"text"},{label:"Email",name:"email",type:"email"},{label:"Company",name:"company",type:"text"}].map(f=>(
+              {[
+                { label:"Full Name",  name:"name",    type:"text"  },
+                { label:"Email",      name:"email",   type:"email" },
+                { label:"Company",    name:"company", type:"text"  },
+              ].map(f => (
                 <div key={f.name}>
                   <label className="block text-xs font-semibold text-slate-500 mb-1.5">{f.label}</label>
-                  <input type={f.type} value={addForm[f.name]} onChange={e=>setAddForm(p=>({...p,[f.name]:e.target.value}))}
+                  <input type={f.type} value={addForm[f.name]}
+                    onChange={e => setAddForm(p => ({...p, [f.name]: e.target.value}))}
                     className="w-full border border-slate-200 bg-slate-50 px-4 py-2.5 rounded-xl text-sm outline-none focus:border-indigo-400" />
                 </div>
               ))}
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-1.5">Role</label>
-                <select value={addForm.role} onChange={e=>setAddForm(p=>({...p,role:e.target.value}))}
+                <select value={addForm.role} onChange={e => setAddForm(p => ({...p, role: e.target.value}))}
                   className="w-full border border-slate-200 bg-slate-50 px-4 py-2.5 rounded-xl text-sm outline-none focus:border-indigo-400">
-                  {ROLES_LIST.map(r=><option key={r} value={r}>{roleConfig[r].label}</option>)}
+                  {ROLES_LIST.map(r => <option key={r} value={r}>{roleConfig[r].label}</option>)}
                 </select>
               </div>
               <div className="flex gap-3 pt-2">
-                <button onClick={()=>setShowAdd(false)} className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50">Cancel</button>
-                <button onClick={()=>{
-                  if(!addForm.name||!addForm.email) return;
-                  setUsers(p=>[{...addForm,id:Date.now(),status:"Active",joined:"Mar 2026"},...p]);
-                  setShowAdd(false);setAddForm({name:"",email:"",role:"VIEWER",company:""});
-                }} className="flex-1 py-2.5 rounded-xl text-white text-sm font-bold" style={{background:"linear-gradient(135deg,#6366f1,#8b5cf6)"}}>Add User</button>
+                <button onClick={() => setShowAdd(false)} className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50">Cancel</button>
+                <button onClick={() => {
+                  if (!addForm.name || !addForm.email) return;
+                  setUsers(p => [{...addForm, id:Date.now(), status:"Active", joined:"Mar 2026"}, ...p]);
+                  setShowAdd(false);
+                  setAddForm({ name:"", email:"", role:"VIEWER", company:"" });
+                }} className="flex-1 py-2.5 rounded-xl text-white text-sm font-bold" style={{ background:"linear-gradient(135deg,#6366f1,#8b5cf6)" }}>Add User</button>
               </div>
             </div>
           </div>
@@ -603,16 +566,16 @@ function UserManagementPage() {
 
       {/* Edit Modal */}
       {editUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{background:"rgba(15,14,42,0.6)",backdropFilter:"blur(4px)"}}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(15,14,42,0.6)", backdropFilter:"blur(4px)" }}>
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
               <h3 className="font-black text-slate-800">Edit User</h3>
-              <button onClick={()=>setEditUser(null)} className="text-slate-400 hover:text-slate-600 text-xl">✕</button>
+              <button onClick={() => setEditUser(null)} className="text-slate-400 hover:text-slate-600 text-xl">✕</button>
             </div>
             <div className="p-6 space-y-4">
               <div className="bg-slate-50 rounded-xl p-3 flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-white text-sm"
-                  style={{background:"linear-gradient(135deg,#6366f1,#8b5cf6)"}}>
+                  style={{ background:"linear-gradient(135deg,#6366f1,#8b5cf6)" }}>
                   {editUser.name[0]}
                 </div>
                 <div>
@@ -623,11 +586,11 @@ function UserManagementPage() {
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-2">Role</label>
                 <div className="space-y-2">
-                  {ROLES_LIST.map(r=>{
-                    const rc2=roleConfig[r];
+                  {ROLES_LIST.map(r => {
+                    const rc2 = roleConfig[r];
                     return (
                       <label key={r} className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${editUser.role===r?"border-indigo-400 bg-indigo-50":"border-slate-100 hover:border-slate-200"}`}>
-                        <input type="radio" checked={editUser.role===r} onChange={()=>setEditUser(p=>({...p,role:r}))} className="sr-only" />
+                        <input type="radio" checked={editUser.role===r} onChange={() => setEditUser(p => ({...p, role:r}))} className="sr-only" />
                         <span className="text-lg">{rc2.icon}</span>
                         <span className="text-sm font-semibold text-slate-700">{rc2.label}</span>
                         {editUser.role===r && <span className="ml-auto text-indigo-500">✓</span>}
@@ -639,8 +602,8 @@ function UserManagementPage() {
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-2">Status</label>
                 <div className="flex gap-2">
-                  {["Active","Inactive"].map(s=>(
-                    <button key={s} onClick={()=>setEditUser(p=>({...p,status:s}))}
+                  {["Active","Inactive"].map(s => (
+                    <button key={s} onClick={() => setEditUser(p => ({...p, status:s}))}
                       className={`flex-1 py-2 rounded-xl text-sm font-semibold border-2 transition-all ${editUser.status===s?"border-indigo-400 bg-indigo-50 text-indigo-700":"border-slate-100 text-slate-500"}`}>
                       {s}
                     </button>
@@ -648,25 +611,25 @@ function UserManagementPage() {
                 </div>
               </div>
               <div className="flex gap-3 pt-1">
-                <button onClick={()=>setEditUser(null)} className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold">Cancel</button>
-                <button onClick={()=>{setUsers(p=>p.map(u=>u.id===editUser.id?editUser:u));setEditUser(null);}}
-                  className="flex-1 py-2.5 rounded-xl text-white text-sm font-bold" style={{background:"linear-gradient(135deg,#6366f1,#8b5cf6)"}}>Save</button>
+                <button onClick={() => setEditUser(null)} className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold">Cancel</button>
+                <button onClick={() => { setUsers(p => p.map(u => u.id===editUser.id ? editUser : u)); setEditUser(null); }}
+                  className="flex-1 py-2.5 rounded-xl text-white text-sm font-bold" style={{ background:"linear-gradient(135deg,#6366f1,#8b5cf6)" }}>Save</button>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Delete */}
+      {/* Delete Modal */}
       {deleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{background:"rgba(15,14,42,0.6)",backdropFilter:"blur(4px)"}}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(15,14,42,0.6)", backdropFilter:"blur(4px)" }}>
           <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center">
             <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center text-2xl mx-auto mb-4">🗑️</div>
             <h3 className="font-black text-slate-800 text-lg mb-2">Delete User?</h3>
             <p className="text-sm text-slate-400 mb-6">हा user permanently delete होईल.</p>
             <div className="flex gap-3">
-              <button onClick={()=>setDeleteId(null)} className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold">Cancel</button>
-              <button onClick={()=>{setUsers(p=>p.filter(u=>u.id!==deleteId));setDeleteId(null);}}
+              <button onClick={() => setDeleteId(null)} className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold">Cancel</button>
+              <button onClick={() => { setUsers(p => p.filter(u => u.id !== deleteId)); setDeleteId(null); }}
                 className="flex-1 py-2.5 rounded-xl text-white text-sm font-bold bg-red-500 hover:bg-red-600 transition-colors">Delete</button>
             </div>
           </div>
@@ -683,29 +646,29 @@ import { ROLE_PERMISSIONS_MAP } from "../auth/AuthContext";
 
 const PERM_GROUPS = [
   { group:"Dashboard", icon:"📊", perms:[
-    { key:"view_stats",        label:"View Stats Cards" },
+    { key:"view_stats",        label:"View Stats Cards"     },
     { key:"view_charts",       label:"View Charts & Graphs" },
     { key:"view_earnings",     label:"View Revenue & Earnings" },
   ]},
   { group:"Campaigns", icon:"📢", perms:[
-    { key:"view_campaigns",     label:"View Campaigns" },
-    { key:"view_last_campaigns",label:"View Recent Campaigns" },
+    { key:"view_campaigns",      label:"View Campaigns"        },
+    { key:"view_last_campaigns", label:"View Recent Campaigns" },
   ]},
   { group:"Email & SMS", icon:"📧", perms:[
-    { key:"view_last_mails",   label:"View Last Emails" },
-    { key:"view_last_sms",     label:"View Last SMS" },
-    { key:"view_gateway",      label:"View Email Gateway" },
+    { key:"view_last_mails",   label:"View Last Emails"    },
+    { key:"view_last_sms",     label:"View Last SMS"       },
+    { key:"view_gateway",      label:"View Email Gateway"  },
   ]},
   { group:"Reports", icon:"📈", perms:[
-    { key:"view_limit_report", label:"View Limit Report" },
+    { key:"view_limit_report", label:"View Limit Report"     },
     { key:"view_purchase",     label:"View Purchase / Billing" },
   ]},
   { group:"Sidebar Access", icon:"🗂️", perms:[
-    { key:"sidebar_subscribers",label:"Contacts / Subscribers" },
-    { key:"sidebar_templates",  label:"Templates" },
-    { key:"sidebar_reports",    label:"Reports" },
-    { key:"sidebar_settings",   label:"Settings" },
-    { key:"sidebar_roles",      label:"Roles & Permissions" },
+    { key:"sidebar_subscribers", label:"Contacts / Subscribers" },
+    { key:"sidebar_templates",   label:"Templates"              },
+    { key:"sidebar_reports",     label:"Reports"                },
+    { key:"sidebar_settings",    label:"Settings"               },
+    { key:"sidebar_roles",       label:"Roles & Permissions"    },
   ]},
   { group:"Administration", icon:"⚙️", perms:[
     { key:"can_edit_roles", label:"Can Edit Roles" },
@@ -716,9 +679,9 @@ function RolesPermissionsPage() {
   const { user: currentUser, hasPerm } = useAuth();
   const canEdit = hasPerm("can_edit_roles");
 
-  const [perms, setPerms] = useState(()=>{
-    const copy={};
-    ROLES_LIST.forEach(r=>{copy[r]={...ROLE_PERMISSIONS_MAP[r].permissions};});
+  const [perms, setPerms] = useState(() => {
+    const copy = {};
+    ROLES_LIST.forEach(r => { copy[r] = {...ROLE_PERMISSIONS_MAP[r].permissions}; });
     return copy;
   });
   const [activeRole, setActiveRole] = useState("SUPER_ADMIN");
@@ -727,8 +690,8 @@ function RolesPermissionsPage() {
   const totalPerms = Object.keys(ROLE_PERMISSIONS_MAP.SUPER_ADMIN.permissions).length;
 
   function toggle(role, key) {
-    if(!canEdit||role==="SUPER_ADMIN") return;
-    setPerms(p=>({...p,[role]:{...p[role],[key]:!p[role][key]}}));
+    if (!canEdit || role === "SUPER_ADMIN") return;
+    setPerms(p => ({...p, [role]: {...p[role], [key]: !p[role][key]}}));
     setSaved(false);
   }
   const count = (r) => Object.values(perms[r]).filter(Boolean).length;
@@ -738,21 +701,21 @@ function RolesPermissionsPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-slate-800">Roles & Permissions</h1>
-          <p className="text-sm text-slate-400 mt-0.5">{canEdit?"Toggle permissions per role.":"Read-only view."}</p>
+          <p className="text-sm text-slate-400 mt-0.5">{canEdit ? "Toggle permissions per role." : "Read-only view."}</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex bg-slate-100 rounded-xl p-1">
-            {[{v:"edit",l:"Editor"},{v:"matrix",l:"Matrix"}].map(({v,l})=>(
-              <button key={v} onClick={()=>setViewMode(v)}
+            {[{v:"edit",l:"Editor"},{v:"matrix",l:"Matrix"}].map(({v,l}) => (
+              <button key={v} onClick={() => setViewMode(v)}
                 className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${viewMode===v?"bg-white shadow text-indigo-600":"text-slate-500"}`}>
                 {l}
               </button>
             ))}
           </div>
           {canEdit && (
-            <button onClick={()=>setSaved(true)}
+            <button onClick={() => setSaved(true)}
               className={`px-5 py-2 rounded-xl text-sm font-bold text-white transition-all ${saved?"bg-emerald-500":"bg-indigo-600 hover:bg-indigo-700"}`}>
-              {saved?"✓ Saved!":"Save"}
+              {saved ? "✓ Saved!" : "Save"}
             </button>
           )}
         </div>
@@ -765,15 +728,15 @@ function RolesPermissionsPage() {
         </div>
       )}
 
-      {viewMode==="matrix" && (
+      {viewMode === "matrix" && (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm min-w-[600px]">
               <thead>
                 <tr className="border-b border-slate-100">
                   <th className="px-5 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wide w-52">Permission</th>
-                  {ROLES_LIST.map(r=>{
-                    const rc2=roleConfig[r];
+                  {ROLES_LIST.map(r => {
+                    const rc2 = roleConfig[r];
                     return (
                       <th key={r} className="px-4 py-4 text-center">
                         <span className="text-lg block">{rc2.icon}</span>
@@ -785,19 +748,19 @@ function RolesPermissionsPage() {
                 </tr>
               </thead>
               <tbody>
-                {PERM_GROUPS.map(group=>(
+                {PERM_GROUPS.map(group => (
                   <React.Fragment key={group.group}>
                     <tr className="bg-slate-50">
                       <td colSpan={ROLES_LIST.length+1} className="px-5 py-2">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{group.icon} {group.group}</span>
                       </td>
                     </tr>
-                    {group.perms.map(({key,label})=>(
+                    {group.perms.map(({key, label}) => (
                       <tr key={key} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                         <td className="px-5 py-3 text-sm text-slate-600 font-medium">{label}</td>
-                        {ROLES_LIST.map(r=>(
+                        {ROLES_LIST.map(r => (
                           <td key={r} className="px-4 py-3 text-center">
-                            {perms[r][key]?<span className="text-emerald-500 text-lg">✓</span>:<span className="text-slate-200 text-lg">✕</span>}
+                            {perms[r][key] ? <span className="text-emerald-500 text-lg">✓</span> : <span className="text-slate-200 text-lg">✕</span>}
                           </td>
                         ))}
                       </tr>
@@ -810,14 +773,14 @@ function RolesPermissionsPage() {
         </div>
       )}
 
-      {viewMode==="edit" && (
+      {viewMode === "edit" && (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           <div className="space-y-2">
-            {ROLES_LIST.map(r=>{
-              const rc2=roleConfig[r];
-              const isLocked=r==="SUPER_ADMIN";
+            {ROLES_LIST.map(r => {
+              const rc2      = roleConfig[r];
+              const isLocked = r === "SUPER_ADMIN";
               return (
-                <button key={r} onClick={()=>setActiveRole(r)}
+                <button key={r} onClick={() => setActiveRole(r)}
                   className={`w-full text-left p-4 rounded-xl border-2 transition-all ${activeRole===r?"border-indigo-400 bg-indigo-50 shadow-md":"border-slate-100 bg-white hover:border-slate-200"}`}>
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-xl">{rc2.icon}</span>
@@ -826,7 +789,7 @@ function RolesPermissionsPage() {
                   <p className="font-bold text-sm text-slate-800">{rc2.label}</p>
                   <div className="flex items-center gap-1 mt-2">
                     <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full rounded-full" style={{width:`${(count(r)/totalPerms)*100}%`,background:rc2.color}} />
+                      <div className="h-full rounded-full" style={{ width:`${(count(r)/totalPerms)*100}%`, background:rc2.color }} />
                     </div>
                     <span className="text-[10px] text-slate-400">{count(r)}/{totalPerms}</span>
                   </div>
@@ -836,45 +799,45 @@ function RolesPermissionsPage() {
           </div>
 
           <div className="lg:col-span-3 space-y-4">
-            {(()=>{
-              const rc2=roleConfig[activeRole];
-              const isLocked=activeRole==="SUPER_ADMIN";
+            {(() => {
+              const rc2      = roleConfig[activeRole];
+              const isLocked = activeRole === "SUPER_ADMIN";
               return (
                 <div className="flex items-center justify-between bg-white rounded-xl border border-slate-100 shadow-sm px-5 py-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style={{background:rc2.bg}}>{rc2.icon}</div>
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style={{ background:rc2.bg }}>{rc2.icon}</div>
                     <div>
                       <p className="font-black text-slate-800">{rc2.label}</p>
-                      <p className="text-xs text-slate-400">{count(activeRole)}/{totalPerms} permissions {isLocked?"— locked":"enabled"}</p>
+                      <p className="text-xs text-slate-400">{count(activeRole)}/{totalPerms} permissions {isLocked ? "— locked" : "enabled"}</p>
                     </div>
                   </div>
                   {canEdit && !isLocked && (
-                    <button onClick={()=>setPerms(p=>({...p,[activeRole]:{...ROLE_PERMISSIONS_MAP[activeRole].permissions}}))}
+                    <button onClick={() => setPerms(p => ({...p, [activeRole]: {...ROLE_PERMISSIONS_MAP[activeRole].permissions}}))}
                       className="text-xs text-slate-500 border border-slate-200 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors">Reset</button>
                   )}
                 </div>
               );
             })()}
-            {PERM_GROUPS.map(group=>(
+            {PERM_GROUPS.map(group => (
               <div key={group.group} className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
                 <div className="flex items-center gap-2 px-5 py-3 border-b border-slate-50 bg-slate-50">
                   <span>{group.icon}</span>
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{group.group}</span>
                 </div>
                 <div className="divide-y divide-slate-50">
-                  {group.perms.map(({key,label})=>{
-                    const isLocked=activeRole==="SUPER_ADMIN";
-                    const isOn=perms[activeRole][key];
+                  {group.perms.map(({key, label}) => {
+                    const isLocked = activeRole === "SUPER_ADMIN";
+                    const isOn     = perms[activeRole][key];
                     return (
                       <div key={key} className="flex items-center justify-between px-5 py-3.5 hover:bg-slate-50 transition-colors">
-                        <p className={`text-sm font-semibold ${isOn?"text-slate-800":"text-slate-400"}`}>{label}</p>
+                        <p className={`text-sm font-semibold ${isOn ? "text-slate-800" : "text-slate-400"}`}>{label}</p>
                         <div className="flex items-center gap-3">
-                          <span className={`text-xs font-semibold ${isOn?"text-emerald-600":"text-slate-300"}`}>{isOn?"ON":"OFF"}</span>
-                          <button onClick={()=>toggle(activeRole,key)} disabled={!canEdit||isLocked}
+                          <span className={`text-xs font-semibold ${isOn ? "text-emerald-600" : "text-slate-300"}`}>{isOn ? "ON" : "OFF"}</span>
+                          <button onClick={() => toggle(activeRole, key)} disabled={!canEdit || isLocked}
                             className={`relative inline-flex items-center w-11 h-6 rounded-full transition-all duration-200 ${(!canEdit||isLocked)?"opacity-40 cursor-not-allowed":"cursor-pointer"}`}
-                            style={{background:isOn?"#6366f1":"#e2e8f0"}}>
+                            style={{ background: isOn ? "#6366f1" : "#e2e8f0" }}>
                             <span className="inline-block w-4 h-4 rounded-full bg-white shadow transition-transform duration-200"
-                              style={{transform:isOn?"translateX(22px)":"translateX(3px)"}} />
+                              style={{ transform: isOn ? "translateX(22px)" : "translateX(3px)" }} />
                           </button>
                         </div>
                       </div>
@@ -891,198 +854,29 @@ function RolesPermissionsPage() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SIDEBAR — campaigns dropdown added
-// ─────────────────────────────────────────────────────────────────────────────
-function Sidebar({ collapsed }) {
-  const { user, hasPerm, logout } = useAuth();
-  const navigate  = useNavigate();
-  const location  = useLocation();
-  const role = user?.role || "VIEWER";
-  const rc   = roleConfig[role] || roleConfig.VIEWER;
-
-  // Campaigns sub-menu open state
-  const [campaignsOpen, setCampaignsOpen] = useState(
-    location.pathname.startsWith("/admin/campaigns")
-  );
-
-  const isCampaignsActive = location.pathname.startsWith("/admin/campaigns");
-
-  return (
-    <aside className="flex flex-col h-full transition-all duration-300 overflow-hidden flex-shrink-0"
-      style={{ width: collapsed ? "68px" : "236px", background: "#0F0E2A", borderRight: "1px solid rgba(255,255,255,0.06)" }}>
-
-      {/* Logo */}
-      <div className="flex items-center gap-3 px-4 py-[18px] border-b border-white/5 flex-shrink-0">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg"
-          style={{background:"linear-gradient(135deg,#4F46E5,#06B6D4)"}}>
-          <span className="text-white font-black text-base">M</span>
-        </div>
-        {!collapsed && <span className="text-white font-bold text-lg tracking-wide truncate">MailDoll</span>}
-      </div>
-
-      {/* Role Badge */}
-      {!collapsed && (
-        <div className="mx-3 mt-3 mb-1 px-3 py-2.5 rounded-xl flex-shrink-0"
-          style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)"}}>
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center text-sm flex-shrink-0" style={{background:rc.bg}}>{rc.icon}</div>
-            <div className="min-w-0">
-              <p className="text-white text-[11px] font-semibold truncate">{user?.email}</p>
-              <p className="text-[10px] font-bold truncate" style={{color:rc.color}}>{rc.label}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Nav */}
-      <nav className="flex-1 overflow-y-auto py-2 px-2">
-        {NAV_ITEMS.map(({group,items})=>{
-          const visible=items.filter(item=>item.perm===null||hasPerm(item.perm));
-          if(visible.length===0) return null;
-          return (
-            <div key={group} className="mb-1">
-              {!collapsed && (
-                <p className="text-[9px] font-bold uppercase tracking-[0.15em] px-3 py-2 mt-1.5"
-                  style={{color:"rgba(255,255,255,0.22)"}}>{group}</p>
-              )}
-              {collapsed && <div className="h-2" />}
-              {visible.map(item=>{
-                const hasSub = item.children && item.children.length > 0;
-
-                // ── Item with sub-menu (Campaigns) ──────────────────
-                if (hasSub) {
-                  const isParentActive = location.pathname.startsWith(item.path);
-                  return (
-                    <div key={item.path}>
-                      {/* Parent button */}
-                      <button
-                        onClick={() => {
-                          if (collapsed) {
-                            navigate(item.children[0].path);
-                          } else {
-                            setCampaignsOpen(o => !o);
-                          }
-                        }}
-                        title={collapsed ? item.label : undefined}
-                        className={`flex items-center w-full px-3 py-2.5 rounded-xl mb-0.5 transition-all duration-150
-                          ${isParentActive ? "text-white" : "text-white/45 hover:text-white/80 hover:bg-white/5"}
-                          ${collapsed ? "justify-center" : "gap-3"}`}
-                        style={isParentActive ? {
-                          background: "linear-gradient(135deg,rgba(99,102,241,0.28),rgba(139,92,246,0.15))",
-                          border: "1px solid rgba(99,102,241,0.32)",
-                        } : {}}
-                      >
-                        <span className="text-[18px] flex-shrink-0 leading-none">{item.icon}</span>
-                        {!collapsed && (
-                          <>
-                            <span className="text-[13px] font-semibold truncate flex-1 text-left">{item.label}</span>
-                            <span className={`text-[10px] transition-transform duration-200 ${campaignsOpen ? "rotate-180" : ""} text-white/30`}>▼</span>
-                          </>
-                        )}
-                      </button>
-
-                      {/* Sub-items */}
-                      {!collapsed && campaignsOpen && (
-                        <div className="ml-3 pl-3 border-l border-white/10 mb-1 space-y-0.5">
-                          {item.children.map(child => {
-                            const isChildActive = location.pathname === child.path;
-                            return (
-                              <NavLink
-                                key={child.path}
-                                to={child.path}
-                                className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all duration-150 text-[12px] font-semibold
-                                  ${isChildActive
-                                    ? "text-white bg-white/10"
-                                    : "text-white/40 hover:text-white/70 hover:bg-white/5"
-                                  }`}
-                              >
-                                <span className="text-[14px] leading-none">{child.icon}</span>
-                                <span className="truncate">{child.label}</span>
-                                {isChildActive && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-400 flex-shrink-0" />}
-                              </NavLink>
-                            );
-                          })}
-                        </div>
-                      )}
-
-                      {/* Collapsed: tooltip sub-menu */}
-                      {collapsed && (
-                        <div className="space-y-0.5">
-                          {item.children.map(child => (
-                            <NavLink
-                              key={child.path}
-                              to={child.path}
-                              title={child.label}
-                              className={({ isActive }) =>
-                                `flex items-center justify-center py-2 rounded-xl mb-0.5 transition-all duration-150
-                                ${isActive ? "text-white bg-white/10" : "text-white/30 hover:text-white/60 hover:bg-white/5"}`
-                              }
-                            >
-                              <span className="text-[14px]">{child.icon}</span>
-                            </NavLink>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-
-                // ── Regular NavLink ──────────────────────────────────
-                return (
-                  <NavLink key={item.path} to={item.path} end={item.end} title={collapsed ? item.label : undefined}
-                    className={({ isActive }) =>
-                      `flex items-center gap-3 px-3 py-2.5 rounded-xl mb-0.5 transition-all duration-150
-                      ${isActive ? "text-white" : "text-white/45 hover:text-white/80 hover:bg-white/5"}
-                      ${collapsed ? "justify-center" : ""}`
-                    }
-                    style={({ isActive }) => isActive ? {
-                      background: "linear-gradient(135deg,rgba(99,102,241,0.28),rgba(139,92,246,0.15))",
-                      border: "1px solid rgba(99,102,241,0.32)",
-                    } : {}}>
-                    <span className="text-[18px] flex-shrink-0 leading-none">{item.icon}</span>
-                    {!collapsed && <span className="text-[13px] font-semibold truncate">{item.label}</span>}
-                  </NavLink>
-                );
-              })}
-            </div>
-          );
-        })}
-      </nav>
-
-      {/* Logout */}
-      <div className="p-2.5 border-t border-white/5 flex-shrink-0">
-        <button onClick={()=>{logout();navigate("/login");}} title={collapsed?"Logout":undefined}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-all duration-150">
-          <span className="text-[18px] flex-shrink-0">🚪</span>
-          {!collapsed && <span className="text-[13px] font-semibold">Logout</span>}
-        </button>
-      </div>
-    </aside>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // TOP HEADER
 // ─────────────────────────────────────────────────────────────────────────────
 function TopHeader({ onMenuToggle }) {
   const { user } = useAuth();
   const location = useLocation();
-  const role = user?.role || "VIEWER";
-  const rc   = roleConfig[role] || roleConfig.VIEWER;
+  const role     = user?.role || "VIEWER";
+  const rc       = roleConfig[role] || roleConfig.VIEWER;
 
   const pathTitles = {
-    "/admin":                   "Dashboard",
-    "/admin/campaigns":         "Campaigns",
-    "/admin/campaigns/email":   "Email Campaigns",
-    "/admin/campaigns/whatsapp":"WhatsApp Campaigns",
-    "/admin/templates":         "Templates",
-    "/admin/contacts":          "Contacts",
-    "/admin/automation":        "Automation",
-    "/admin/reports":           "Reports",
-    "/admin/users":             "User Management",
-    "/admin/roles":             "Roles & Permissions",
-    "/admin/subscription":      "Subscription",
-    "/admin/settings":          "Settings",
+    "/admin":                     "Dashboard",
+    "/admin/campaigns":           "Campaigns",
+    "/admin/campaigns/email":     "Email Campaigns",
+    "/admin/campaigns/whatsapp":  "WhatsApp Campaigns",
+    "/admin/templates":           "Templates",
+    "/admin/templates/email":     "Email Templates",
+    "/admin/templates/whatsapp":  "WhatsApp Templates",
+    "/admin/contacts":            "Contacts",
+    "/admin/automation":          "Automation",
+    "/admin/reports":             "Reports",
+    "/admin/users":               "User Management",
+    "/admin/roles":               "Roles & Permissions",
+    "/admin/subscription":        "Subscription",
+    "/admin/settings":            "Settings",
   };
   const title = pathTitles[location.pathname] || "Dashboard";
 
@@ -1102,12 +896,12 @@ function TopHeader({ onMenuToggle }) {
         </button>
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-slate-50 transition-all">
           <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white"
-            style={{background:`linear-gradient(135deg,${rc.color},${rc.color}99)`}}>
+            style={{ background:`linear-gradient(135deg,${rc.color},${rc.color}99)` }}>
             {user?.email?.[0]?.toUpperCase()}
           </div>
           <div className="hidden sm:block">
             <p className="text-[11px] font-bold text-slate-700 leading-none">{user?.email?.split("@")[0]}</p>
-            <p className="text-[10px] font-semibold mt-0.5" style={{color:rc.color}}>{rc.label}</p>
+            <p className="text-[10px] font-semibold mt-0.5" style={{ color:rc.color }}>{rc.label}</p>
           </div>
         </div>
       </div>
@@ -1116,11 +910,10 @@ function TopHeader({ onMenuToggle }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ADMIN LAYOUT EXPORT
+// ADMIN LAYOUT — MAIN EXPORT
 // ─────────────────────────────────────────────────────────────────────────────
 export default function AdminLayout() {
   const { user, hasPerm } = useAuth();
-  const navigate   = useNavigate();
   const [collapsed,  setCollapsed]  = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -1131,32 +924,34 @@ export default function AdminLayout() {
 
       {/* Mobile Overlay */}
       {mobileOpen && (
-        <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={()=>setMobileOpen(false)} />
+        <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setMobileOpen(false)} />
       )}
 
       {/* Sidebar Desktop */}
       <div className="hidden md:flex h-full">
-        <Sidebar collapsed={collapsed} />
+        <AdminSidebar collapsed={collapsed} />
       </div>
 
       {/* Sidebar Mobile */}
-      <div className={`fixed left-0 top-0 h-full z-50 md:hidden transition-transform duration-300 ${mobileOpen?"translate-x-0":"-translate-x-full"}`}
-        style={{width:"236px"}}>
-        <Sidebar collapsed={false} />
+      <div
+        className={`fixed left-0 top-0 h-full z-50 md:hidden transition-transform duration-300 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
+        style={{ width: "236px" }}
+      >
+        <AdminSidebar collapsed={false} />
       </div>
 
       {/* Main Content */}
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-        <TopHeader onMenuToggle={()=>{
-          if(window.innerWidth<768) setMobileOpen(o=>!o);
-          else setCollapsed(c=>!c);
+        <TopHeader onMenuToggle={() => {
+          if (window.innerWidth < 768) setMobileOpen(o => !o);
+          else setCollapsed(c => !c);
         }} />
 
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
           <Routes>
             <Route index element={<DashboardPage />} />
 
-            {/* Campaigns with sub-routes */}
+            {/* Campaigns */}
             <Route path="campaigns" element={
               hasPerm("view_campaigns") ? <Navigate to="/admin/campaigns/email" replace /> : <AccessDenied />
             } />
@@ -1167,15 +962,25 @@ export default function AdminLayout() {
               hasPerm("view_campaigns") ? <WhatsAppCampaigns /> : <AccessDenied />
             } />
 
-            <Route path="templates"  element={hasPerm("sidebar_templates")  ?<PlaceholderPage title="Templates"  icon="🎨"/>:<AccessDenied/>} />
-            <Route path="contacts"   element={hasPerm("sidebar_subscribers")?<PlaceholderPage title="Contacts"   icon="👥"/>:<AccessDenied/>} />
-            <Route path="automation" element={hasPerm("view_campaigns")     ?<PlaceholderPage title="Automation" icon="⚙️"/>:<AccessDenied/>} />
-            <Route path="reports"    element={hasPerm("sidebar_reports")    ?<PlaceholderPage title="Reports"    icon="📈"/>:<AccessDenied/>} />
-            <Route path="users"      element={hasPerm("sidebar_roles")      ?<UserManagementPage/>              :<AccessDenied/>} />
-            <Route path="roles"      element={hasPerm("sidebar_roles")      ?<RolesPermissionsPage/>            :<AccessDenied/>} />
-            <Route path="subscription"element={hasPerm("view_purchase")     ?<PlaceholderPage title="Subscription"icon="💳"/>:<AccessDenied/>} />
-            <Route path="settings"   element={hasPerm("sidebar_settings")   ?<PlaceholderPage title="Settings"  icon="🔧"/>:<AccessDenied/>} />
-            <Route path="*"          element={<AccessDenied />} />
+            {/* ✅ Templates — /admin/templates → Email Templates redirect */}
+            <Route path="templates" element={
+              hasPerm("sidebar_templates") ? <Navigate to="/admin/templates/email" replace /> : <AccessDenied />
+            } />
+            <Route path="templates/email" element={
+              hasPerm("sidebar_templates") ? <EmailTemplates /> : <AccessDenied />
+            } />
+            <Route path="templates/whatsapp" element={
+              hasPerm("sidebar_templates") ? <WhatsAppTemplates /> : <AccessDenied />
+            } />
+
+            <Route path="contacts"     element={hasPerm("sidebar_subscribers") ? <PlaceholderPage title="Contacts"     icon="👥" /> : <AccessDenied />} />
+            <Route path="automation"   element={hasPerm("view_campaigns")      ? <PlaceholderPage title="Automation"   icon="⚙️" /> : <AccessDenied />} />
+            <Route path="reports"      element={hasPerm("sidebar_reports")     ? <PlaceholderPage title="Reports"      icon="📈" /> : <AccessDenied />} />
+            <Route path="users"        element={hasPerm("sidebar_roles")       ? <UserManagementPage />               : <AccessDenied />} />
+            <Route path="roles"        element={hasPerm("sidebar_roles")       ? <RolesPermissionsPage />             : <AccessDenied />} />
+            <Route path="subscription" element={hasPerm("view_purchase")       ? <PlaceholderPage title="Subscription" icon="💳" /> : <AccessDenied />} />
+            <Route path="settings"     element={hasPerm("sidebar_settings")    ? <PlaceholderPage title="Settings"    icon="🔧" /> : <AccessDenied />} />
+            <Route path="*"            element={<AccessDenied />} />
           </Routes>
         </main>
       </div>

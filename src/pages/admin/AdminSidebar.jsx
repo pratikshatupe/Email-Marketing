@@ -1,274 +1,345 @@
-import React, { useState } from "react";
-import {
-  X,
-  ChevronDown,
-  LayoutDashboard,
-  Users,
-  Megaphone,
-  CreditCard,
-  Receipt,
-  Mail,
-  BarChart2,
-  Settings,
-  ScrollText,
-  UserCircle,
-} from "lucide-react";
-
-import { useLanguage } from "../admin/Languagecontext";
+import { useState } from "react";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
-// ─────────────────────────────────────────────
-// MENU CONFIG WITH PERMISSIONS
-// ─────────────────────────────────────────────
-const MENU = [
+// ─────────────────────────────────────────────────────────────────────────────
+// ROLE CONFIG
+// ─────────────────────────────────────────────────────────────────────────────
+export const roleConfig = {
+  SUPER_ADMIN:       { label: "Super Admin",       icon: "👑", color: "#6366f1", bg: "#ede9fe" },
+  BUSINESS_ADMIN:    { label: "Business Admin",    icon: "🏢", color: "#10b981", bg: "#d1fae5" },
+  MARKETING_MANAGER: { label: "Marketing Manager", icon: "🎯", color: "#f59e0b", bg: "#fef3c7" },
+  VIEWER:            { label: "Viewer",            icon: "👁️", color: "#ec4899", bg: "#fce7f3" },
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NAV CONFIG  ← Templates ला children add केले
+// ─────────────────────────────────────────────────────────────────────────────
+export const NAV_ITEMS = [
   {
-    group: "group_main",
+    group: "Overview",
     items: [
-      {
-        id: "dashboard",
-        labelKey: "dashboard",
-        icon: LayoutDashboard,
-        perm: "view_stats",
-      },
+      { label: "Dashboard", icon: "📊", path: "/admin", perm: null, end: true },
     ],
   },
   {
-    group: "group_management",
+    group: "Marketing",
     items: [
       {
-        id: "user_management",
-        labelKey: "user_management",
-        icon: Users,
-        perm: "sidebar_subscribers",
-      },
-      {
-        id: "campaigns",
-        labelKey: "campaigns",
-        icon: Megaphone,
+        label: "Campaigns",
+        icon: "📢",
+        path: "/admin/campaigns",
         perm: "view_campaigns",
+        children: [
+          { label: "Email Campaigns",    icon: "✉️",  path: "/admin/campaigns/email"    },
+          { label: "WhatsApp Campaigns", icon: "💬",  path: "/admin/campaigns/whatsapp" },
+        ],
       },
       {
-        id: "subscription_plans",
-        labelKey: "subscription_plans",
-        icon: CreditCard,
-        perm: "view_purchase",
+        label: "Templates",
+        icon: "🎨",
+        path: "/admin/templates",
+        perm: "sidebar_templates",
+        children: [
+          { label: "Email Templates",    icon: "📧",  path: "/admin/templates/email"    },
+          { label: "WhatsApp Templates", icon: "💬",  path: "/admin/templates/whatsapp" },
+        ],
       },
+      { label: "Contacts",   icon: "👥", path: "/admin/contacts",   perm: "sidebar_subscribers" },
+      { label: "Automation", icon: "⚙️", path: "/admin/automation", perm: "view_campaigns"      },
     ],
   },
   {
-    group: "group_finance",
+    group: "Analytics",
     items: [
-      {
-        id: "billing_payments",
-        labelKey: "billing_payments",
-        icon: Receipt,
-        perm: "view_purchase",
-      },
+      { label: "Reports", icon: "📈", path: "/admin/reports", perm: "sidebar_reports" },
     ],
   },
   {
-    group: "group_config",
+    group: "Administration",
     items: [
-      {
-        id: "email_config",
-        labelKey: "email_config",
-        icon: Mail,
-        perm: "view_gateway",
-      },
-    ],
-  },
-  {
-    group: "group_analytics",
-    items: [
-      {
-        id: "global_analytics",
-        labelKey: "global_analytics",
-        icon: BarChart2,
-        perm: "view_charts",
-      },
-    ],
-  },
-  {
-    group: "group_system",
-    items: [
-      {
-        id: "system_settings",
-        labelKey: "system_settings",
-        icon: Settings,
-        perm: "sidebar_settings",
-      },
-      {
-        id: "audit_logs",
-        labelKey: "audit_logs",
-        icon: ScrollText,
-        perm: "can_edit_roles",
-      },
+      { label: "Users",        icon: "👤", path: "/admin/users",        perm: "sidebar_roles"    },
+      { label: "Roles",        icon: "🔐", path: "/admin/roles",        perm: "sidebar_roles"    },
+      { label: "Subscription", icon: "💳", path: "/admin/subscription", perm: "view_purchase"    },
+      { label: "Settings",     icon: "🔧", path: "/admin/settings",     perm: "sidebar_settings" },
     ],
   },
 ];
 
-// ─────────────────────────────────────────────
-// COMPONENT
-// ─────────────────────────────────────────────
-export default function AdminSidebar({
-  active,
-  setActive,
-  collapsed,
-  onCloseMobile,
-}) {
-  const { t } = useLanguage();
-  const { hasPerm, user } = useAuth();
+// ─────────────────────────────────────────────────────────────────────────────
+// SIDEBAR COMPONENT
+// ─────────────────────────────────────────────────────────────────────────────
+export default function AdminSidebar({ collapsed }) {
+  const { user, hasPerm, logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const [open, setOpen] = useState(
-    Object.fromEntries(MENU.map((g) => [g.group, true]))
+  const role = user?.role || "VIEWER";
+  const rc   = roleConfig[role] || roleConfig.VIEWER;
+
+  // Campaigns dropdown — auto-open जर route match असेल
+  const [campaignsOpen, setCampaignsOpen] = useState(
+    location.pathname.startsWith("/admin/campaigns")
   );
 
-  function toggleGroup(g) {
-    if (!collapsed) {
-      setOpen((prev) => ({ ...prev, [g]: !prev[g] }));
-    }
-  }
+  // Templates dropdown — auto-open जर route match असेल
+  const [templatesOpen, setTemplatesOpen] = useState(
+    location.pathname.startsWith("/admin/templates")
+  );
 
-  // ─────────────────────────────────────────────
-  // PERMISSION FILTER FUNCTION
-  // ─────────────────────────────────────────────
-  function hasAccess(item) {
-    // SUPER ADMIN → full access
-    if (user?.role === "SUPER_ADMIN") return true;
+  // Generic toggle helper — item.path वरून open/close state manage करतो
+  const isDropdownOpen = (path) => {
+    if (path === "/admin/campaigns") return campaignsOpen;
+    if (path === "/admin/templates") return templatesOpen;
+    return false;
+  };
 
-    // if no permission required → show
-    if (!item.perm) return true;
-
-    return hasPerm(item.perm);
-  }
+  const toggleDropdown = (path) => {
+    if (path === "/admin/campaigns") setCampaignsOpen((o) => !o);
+    if (path === "/admin/templates") setTemplatesOpen((o) => !o);
+  };
 
   return (
-    <div
-      className={`h-screen bg-[#0d0c1d] text-white flex flex-col transition-all duration-300
-      ${collapsed ? "w-[68px]" : "w-56"}`}
+    <aside
+      className="flex flex-col h-full transition-all duration-300 overflow-hidden flex-shrink-0"
+      style={{
+        width: collapsed ? "68px" : "236px",
+        background: "#0F0E2A",
+        borderRight: "1px solid rgba(255,255,255,0.06)",
+      }}
     >
-      {/* ─── Logo ───────────────────────── */}
-      <div
-        className={`flex items-center border-b border-white/10 px-4 py-4
-        ${collapsed ? "justify-center" : "justify-between"}`}
-      >
-        {collapsed ? (
-          <span className="text-base font-bold text-indigo-400">M</span>
-        ) : (
-          <>
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-sm">
-                ✉️
-              </div>
-              <span className="font-bold text-sm">Mail Admin</span>
-            </div>
-            <button
-              onClick={onCloseMobile}
-              className="md:hidden p-1 rounded-lg hover:bg-white/10 text-white/40"
-            >
-              <X size={16} />
-            </button>
-          </>
+      {/* ── Logo ── */}
+      <div className="flex items-center gap-3 px-4 py-[18px] border-b border-white/5 flex-shrink-0">
+        <div
+          className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg"
+          style={{ background: "linear-gradient(135deg,#4F46E5,#06B6D4)" }}
+        >
+          <span className="text-white font-black text-base">M</span>
+        </div>
+        {!collapsed && (
+          <span className="text-white font-bold text-lg tracking-wide truncate">
+            MailDoll
+          </span>
         )}
       </div>
 
-      {/* ─── Menu ───────────────────────── */}
-      <div className="flex-1 overflow-y-auto py-2 scrollbar-hide">
-        {MENU.map(({ group, items }) => {
-          const filteredItems = items.filter((item) => hasAccess(item));
+      {/* ── Role Badge ── */}
+      {!collapsed && (
+        <div
+          className="mx-3 mt-3 mb-1 px-3 py-2.5 rounded-xl flex-shrink-0"
+          style={{
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(255,255,255,0.07)",
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <div
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-sm flex-shrink-0"
+              style={{ background: rc.bg }}
+            >
+              {rc.icon}
+            </div>
+            <div className="min-w-0">
+              <p className="text-white text-[11px] font-semibold truncate">
+                {user?.email}
+              </p>
+              <p className="text-[10px] font-bold truncate" style={{ color: rc.color }}>
+                {rc.label}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
-          // hide group if empty
-          if (filteredItems.length === 0) return null;
-
-          const isOpen = open[group] !== false;
+      {/* ── Nav ── */}
+      <nav className="flex-1 overflow-y-auto py-2 px-2">
+        {NAV_ITEMS.map(({ group, items }) => {
+          const visible = items.filter(
+            (item) => item.perm === null || hasPerm(item.perm)
+          );
+          if (visible.length === 0) return null;
 
           return (
-            <div key={group}>
-              {/* Group Header */}
-              {!collapsed ? (
-                <button
-                  onClick={() => toggleGroup(group)}
-                  className="w-full flex justify-between items-center px-4 pt-3 pb-1
-                  text-[10px] text-white/25 uppercase tracking-widest hover:text-white/45"
+            <div key={group} className="mb-1">
+              {!collapsed && (
+                <p
+                  className="text-[9px] font-bold uppercase tracking-[0.15em] px-3 py-2 mt-1.5"
+                  style={{ color: "rgba(255,255,255,0.22)" }}
                 >
-                  <span>{t(group)}</span>
-                  <ChevronDown
-                    size={11}
-                    className={`transition-transform ${
-                      isOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-              ) : (
-                <div className="mx-3 my-1.5 border-t border-white/8" />
+                  {group}
+                </p>
               )}
+              {collapsed && <div className="h-2" />}
 
-              {/* Items */}
-              {(isOpen || collapsed) &&
-                filteredItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = active === item.id;
+              {visible.map((item) => {
+                const hasSub = item.children && item.children.length > 0;
+
+                /* ── Item with dropdown children ── */
+                if (hasSub) {
+                  const isParentActive = location.pathname.startsWith(item.path);
+                  const isOpen         = isDropdownOpen(item.path);
 
                   return (
-                    <button
-                      key={item.id}
-                      onClick={() => setActive(item.id)}
-                      title={collapsed ? t(item.labelKey) : undefined}
-                      className={`flex items-center w-full transition-all duration-150
-                      ${collapsed ? "justify-center py-3" : "gap-3 px-4 py-2.5"}
+                    <div key={item.path}>
+                      {/* Parent button */}
+                      <button
+                        onClick={() => {
+                          if (collapsed) {
+                            navigate(item.children[0].path);
+                          } else {
+                            toggleDropdown(item.path);
+                          }
+                        }}
+                        title={collapsed ? item.label : undefined}
+                        className={`flex items-center w-full px-3 py-2.5 rounded-xl mb-0.5 transition-all duration-150
+                          ${isParentActive
+                            ? "text-white"
+                            : "text-white/45 hover:text-white/80 hover:bg-white/5"
+                          }
+                          ${collapsed ? "justify-center" : "gap-3"}`}
+                        style={
+                          isParentActive
+                            ? {
+                                background:
+                                  "linear-gradient(135deg,rgba(99,102,241,0.28),rgba(139,92,246,0.15))",
+                                border: "1px solid rgba(99,102,241,0.32)",
+                              }
+                            : {}
+                        }
+                      >
+                        <span className="text-[18px] flex-shrink-0 leading-none">
+                          {item.icon}
+                        </span>
+                        {!collapsed && (
+                          <>
+                            <span className="text-[13px] font-semibold truncate flex-1 text-left">
+                              {item.label}
+                            </span>
+                            <span
+                              className={`text-[10px] transition-transform duration-200 text-white/30 ${
+                                isOpen ? "rotate-180" : ""
+                              }`}
+                            >
+                              ▼
+                            </span>
+                          </>
+                        )}
+                      </button>
+
+                      {/* Children — expanded sidebar */}
+                      {!collapsed && isOpen && (
+                        <div className="ml-3 pl-3 border-l border-white/10 mb-1 space-y-0.5">
+                          {item.children.map((child) => {
+                            const isChildActive =
+                              location.pathname === child.path;
+                            return (
+                              <NavLink
+                                key={child.path}
+                                to={child.path}
+                                className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all duration-150 text-[12px] font-semibold
+                                  ${
+                                    isChildActive
+                                      ? "text-white bg-white/10"
+                                      : "text-white/40 hover:text-white/70 hover:bg-white/5"
+                                  }`}
+                              >
+                                <span className="text-[14px] leading-none">
+                                  {child.icon}
+                                </span>
+                                <span className="truncate">{child.label}</span>
+                                {isChildActive && (
+                                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-400 flex-shrink-0" />
+                                )}
+                              </NavLink>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {/* Children — collapsed sidebar (icons only) */}
+                      {collapsed && (
+                        <div className="space-y-0.5">
+                          {item.children.map((child) => (
+                            <NavLink
+                              key={child.path}
+                              to={child.path}
+                              title={child.label}
+                              className={({ isActive }) =>
+                                `flex items-center justify-center py-2 rounded-xl mb-0.5 transition-all duration-150
+                                ${
+                                  isActive
+                                    ? "text-white bg-white/10"
+                                    : "text-white/30 hover:text-white/60 hover:bg-white/5"
+                                }`
+                              }
+                            >
+                              <span className="text-[14px]">{child.icon}</span>
+                            </NavLink>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
+                /* ── Regular nav item ── */
+                return (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    end={item.end}
+                    title={collapsed ? item.label : undefined}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-2.5 rounded-xl mb-0.5 transition-all duration-150
                       ${
                         isActive
-                          ? "bg-indigo-600 text-white"
-                          : "text-white/45 hover:bg-white/6 hover:text-white/75"
-                      }`}
-                    >
-                      <Icon size={collapsed ? 18 : 15} />
-                      {!collapsed && (
-                        <span className="truncate text-[13px] font-medium">
-                          {t(item.labelKey)}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
+                          ? "text-white"
+                          : "text-white/45 hover:text-white/80 hover:bg-white/5"
+                      }
+                      ${collapsed ? "justify-center" : ""}`
+                    }
+                    style={({ isActive }) =>
+                      isActive
+                        ? {
+                            background:
+                              "linear-gradient(135deg,rgba(99,102,241,0.28),rgba(139,92,246,0.15))",
+                            border: "1px solid rgba(99,102,241,0.32)",
+                          }
+                        : {}
+                    }
+                  >
+                    <span className="text-[18px] flex-shrink-0 leading-none">
+                      {item.icon}
+                    </span>
+                    {!collapsed && (
+                      <span className="text-[13px] font-semibold truncate">
+                        {item.label}
+                      </span>
+                    )}
+                  </NavLink>
+                );
+              })}
             </div>
           );
         })}
-      </div>
+      </nav>
 
-      {/* ─── User Footer ───────────────────────── */}
-      <div
-        className={`border-t border-white/10 ${
-          collapsed ? "py-3 flex justify-center" : "px-3 py-3"
-        }`}
-      >
-        {collapsed ? (
-          <button
-            onClick={() => setActive("profile")}
-            className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold"
-          >
-            A
-          </button>
-        ) : (
-          <button
-            onClick={() => setActive("profile")}
-            className="flex items-center gap-2.5 w-full p-2 rounded-xl hover:bg-white/6"
-          >
-            <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold">
-              A
-            </div>
-            <div className="flex-1 text-left">
-              <div className="text-[12px] font-semibold text-white/70">
-                {user?.email || "Admin"}
-              </div>
-              <div className="text-[10px] text-white/28">
-                {user?.role || "Role"}
-              </div>
-            </div>
-            <UserCircle size={13} className="text-white/20" />
-          </button>
-        )}
+      {/* ── Logout ── */}
+      <div className="p-2.5 border-t border-white/5 flex-shrink-0">
+        <button
+          onClick={() => {
+            logout();
+            navigate("/login");
+          }}
+          title={collapsed ? "Logout" : undefined}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-all duration-150"
+        >
+          <span className="text-[18px] flex-shrink-0">🚪</span>
+          {!collapsed && (
+            <span className="text-[13px] font-semibold">Logout</span>
+          )}
+        </button>
       </div>
-    </div>
+    </aside>
   );
 }

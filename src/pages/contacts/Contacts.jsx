@@ -1,8 +1,9 @@
 // frontend/pages/contacts/Contacts.jsx
 // Full Contacts page — matches AdminLayout design system
-// Features: List, Search, Filter by Segment, Add Contact Modal, Edit Modal, Delete Confirm, CSV Upload hint
+// Features: List, Search, Filter by Segment, Add Contact Modal, Edit Modal, Delete Confirm,
+//           File Upload Modal — CSV import + Image/Screenshot preview + PDF preview
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useAuth } from "../auth/AuthContext";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -44,9 +45,34 @@ const AVATAR_COLORS = [
   "linear-gradient(135deg,#06b6d4,#0284c7)",
 ];
 
-// ─────────────────────────────────────────────────────────────────────────────
-// EMPTY FORM
-// ─────────────────────────────────────────────────────────────────────────────
+// ── File type config ──
+const FILE_TYPES = {
+  csv:   {
+    accept:  ".csv",
+    label:   "CSV",
+    icon:    "📊",
+    color:   "#10b981",
+    bg:      "#d1fae5",
+    hint:    "Contacts import करण्यासाठी CSV upload करा",
+  },
+  image: {
+    accept:  "image/png,image/jpeg,image/jpg,image/webp,image/gif",
+    label:   "Image / SS",
+    icon:    "🖼️",
+    color:   "#6366f1",
+    bg:      "#ede9fe",
+    hint:    "Screenshots, business cards किंवा कोणतीही image upload करा",
+  },
+  pdf:   {
+    accept:  ".pdf",
+    label:   "PDF",
+    icon:    "📄",
+    color:   "#f59e0b",
+    bg:      "#fef3c7",
+    hint:    "Contact lists किंवा PDF documents upload करा",
+  },
+};
+
 const EMPTY_FORM = { name: "", email: "", phone: "", segment_id: "", status: "active" };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -54,30 +80,44 @@ const EMPTY_FORM = { name: "", email: "", phone: "", segment_id: "", status: "ac
 // ─────────────────────────────────────────────────────────────────────────────
 export default function Contacts() {
   const { user, hasPerm } = useAuth();
-  const role    = user?.role || "VIEWER";
-  const canEdit = role === "SUPER_ADMIN" || role === "BUSINESS_ADMIN" || role === "MARKETING_MANAGER";
+  const role      = user?.role || "VIEWER";
+  const canEdit   = role === "SUPER_ADMIN" || role === "BUSINESS_ADMIN" || role === "MARKETING_MANAGER";
   const canDelete = role === "SUPER_ADMIN" || role === "BUSINESS_ADMIN";
 
-  // ── State ──
-  const [contacts,   setContacts]   = useState(INITIAL_CONTACTS);
-  const [segments]                  = useState(INITIAL_SEGMENTS);
-  const [search,     setSearch]     = useState("");
-  const [segFilter,  setSegFilter]  = useState("ALL");
-  const [statFilter, setStatFilter] = useState("ALL");
-  const [page,       setPage]       = useState(1);
+  // ── Core state ──
+  const [contacts,  setContacts]  = useState(INITIAL_CONTACTS);
+  const [segments]                = useState(INITIAL_SEGMENTS);
+  const [search,    setSearch]    = useState("");
+  const [segFilter, setSegFilter] = useState("ALL");
+  const [statFilter,setStatFilter]= useState("ALL");
+  const [page,      setPage]      = useState(1);
   const PER_PAGE = 8;
 
-  const [showAdd,    setShowAdd]    = useState(false);
-  const [editContact,setEditContact]= useState(null);
-  const [deleteId,   setDeleteId]   = useState(null);
-  const [addForm,    setAddForm]    = useState(EMPTY_FORM);
-  const [errors,     setErrors]     = useState({});
-  const [showImport, setShowImport] = useState(false);
+  // ── Modal state ──
+  const [showAdd,     setShowAdd]     = useState(false);
+  const [editContact, setEditContact] = useState(null);
+  const [deleteId,    setDeleteId]    = useState(null);
+  const [addForm,     setAddForm]     = useState(EMPTY_FORM);
+  const [errors,      setErrors]      = useState({});
 
-  // ── Filtered list ──
+  // ── Upload Modal state ──
+  const [showUpload,    setShowUpload]    = useState(false);
+  const [activeTab,     setActiveTab]     = useState("csv");
+  const [uploadedFiles, setUploadedFiles] = useState({ csv: null, image: null, pdf: null });
+  const [previews,      setPreviews]      = useState({ image: null, pdf: null });
+  const [uploadErrors,  setUploadErrors]  = useState({});
+  const [uploadSuccess, setUploadSuccess] = useState({});
+  const [isDragging,    setIsDragging]    = useState(false);
+
+  const csvInputRef   = useRef(null);
+  const imageInputRef = useRef(null);
+  const pdfInputRef   = useRef(null);
+  const inputRefs     = { csv: csvInputRef, image: imageInputRef, pdf: pdfInputRef };
+
+  // ── Filtered + paginated ──
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    return contacts.filter((c) => {
+    return contacts.filter(c => {
       const matchQ   = !q || c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q) || (c.phone||"").includes(q);
       const matchSeg = segFilter === "ALL" || String(c.segment_id) === String(segFilter);
       const matchSt  = statFilter === "ALL" || c.status === statFilter;
@@ -85,33 +125,32 @@ export default function Contacts() {
     });
   }, [contacts, search, segFilter, statFilter]);
 
-  const totalPages  = Math.ceil(filtered.length / PER_PAGE);
-  const paginated   = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const totalPages = Math.ceil(filtered.length / PER_PAGE);
+  const paginated  = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
-  // ── Summary cards ──
-  const totalActive       = contacts.filter(c => c.status === "active").length;
-  const totalUnsub        = contacts.filter(c => c.status === "unsubscribed").length;
-  const totalInactive     = contacts.filter(c => c.status === "inactive").length;
+  const totalActive   = contacts.filter(c => c.status === "active").length;
+  const totalUnsub    = contacts.filter(c => c.status === "unsubscribed").length;
+  const totalInactive = contacts.filter(c => c.status === "inactive").length;
 
   // ── Validation ──
   function validate(form) {
     const e = {};
-    if (!form.name.trim())              e.name  = "Name आवश्यक आहे";
-    if (!form.email.trim())             e.email = "Email आवश्यक आहे";
+    if (!form.name.trim())                      e.name  = "Name आवश्यक आहे";
+    if (!form.email.trim())                     e.email = "Email आवश्यक आहे";
     else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = "Valid email टाका";
     return e;
   }
 
-  // ── Add ──
+  // ── Add contact ──
   function handleAdd() {
     const e = validate(addForm);
     if (Object.keys(e).length) { setErrors(e); return; }
     const seg = segments.find(s => String(s.id) === String(addForm.segment_id));
     setContacts(prev => [{
       ...addForm,
-      id: Date.now(),
+      id:           Date.now(),
       segment_name: seg?.name || "—",
-      created_at: new Date().toISOString().slice(0,10),
+      created_at:   new Date().toISOString().slice(0, 10),
     }, ...prev]);
     setShowAdd(false);
     setAddForm(EMPTY_FORM);
@@ -137,9 +176,171 @@ export default function Contacts() {
     setDeleteId(null);
   }
 
-  // ─── Render ───
+  // ───────────────────────────────────────────────
+  // FILE UPLOAD HANDLERS
+  // ───────────────────────────────────────────────
+
+  function clearFileState(type) {
+    setUploadErrors(p  => { const n = { ...p };  delete n[type]; return n; });
+    setUploadSuccess(p => { const n = { ...p };  delete n[type]; return n; });
+  }
+
+  function handleFileSelect(type, file) {
+    if (!file) return;
+    clearFileState(type);
+
+    // Validate
+    const maxBytes = 10 * 1024 * 1024;
+    if (type === "csv"   && !file.name.toLowerCase().endsWith(".csv")) {
+      setUploadErrors(p => ({ ...p, csv:   "फक्त .csv file select करा" })); return;
+    }
+    if (type === "image" && !file.type.startsWith("image/")) {
+      setUploadErrors(p => ({ ...p, image: "फक्त Image file select करा (PNG, JPG, WebP, GIF)" })); return;
+    }
+    if (type === "pdf"   && file.type !== "application/pdf") {
+      setUploadErrors(p => ({ ...p, pdf:   "फक्त .pdf file select करा" })); return;
+    }
+    if (file.size > maxBytes) {
+      setUploadErrors(p => ({ ...p, [type]: "File size 10 MB पेक्षा जास्त नसावी" })); return;
+    }
+
+    setUploadedFiles(prev => ({ ...prev, [type]: file }));
+
+    // Generate previews
+    if (type === "image") {
+      const reader = new FileReader();
+      reader.onload = e => setPreviews(prev => ({ ...prev, image: e.target.result }));
+      reader.readAsDataURL(file);
+    }
+    if (type === "pdf") {
+      const url = URL.createObjectURL(file);
+      setPreviews(prev => ({ ...prev, pdf: url }));
+    }
+  }
+
+  function handleInputChange(type, e) {
+    handleFileSelect(type, e.target.files[0]);
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+
+    // Auto-detect type
+    let detectedType = activeTab;
+    if (file.type.startsWith("image/"))       detectedType = "image";
+    else if (file.type === "application/pdf") detectedType = "pdf";
+    else if (file.name.toLowerCase().endsWith(".csv")) detectedType = "csv";
+
+    setActiveTab(detectedType);
+    handleFileSelect(detectedType, file);
+  }
+
+  function removeFile(type) {
+    setUploadedFiles(prev => ({ ...prev, [type]: null }));
+    setPreviews(prev => ({ ...prev, [type]: null }));
+    clearFileState(type);
+    if (inputRefs[type]?.current) inputRefs[type].current.value = "";
+  }
+
+  // ── CSV import ──
+  function handleCsvUpload() {
+    const file = uploadedFiles.csv;
+    if (!file) { setUploadErrors(p => ({ ...p, csv: "आधी CSV file select करा" })); return; }
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const text  = ev.target.result;
+      const lines = text.trim().split("\n").filter(Boolean);
+
+      if (lines.length < 2) {
+        setUploadErrors(p => ({ ...p, csv: "CSV मध्ये कमीत कमी एक data row असणे आवश्यक आहे" }));
+        return;
+      }
+
+      const headers  = lines[0].split(",").map(h => h.trim().toLowerCase());
+      const nameIdx  = headers.indexOf("name");
+      const emailIdx = headers.indexOf("email");
+      const phoneIdx = headers.indexOf("phone");
+      const segIdx   = headers.indexOf("segment_id");
+
+      if (emailIdx === -1) {
+        setUploadErrors(p => ({ ...p, csv: "CSV मध्ये 'email' column नाही" }));
+        return;
+      }
+
+      const newContacts = [];
+      for (let i = 1; i < lines.length; i++) {
+        const cols  = lines[i].split(",").map(c => c.trim());
+        const email = cols[emailIdx];
+        if (!email || !/\S+@\S+\.\S+/.test(email)) continue;
+
+        const segment_id = segIdx !== -1 ? cols[segIdx] : "";
+        const seg        = segments.find(s => String(s.id) === String(segment_id));
+
+        newContacts.push({
+          id:           Date.now() + i,
+          name:         nameIdx !== -1 ? (cols[nameIdx] || "Unknown") : "Unknown",
+          email,
+          phone:        phoneIdx !== -1 ? (cols[phoneIdx] || "") : "",
+          segment_id:   segment_id || "",
+          segment_name: seg?.name || "—",
+          status:       "active",
+          created_at:   new Date().toISOString().slice(0, 10),
+        });
+      }
+
+      if (newContacts.length === 0) {
+        setUploadErrors(p => ({ ...p, csv: "Valid contacts सापडले नाहीत. Email column check करा." }));
+        return;
+      }
+
+      setContacts(prev => [...newContacts, ...prev]);
+      setUploadSuccess(p => ({ ...p, csv: `✅ ${newContacts.length} contacts successfully import झाले!` }));
+      setUploadedFiles(prev => ({ ...prev, csv: null }));
+      if (csvInputRef.current) csvInputRef.current.value = "";
+      setPage(1);
+    };
+    reader.readAsText(file);
+  }
+
+  // ── Image / PDF confirm ──
+  function handleMediaUpload(type) {
+    const file = uploadedFiles[type];
+    if (!file) return;
+    setUploadSuccess(p => ({ ...p, [type]: `✅ "${file.name}" successfully upload झाली!` }));
+    setUploadedFiles(prev => ({ ...prev, [type]: null }));
+    setPreviews(prev => ({ ...prev, [type]: null }));
+    if (inputRefs[type]?.current) inputRefs[type].current.value = "";
+  }
+
+  // ── Close upload modal ──
+  function closeUpload() {
+    setShowUpload(false);
+    setUploadedFiles({ csv: null, image: null, pdf: null });
+    setPreviews({ image: null, pdf: null });
+    setUploadErrors({});
+    setUploadSuccess({});
+    setIsDragging(false);
+    Object.values(inputRefs).forEach(r => { if (r?.current) r.current.value = ""; });
+  }
+
+  // Convenience shortcuts for active tab
+  const currentFile = uploadedFiles[activeTab];
+  const currentErr  = uploadErrors[activeTab];
+  const currentOk   = uploadSuccess[activeTab];
+  const tabMeta     = FILE_TYPES[activeTab];
+
+  // ─────────────────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-5">
+
+      {/* Hidden file inputs */}
+      <input ref={csvInputRef}   type="file" accept=".csv"                                                       className="hidden" onChange={e => handleInputChange("csv",   e)} />
+      <input ref={imageInputRef} type="file" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"        className="hidden" onChange={e => handleInputChange("image", e)} />
+      <input ref={pdfInputRef}   type="file" accept=".pdf"                                                       className="hidden" onChange={e => handleInputChange("pdf",   e)} />
 
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -150,10 +351,10 @@ export default function Contacts() {
         {canEdit && (
           <div className="flex gap-2 flex-wrap">
             <button
-              onClick={() => setShowImport(true)}
+              onClick={() => setShowUpload(true)}
               className="px-4 py-2.5 rounded-xl text-sm font-bold border-2 border-indigo-200 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors flex items-center gap-2"
             >
-              <span>📤</span> CSV Upload
+              <span>📤</span> Upload File
             </button>
             <button
               onClick={() => { setShowAdd(true); setAddForm(EMPTY_FORM); setErrors({}); }}
@@ -169,16 +370,14 @@ export default function Contacts() {
       {/* ── Summary Cards ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Total Contacts",   value: contacts.length, icon: "👥", color: "#6366f1", bg: "#ede9fe" },
-          { label: "Active",           value: totalActive,     icon: "✅", color: "#10b981", bg: "#d1fae5" },
-          { label: "Inactive",         value: totalInactive,   icon: "💤", color: "#94a3b8", bg: "#f1f5f9" },
-          { label: "Unsubscribed",     value: totalUnsub,      icon: "🚫", color: "#ef4444", bg: "#fee2e2" },
+          { label: "Total Contacts", value: contacts.length, icon: "👥", bg: "#ede9fe" },
+          { label: "Active",         value: totalActive,     icon: "✅", bg: "#d1fae5" },
+          { label: "Inactive",       value: totalInactive,   icon: "💤", bg: "#f1f5f9" },
+          { label: "Unsubscribed",   value: totalUnsub,      icon: "🚫", bg: "#fee2e2" },
         ].map((s, i) => (
           <div key={i} className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-start justify-between mb-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg" style={{ background: s.bg }}>
-                {s.icon}
-              </div>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg mb-3" style={{ background: s.bg }}>
+              {s.icon}
             </div>
             <p className="text-2xl font-black text-slate-800 mb-0.5">{s.value.toLocaleString()}</p>
             <p className="text-xs text-slate-400 font-medium">{s.label}</p>
@@ -188,7 +387,6 @@ export default function Contacts() {
 
       {/* ── Filters ── */}
       <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4 flex flex-col md:flex-row gap-3">
-        {/* Search */}
         <div className="relative flex-1">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-sm">🔍</span>
           <input
@@ -199,7 +397,6 @@ export default function Contacts() {
             className="w-full pl-9 pr-4 py-2 border border-slate-200 bg-slate-50 rounded-lg text-sm outline-none focus:border-indigo-400"
           />
         </div>
-        {/* Segment Filter */}
         <select
           value={segFilter}
           onChange={e => { setSegFilter(e.target.value); setPage(1); }}
@@ -208,7 +405,6 @@ export default function Contacts() {
           <option value="ALL">All Segments</option>
           {segments.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
         </select>
-        {/* Status Filter */}
         <select
           value={statFilter}
           onChange={e => { setStatFilter(e.target.value); setPage(1); }}
@@ -219,7 +415,6 @@ export default function Contacts() {
           <option value="inactive">Inactive</option>
           <option value="unsubscribed">Unsubscribed</option>
         </select>
-        {/* Clear */}
         {(search || segFilter !== "ALL" || statFilter !== "ALL") && (
           <button
             onClick={() => { setSearch(""); setSegFilter("ALL"); setStatFilter("ALL"); setPage(1); }}
@@ -260,18 +455,14 @@ export default function Contacts() {
                   </td>
                 </tr>
               ) : (
-                paginated.map((c, idx) => {
+                paginated.map(c => {
                   const sm = STATUS_META[c.status] || STATUS_META.inactive;
                   const av = AVATAR_COLORS[c.id % AVATAR_COLORS.length];
                   return (
                     <tr key={c.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                      {/* Contact */}
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-3">
-                          <div
-                            className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-white text-xs flex-shrink-0"
-                            style={{ background: av }}
-                          >
+                          <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-white text-xs flex-shrink-0" style={{ background: av }}>
                             {c.name[0]}
                           </div>
                           <div>
@@ -280,26 +471,18 @@ export default function Contacts() {
                           </div>
                         </div>
                       </td>
-                      {/* Segment */}
                       <td className="px-5 py-3">
                         <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-600">
                           {c.segment_name || "—"}
                         </span>
                       </td>
-                      {/* Phone */}
                       <td className="px-5 py-3 text-slate-500 text-xs">{c.phone || "—"}</td>
-                      {/* Status */}
                       <td className="px-5 py-3">
-                        <span
-                          className="px-2.5 py-1 rounded-full text-xs font-semibold"
-                          style={{ background: sm.bg, color: sm.text }}
-                        >
+                        <span className="px-2.5 py-1 rounded-full text-xs font-semibold" style={{ background: sm.bg, color: sm.text }}>
                           {sm.label}
                         </span>
                       </td>
-                      {/* Date */}
                       <td className="px-5 py-3 text-slate-400 text-xs">{c.created_at}</td>
-                      {/* Actions */}
                       {canEdit && (
                         <td className="px-5 py-3">
                           <div className="flex gap-2">
@@ -328,7 +511,6 @@ export default function Contacts() {
           </table>
         </div>
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between px-5 py-4 border-t border-slate-50">
             <button
@@ -343,11 +525,7 @@ export default function Contacts() {
                 <button
                   key={p}
                   onClick={() => setPage(p)}
-                  className={`w-8 h-8 rounded-lg text-xs font-semibold transition-all ${
-                    page === p
-                      ? "text-white shadow"
-                      : "text-slate-500 hover:bg-slate-100"
-                  }`}
+                  className={`w-8 h-8 rounded-lg text-xs font-semibold transition-all ${page === p ? "text-white shadow" : "text-slate-500 hover:bg-slate-100"}`}
                   style={page === p ? { background: "linear-gradient(135deg,#6366f1,#8b5cf6)" } : {}}
                 >
                   {p}
@@ -405,7 +583,7 @@ export default function Contacts() {
           <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center">
             <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center text-2xl mx-auto mb-4">🗑️</div>
             <h3 className="font-black text-slate-800 text-lg mb-2">Delete Contact?</h3>
-            <p className="text-sm text-slate-400 mb-6">हा contact permanently delete होईल. ही action undo करता येणार नाही.</p>
+            <p className="text-sm text-slate-400 mb-6">contact permanently delete . action undo.</p>
             <div className="flex gap-3">
               <button
                 onClick={() => setDeleteId(null)}
@@ -424,47 +602,234 @@ export default function Contacts() {
         </div>
       )}
 
-      {/* ─────────────── CSV IMPORT HINT MODAL ─────────────── */}
-      {showImport && (
-        <Modal title="CSV Upload" onClose={() => setShowImport(false)} maxW="max-w-md">
-          <div className="space-y-4">
-            <div className="border-2 border-dashed border-indigo-200 rounded-xl p-8 flex flex-col items-center gap-3 bg-indigo-50">
-              <span className="text-4xl">📂</span>
-              <p className="font-semibold text-slate-700 text-sm">CSV file drag & drop करा</p>
-              <p className="text-xs text-slate-400">किंवा browse करा</p>
-              <button className="px-5 py-2 rounded-xl text-white text-xs font-bold" style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)" }}>
-                Browse File
-              </button>
+      {/* ─────────────── UPLOAD MODAL ─────────────── */}
+      {showUpload && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(15,14,42,0.65)", backdropFilter: "blur(6px)" }}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl w-full flex flex-col"
+            style={{ maxWidth: "520px", maxHeight: "92vh" }}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 flex-shrink-0">
+              <div>
+                <h3 className="font-black text-slate-800 text-base">File Upload</h3>
+                <p className="text-xs text-slate-400 mt-0.5">CSV, Image / Screenshot  PDF upload </p>
+              </div>
+              <button onClick={closeUpload} className="text-slate-400 hover:text-slate-600 text-xl leading-none transition-colors">✕</button>
             </div>
-            <div className="bg-slate-50 rounded-xl p-4">
-              <p className="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wide">CSV Format</p>
-              <code className="text-xs text-indigo-600 bg-indigo-50 px-3 py-2 rounded-lg block font-mono">
-                name, email, phone, segment_id
-              </code>
-              <p className="text-[11px] text-slate-400 mt-2">
-                पहिली row header असणे आवश्यक आहे. Email column mandatory आहे.
-              </p>
+
+            {/* Tab Bar */}
+            <div className="flex gap-1.5 px-6 pt-4 flex-shrink-0">
+              {Object.entries(FILE_TYPES).map(([key, meta]) => (
+                <button
+                  key={key}
+                  onClick={() => setActiveTab(key)}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold border-2 transition-all relative ${
+                    activeTab === key
+                      ? "border-transparent text-white shadow-md"
+                      : "border-slate-100 text-slate-500 hover:border-slate-200 bg-white"
+                  }`}
+                  style={activeTab === key ? { background: `linear-gradient(135deg,${meta.color},${meta.color}bb)` } : {}}
+                >
+                  <span className="text-sm">{meta.icon}</span>
+                  <span>{meta.label}</span>
+                  {/* green dot — file selected on this tab but not active */}
+                  {uploadedFiles[key] && activeTab !== key && (
+                    <span className="absolute top-1 right-1.5 w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  )}
+                </button>
+              ))}
             </div>
-            <div className="flex gap-3">
+
+            {/* Scrollable body */}
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+
+              {/* Drop Zone */}
+              <div
+                className={`border-2 border-dashed rounded-2xl transition-all duration-150 cursor-pointer select-none
+                  ${isDragging
+                    ? "border-indigo-400 bg-indigo-50 scale-[1.01]"
+                    : currentFile
+                      ? "border-emerald-300 bg-emerald-50/60"
+                      : "border-slate-200 bg-slate-50 hover:border-indigo-300 hover:bg-indigo-50/40"
+                  }`}
+                onClick={() => inputRefs[activeTab]?.current?.click()}
+                onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={handleDrop}
+              >
+                {/* ── IMAGE PREVIEW ── */}
+                {activeTab === "image" && previews.image && (
+                  <div className="p-3">
+                    <img
+                      src={previews.image}
+                      alt="preview"
+                      className="w-full max-h-52 object-contain rounded-xl border border-slate-100 bg-white shadow-sm"
+                    />
+                    <div className="flex items-center justify-between mt-2.5 px-1">
+                      <p className="text-xs font-semibold text-emerald-700 truncate max-w-[300px]">
+                        ✅ {uploadedFiles.image?.name}
+                      </p>
+                      <button
+                        onClick={e => { e.stopPropagation(); removeFile("image"); }}
+                        className="text-xs text-red-400 hover:text-red-600 font-semibold ml-2 flex-shrink-0 border border-red-200 px-2 py-0.5 rounded-lg transition-colors"
+                      >
+                        ✕ Remove
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── PDF PREVIEW ── */}
+                {activeTab === "pdf" && previews.pdf && (
+                  <div className="p-3">
+                    <div className="w-full h-52 rounded-xl overflow-hidden border border-slate-100 bg-white shadow-sm">
+                      <iframe src={previews.pdf} title="pdf-preview" className="w-full h-full" />
+                    </div>
+                    <div className="flex items-center justify-between mt-2.5 px-1">
+                      <p className="text-xs font-semibold text-emerald-700 truncate max-w-[300px]">
+                        ✅ {uploadedFiles.pdf?.name}
+                      </p>
+                      <button
+                        onClick={e => { e.stopPropagation(); removeFile("pdf"); }}
+                        className="text-xs text-red-400 hover:text-red-600 font-semibold ml-2 flex-shrink-0 border border-red-200 px-2 py-0.5 rounded-lg transition-colors"
+                      >
+                        ✕ Remove
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── DEFAULT / CSV ── */}
+                {!(activeTab === "image" && previews.image) && !(activeTab === "pdf" && previews.pdf) && (
+                  <div className="flex flex-col items-center gap-3 py-9 px-4 text-center">
+                    <div
+                      className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-sm"
+                      style={{ background: currentFile ? "#d1fae5" : tabMeta.bg }}
+                    >
+                      {currentFile ? "✅" : tabMeta.icon}
+                    </div>
+
+                    {currentFile ? (
+                      <>
+                        <div>
+                          <p className="font-bold text-slate-700 text-sm break-all px-4">{currentFile.name}</p>
+                          <p className="text-xs text-slate-400 mt-0.5">{(currentFile.size / 1024).toFixed(1)} KB</p>
+                        </div>
+                        <button
+                          onClick={e => { e.stopPropagation(); removeFile(activeTab); }}
+                          className="text-xs text-red-400 hover:text-red-600 font-semibold border border-red-200 px-3 py-1 rounded-lg transition-colors"
+                        >
+                          ✕ Remove
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <div>
+                          <p className="font-semibold text-slate-700 text-sm">
+                            {tabMeta.label} file drag & drop 
+                          </p>
+                          <p className="text-xs text-slate-400 mt-0.5">click </p>
+                        </div>
+                        <button
+                          onClick={e => { e.stopPropagation(); inputRefs[activeTab]?.current?.click(); }}
+                          className="px-5 py-2 rounded-xl text-white text-xs font-bold shadow-sm hover:opacity-90 transition-opacity"
+                          style={{ background: `linear-gradient(135deg,${tabMeta.color},${tabMeta.color}bb)` }}
+                        >
+                          Browse File
+                        </button>
+                        <p className="text-[10px] text-slate-300">Max file size: 10 MB</p>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Error */}
+              {currentErr && (
+                <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-xs font-semibold text-red-600 flex items-start gap-2">
+                  <span className="flex-shrink-0">❌</span>
+                  <span>{currentErr}</span>
+                </div>
+              )}
+
+              {/* Success */}
+              {currentOk && (
+                <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 text-xs font-semibold text-emerald-700 flex items-start gap-2">
+                  <span>{currentOk}</span>
+                </div>
+              )}
+
+              {/* Info hints */}
+              {activeTab === "csv" && (
+                <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                  <p className="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wide">CSV Format</p>
+                  <code className="text-xs text-indigo-600 bg-indigo-50 px-3 py-2 rounded-lg block font-mono">
+                    name, email, phone, segment_id
+                  </code>
+                  <p className="text-[11px] text-slate-400 mt-2">
+                     row header . <strong>email</strong> column mandatory.
+                  </p>
+                </div>
+              )}
+
+              {activeTab === "image" && (
+                <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                  <p className="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wide">Supported Formats</p>
+                  <div className="flex gap-2 flex-wrap">
+                    {["PNG", "JPG", "JPEG", "WebP", "GIF"].map(f => (
+                      <span key={f} className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-600">{f}</span>
+                    ))}
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-2">
+                    Contact list  screenshots, business cards images upload.
+                  </p>
+                </div>
+              )}
+
+              {activeTab === "pdf" && (
+                <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                  <p className="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wide">PDF Upload</p>
+                  <p className="text-[11px] text-slate-400">
+                    Contact lists, reports  PDF documents upload . File select inline preview .
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="flex gap-3 px-6 py-4 border-t border-slate-100 flex-shrink-0">
               <button
-                onClick={() => setShowImport(false)}
-                className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold"
+                onClick={closeUpload}
+                className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition-colors"
               >
                 Cancel
               </button>
-              <button className="flex-1 py-2.5 rounded-xl text-white text-sm font-bold" style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)" }}>
-                Upload
+              <button
+                disabled={!currentFile}
+                onClick={() => {
+                  if (activeTab === "csv")        handleCsvUpload();
+                  else if (activeTab === "image") handleMediaUpload("image");
+                  else if (activeTab === "pdf")   handleMediaUpload("pdf");
+                }}
+                className="flex-1 py-2.5 rounded-xl text-white text-sm font-bold hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed shadow-md"
+                style={{ background: `linear-gradient(135deg,${tabMeta.color},${tabMeta.color}bb)` }}
+              >
+                {activeTab === "csv" ? "Import Contacts" : "Upload File"}
               </button>
             </div>
           </div>
-        </Modal>
+        </div>
       )}
     </div>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// REUSABLE MODAL WRAPPER
+// MODAL WRAPPER
 // ─────────────────────────────────────────────────────────────────────────────
 function Modal({ title, onClose, children, maxW = "max-w-md" }) {
   return (
@@ -484,7 +849,7 @@ function Modal({ title, onClose, children, maxW = "max-w-md" }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CONTACT FORM (Add + Edit shared)
+// CONTACT FORM
 // ─────────────────────────────────────────────────────────────────────────────
 function ContactForm({ form, setForm, segments, errors, onSubmit, onCancel, submitLabel, showStatus = false }) {
   const field = (label, name, type = "text", placeholder = "") => (
@@ -504,11 +869,10 @@ function ContactForm({ form, setForm, segments, errors, onSubmit, onCancel, subm
 
   return (
     <div className="space-y-4">
-      {field("Full Name *", "name", "text", "Rahul Sharma")}
+      {field("Full Name *", "name",  "text",  "Rahul Sharma")}
       {field("Email *",     "email", "email", "rahul@example.com")}
       {field("Phone",       "phone", "tel",   "9876543210")}
 
-      {/* Segment */}
       <div>
         <label className="block text-xs font-semibold text-slate-500 mb-1.5">Segment</label>
         <select
@@ -516,12 +880,11 @@ function ContactForm({ form, setForm, segments, errors, onSubmit, onCancel, subm
           onChange={e => setForm(p => ({ ...p, segment_id: e.target.value }))}
           className="w-full border border-slate-200 bg-slate-50 px-4 py-2.5 rounded-xl text-sm outline-none focus:border-indigo-400"
         >
-          <option value="">— Segment निवडा —</option>
+          <option value="">— Segment select —</option>
           {segments.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
         </select>
       </div>
 
-      {/* Status — edit only */}
       {showStatus && (
         <div>
           <label className="block text-xs font-semibold text-slate-500 mb-2">Status</label>
@@ -532,7 +895,7 @@ function ContactForm({ form, setForm, segments, errors, onSubmit, onCancel, subm
                 <button
                   key={s}
                   onClick={() => setForm(p => ({ ...p, status: s }))}
-                  className={`flex-1 py-2 rounded-xl text-xs font-semibold border-2 transition-all`}
+                  className="flex-1 py-2 rounded-xl text-xs font-semibold border-2 transition-all"
                   style={
                     form.status === s
                       ? { borderColor: meta.text, background: meta.bg, color: meta.text }

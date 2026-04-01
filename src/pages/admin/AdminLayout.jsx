@@ -18,6 +18,7 @@ import EmailTemplates       from "../templates/Tamplates";
 import WhatsAppTemplates    from "../templates/WhatsappTamplates";
 import Settings             from "../settings/Settings";
 import Contacts             from "../contacts/Contacts";
+import Automation           from "../automations/Automation";   // ✅ NEW
 
 export default function AdminLayout() {
   const { user, hasPerm } = useAuth();
@@ -85,8 +86,12 @@ export default function AdminLayout() {
               hasPerm("sidebar_subscribers") ? <Contacts /> : <AccessDenied />
             } />
 
+            {/* ✅ Automation — PlaceholderPage ऐवजी आता real Automation component */}
+            <Route path="automation" element={
+              hasPerm("view_campaigns") ? <Automation /> : <AccessDenied />
+            } />
+
             {/* Placeholder pages */}
-            <Route path="automation"   element={hasPerm("view_campaigns")  ? <PlaceholderPage title="Automation"   icon="⚙️" /> : <AccessDenied />} />
             <Route path="reports"      element={hasPerm("sidebar_reports") ? <PlaceholderPage title="Reports"      icon="📈" /> : <AccessDenied />} />
             <Route path="subscription" element={hasPerm("view_purchase")   ? <PlaceholderPage title="Subscription" icon="💳" /> : <AccessDenied />} />
 
@@ -100,5 +105,5 @@ export default function AdminLayout() {
         </main>
       </div>
     </div>
-  ); // opweipwoeipipqwidp0dp0qdpowdioidjodd//
+  );
 }

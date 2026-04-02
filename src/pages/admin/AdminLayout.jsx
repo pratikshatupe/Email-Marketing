@@ -11,6 +11,7 @@ import { AccessDenied }     from "../admin/Accessdenied";
 import DashboardPage        from "../admin/Dashboardpage";
 import UserManagementPage   from "../admin/Usermanagementpage";
 import RolesPermissionsPage from "../admin/Rolespermissionspage";
+import AdminProfile         from "../admin/AdminProfile";       // ✅ Profile page
 
 import EmailCampaigns       from "../campagins/EmailCampagins";
 import WhatsAppCampaigns    from "../campagins/WhatsappCampagins";
@@ -71,109 +72,70 @@ export default function AdminLayout() {
             {/* ── Dashboard ── */}
             <Route index element={<DashboardPage />} />
 
+            {/* ── Profile (all logged-in users) ── */}
+            <Route path="profile" element={<AdminProfile />} />
+
             {/* ── Campaigns ── */}
-            <Route
-              path="campaigns"
-              element={
-                hasPerm("view_campaigns")
-                  ? <Navigate to="/admin/campaigns/email" replace />
-                  : <AccessDenied />
-              }
-            />
-            <Route
-              path="campaigns/email"
-              element={
-                hasPerm("view_campaigns") ? <EmailCampaigns /> : <AccessDenied />
-              }
-            />
-            <Route
-              path="campaigns/whatsapp"
-              element={
-                hasPerm("view_campaigns") ? <WhatsAppCampaigns /> : <AccessDenied />
-              }
-            />
+            <Route path="campaigns" element={
+              hasPerm("view_campaigns")
+                ? <Navigate to="/admin/campaigns/email" replace />
+                : <AccessDenied />
+            } />
+            <Route path="campaigns/email" element={
+              hasPerm("view_campaigns") ? <EmailCampaigns /> : <AccessDenied />
+            } />
+            <Route path="campaigns/whatsapp" element={
+              hasPerm("view_campaigns") ? <WhatsAppCampaigns /> : <AccessDenied />
+            } />
 
             {/* ── Templates ── */}
-            <Route
-              path="templates"
-              element={
-                hasPerm("sidebar_templates")
-                  ? <Navigate to="/admin/templates/email" replace />
-                  : <AccessDenied />
-              }
-            />
-            <Route
-              path="templates/email"
-              element={
-                hasPerm("sidebar_templates") ? <EmailTemplates /> : <AccessDenied />
-              }
-            />
-            <Route
-              path="templates/whatsapp"
-              element={
-                hasPerm("sidebar_templates") ? <WhatsAppTemplates /> : <AccessDenied />
-              }
-            />
+            <Route path="templates" element={
+              hasPerm("sidebar_templates")
+                ? <Navigate to="/admin/templates/email" replace />
+                : <AccessDenied />
+            } />
+            <Route path="templates/email" element={
+              hasPerm("sidebar_templates") ? <EmailTemplates /> : <AccessDenied />
+            } />
+            <Route path="templates/whatsapp" element={
+              hasPerm("sidebar_templates") ? <WhatsAppTemplates /> : <AccessDenied />
+            } />
 
             {/* ── Contacts ── */}
-            <Route
-              path="contacts"
-              element={
-                hasPerm("sidebar_subscribers") ? <Contacts /> : <AccessDenied />
-              }
-            />
+            <Route path="contacts" element={
+              hasPerm("sidebar_subscribers") ? <Contacts /> : <AccessDenied />
+            } />
 
             {/* ── Segments ── */}
-            <Route
-              path="segments"
-              element={
-                hasPerm("sidebar_subscribers") ? <Segments /> : <AccessDenied />
-              }
-            />
+            <Route path="segments" element={
+              hasPerm("sidebar_subscribers") ? <Segments /> : <AccessDenied />
+            } />
 
             {/* ── Automation ── */}
-            <Route
-              path="automation"
-              element={
-                hasPerm("view_campaigns") ? <Automation /> : <AccessDenied />
-              }
-            />
+            <Route path="automation" element={
+              hasPerm("view_campaigns") ? <Automation /> : <AccessDenied />
+            } />
 
             {/* ── Analytics / Reports ── */}
-            <Route
-              path="reports"
-              element={
-                hasPerm("sidebar_reports") ? <AnalyticsDashboard /> : <AccessDenied />
-              }
-            />
+            <Route path="reports" element={
+              hasPerm("sidebar_reports") ? <AnalyticsDashboard /> : <AccessDenied />
+            } />
 
             {/* ── Subscription ── */}
-            <Route
-              path="subscription"
-              element={
-                hasPerm("view_purchase") ? <Subscription /> : <AccessDenied />
-              }
-            />
+            <Route path="subscription" element={
+              hasPerm("view_purchase") ? <Subscription /> : <AccessDenied />
+            } />
 
             {/* ── Administration ── */}
-            <Route
-              path="users"
-              element={
-                hasPerm("sidebar_roles") ? <UserManagementPage /> : <AccessDenied />
-              }
-            />
-            <Route
-              path="roles"
-              element={
-                hasPerm("sidebar_roles") ? <RolesPermissionsPage /> : <AccessDenied />
-              }
-            />
-            <Route
-              path="settings"
-              element={
-                hasPerm("sidebar_settings") ? <Settings /> : <AccessDenied />
-              }
-            />
+            <Route path="users" element={
+              hasPerm("sidebar_roles") ? <UserManagementPage /> : <AccessDenied />
+            } />
+            <Route path="roles" element={
+              hasPerm("sidebar_roles") ? <RolesPermissionsPage /> : <AccessDenied />
+            } />
+            <Route path="settings" element={
+              hasPerm("sidebar_settings") ? <Settings /> : <AccessDenied />
+            } />
 
             {/* ── 404 inside admin ── */}
             <Route path="*" element={<AccessDenied />} />

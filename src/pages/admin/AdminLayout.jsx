@@ -6,7 +6,7 @@ import { useAuth } from "../auth/AuthContext";
 
 import AdminSidebar         from "../admin/AdminSidebar";
 import TopHeader            from "../admin/Topheader";
-import { AccessDenied, PlaceholderPage } from "../admin/Accessdenied";
+import { AccessDenied }     from "../admin/Accessdenied";
 
 import DashboardPage        from "../admin/Dashboardpage";
 import UserManagementPage   from "../admin/Usermanagementpage";
@@ -18,7 +18,10 @@ import EmailTemplates       from "../templates/Tamplates";
 import WhatsAppTemplates    from "../templates/WhatsappTamplates";
 import Settings             from "../settings/Settings";
 import Contacts             from "../contacts/Contacts";
-import Automation           from "../automations/Automation";   // ✅ NEW
+import Automation           from "../automations/Automation";
+import Segments             from "../segments/Segments";
+import AnalyticsDashboard   from "../analytics/AnalyticsDashboard";
+import Subscription         from "../subscription/Subscription";
 
 export default function AdminLayout() {
   const { user, hasPerm } = useAuth();
@@ -32,7 +35,10 @@ export default function AdminLayout() {
 
       {/* Mobile overlay */}
       {mobileOpen && (
-        <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setMobileOpen(false)} />
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
       )}
 
       {/* Sidebar — Desktop */}
@@ -42,7 +48,9 @@ export default function AdminLayout() {
 
       {/* Sidebar — Mobile Drawer */}
       <div
-        className={`fixed left-0 top-0 h-full z-50 md:hidden transition-transform duration-300 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed left-0 top-0 h-full z-50 md:hidden transition-transform duration-300 ${
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
         style={{ width: "236px" }}
       >
         <AdminSidebar collapsed={false} />
@@ -50,57 +58,126 @@ export default function AdminLayout() {
 
       {/* Main content */}
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-        <TopHeader onMenuToggle={() => {
-          if (window.innerWidth < 768) setMobileOpen(o => !o);
-          else setCollapsed(c => !c);
-        }} />
+        <TopHeader
+          onMenuToggle={() => {
+            if (window.innerWidth < 768) setMobileOpen((o) => !o);
+            else setCollapsed((c) => !c);
+          }}
+        />
 
         <main className="flex-1 overflow-y-auto p-3 md:p-4 lg:p-6">
           <Routes>
+
+            {/* ── Dashboard ── */}
             <Route index element={<DashboardPage />} />
 
-            {/* Campaigns */}
-            <Route path="campaigns" element={
-              hasPerm("view_campaigns") ? <Navigate to="/admin/campaigns/email" replace /> : <AccessDenied />
-            } />
-            <Route path="campaigns/email" element={
-              hasPerm("view_campaigns") ? <EmailCampaigns /> : <AccessDenied />
-            } />
-            <Route path="campaigns/whatsapp" element={
-              hasPerm("view_campaigns") ? <WhatsAppCampaigns /> : <AccessDenied />
-            } />
+            {/* ── Campaigns ── */}
+            <Route
+              path="campaigns"
+              element={
+                hasPerm("view_campaigns")
+                  ? <Navigate to="/admin/campaigns/email" replace />
+                  : <AccessDenied />
+              }
+            />
+            <Route
+              path="campaigns/email"
+              element={
+                hasPerm("view_campaigns") ? <EmailCampaigns /> : <AccessDenied />
+              }
+            />
+            <Route
+              path="campaigns/whatsapp"
+              element={
+                hasPerm("view_campaigns") ? <WhatsAppCampaigns /> : <AccessDenied />
+              }
+            />
 
-            {/* Templates */}
-            <Route path="templates" element={
-              hasPerm("sidebar_templates") ? <Navigate to="/admin/templates/email" replace /> : <AccessDenied />
-            } />
-            <Route path="templates/email" element={
-              hasPerm("sidebar_templates") ? <EmailTemplates /> : <AccessDenied />
-            } />
-            <Route path="templates/whatsapp" element={
-              hasPerm("sidebar_templates") ? <WhatsAppTemplates /> : <AccessDenied />
-            } />
+            {/* ── Templates ── */}
+            <Route
+              path="templates"
+              element={
+                hasPerm("sidebar_templates")
+                  ? <Navigate to="/admin/templates/email" replace />
+                  : <AccessDenied />
+              }
+            />
+            <Route
+              path="templates/email"
+              element={
+                hasPerm("sidebar_templates") ? <EmailTemplates /> : <AccessDenied />
+              }
+            />
+            <Route
+              path="templates/whatsapp"
+              element={
+                hasPerm("sidebar_templates") ? <WhatsAppTemplates /> : <AccessDenied />
+              }
+            />
 
-            {/* Contacts */}
-            <Route path="contacts" element={
-              hasPerm("sidebar_subscribers") ? <Contacts /> : <AccessDenied />
-            } />
+            {/* ── Contacts ── */}
+            <Route
+              path="contacts"
+              element={
+                hasPerm("sidebar_subscribers") ? <Contacts /> : <AccessDenied />
+              }
+            />
 
-            {/* ✅ Automation — PlaceholderPage ऐवजी आता real Automation component */}
-            <Route path="automation" element={
-              hasPerm("view_campaigns") ? <Automation /> : <AccessDenied />
-            } />
+            {/* ── Segments ── */}
+            <Route
+              path="segments"
+              element={
+                hasPerm("sidebar_subscribers") ? <Segments /> : <AccessDenied />
+              }
+            />
 
-            {/* Placeholder pages */}
-            <Route path="reports"      element={hasPerm("sidebar_reports") ? <PlaceholderPage title="Reports"      icon="📈" /> : <AccessDenied />} />
-            <Route path="subscription" element={hasPerm("view_purchase")   ? <PlaceholderPage title="Subscription" icon="💳" /> : <AccessDenied />} />
+            {/* ── Automation ── */}
+            <Route
+              path="automation"
+              element={
+                hasPerm("view_campaigns") ? <Automation /> : <AccessDenied />
+              }
+            />
 
-            {/* Management pages */}
-            <Route path="users"    element={hasPerm("sidebar_roles")    ? <UserManagementPage />   : <AccessDenied />} />
-            <Route path="roles"    element={hasPerm("sidebar_roles")    ? <RolesPermissionsPage /> : <AccessDenied />} />
-            <Route path="settings" element={hasPerm("sidebar_settings") ? <Settings />             : <AccessDenied />} />
+            {/* ── Analytics / Reports ── */}
+            <Route
+              path="reports"
+              element={
+                hasPerm("sidebar_reports") ? <AnalyticsDashboard /> : <AccessDenied />
+              }
+            />
 
+            {/* ── Subscription ── */}
+            <Route
+              path="subscription"
+              element={
+                hasPerm("view_purchase") ? <Subscription /> : <AccessDenied />
+              }
+            />
+
+            {/* ── Administration ── */}
+            <Route
+              path="users"
+              element={
+                hasPerm("sidebar_roles") ? <UserManagementPage /> : <AccessDenied />
+              }
+            />
+            <Route
+              path="roles"
+              element={
+                hasPerm("sidebar_roles") ? <RolesPermissionsPage /> : <AccessDenied />
+              }
+            />
+            <Route
+              path="settings"
+              element={
+                hasPerm("sidebar_settings") ? <Settings /> : <AccessDenied />
+              }
+            />
+
+            {/* ── 404 inside admin ── */}
             <Route path="*" element={<AccessDenied />} />
+
           </Routes>
         </main>
       </div>

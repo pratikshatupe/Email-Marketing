@@ -1,6 +1,4 @@
-// src/pages/admin/AdminProfile.jsx
-// Full profile page — view, edit, logout
-// Works with AuthContext: user = { email, role }
+
 
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -38,13 +36,11 @@ export default function AdminProfile() {
     timezone: user?.timezone || "Asia/Kolkata",
   });
 
-  // ── Password change state ──
   const [pwSection, setPwSection] = useState(false);
   const [pw, setPw] = useState({ current: "", newPw: "", confirm: "" });
   const [pwError, setPwError] = useState("");
   const [pwSaved, setPwSaved] = useState(false);
 
-  // ── Logout confirm ──
   const [logoutConfirm, setLogoutConfirm] = useState(false);
 
   const avatarLetter = (form.name || form.email || "A")[0].toUpperCase();
@@ -57,15 +53,12 @@ export default function AdminProfile() {
     setSaving(true);
     setError("");
     try {
-      // Try to save to backend; if no endpoint just update local
       const res = await fetch(`${API}/auth/me`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(form),
       });
-      // Whether it succeeds or fails, update localStorage display name
     } catch (_) {}
-    // Update localStorage
     const saved = JSON.parse(localStorage.getItem("user") || "{}");
     localStorage.setItem("user", JSON.stringify({ ...saved, ...form }));
     setSaving(false);
@@ -100,10 +93,8 @@ export default function AdminProfile() {
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-4xl mx-auto space-y-5 pb-10">
 
-        {/* ── Hero Banner ── */}
         <div className="rounded-2xl overflow-hidden shadow-sm border border-slate-200">
           <div className={`h-32 md:h-40 bg-gradient-to-br ${rm.gradient} relative`}>
-            {/* Decorative circles */}
             <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full bg-white/10" />
             <div className="absolute top-4 right-16 w-16 h-16 rounded-full bg-white/10" />
           </div>
@@ -111,7 +102,6 @@ export default function AdminProfile() {
           <div className="bg-white px-5 md:px-8 pb-6">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 -mt-12 sm:-mt-14">
 
-              {/* Avatar */}
               <div className="relative self-start">
                 <div className={`w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br ${rm.gradient} flex items-center justify-center text-white font-black text-3xl border-4 border-white shadow-xl`}>
                   {avatarLetter}
@@ -121,7 +111,6 @@ export default function AdminProfile() {
                 </div>
               </div>
 
-              {/* Action buttons */}
               <div className="flex items-center gap-2 flex-wrap">
                 {saved && (
                   <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">
@@ -163,7 +152,6 @@ export default function AdminProfile() {
               </div>
             </div>
 
-            {/* Name & role */}
             <div className="mt-4">
               <h1 className="text-xl md:text-2xl font-black text-slate-800">{form.name}</h1>
               <div className="flex flex-wrap items-center gap-2 mt-1.5">
@@ -177,48 +165,40 @@ export default function AdminProfile() {
           </div>
         </div>
 
-        {/* ── Error ── */}
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm">{error}</div>
         )}
 
-        {/* ── Profile Info + Quick Stats ── */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
 
-          {/* Profile form — takes 2 cols */}
           <div className="md:col-span-2 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
             <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-5">Account Information</h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-              {/* Full Name */}
               <Field
                 label="Full Name" icon="👤" editing={editing}
                 value={form.name} onChange={v => handleField("name", v)}
               />
 
-              {/* Email */}
               <Field
                 label="Email Address" icon="✉️" editing={editing}
                 value={form.email} onChange={v => handleField("email", v)}
                 type="email"
               />
 
-              {/* Phone */}
               <Field
                 label="Phone" icon="📱" editing={editing}
                 value={form.phone} onChange={v => handleField("phone", v)}
                 placeholder="+91 XXXXX XXXXX"
               />
 
-              {/* Company */}
               <Field
                 label="Company" icon="🏢" editing={editing}
                 value={form.company} onChange={v => handleField("company", v)}
                 placeholder="Your company name"
               />
 
-              {/* Timezone */}
               <div className="sm:col-span-2">
                 <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Timezone</label>
                 {editing ? (
@@ -236,13 +216,11 @@ export default function AdminProfile() {
                 )}
               </div>
 
-              {/* Role — always readonly */}
               <div className="sm:col-span-2">
                 <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Role</label>
                 <ReadField icon={rm.icon} value={rm.label} />
               </div>
 
-              {/* Bio */}
               <div className="sm:col-span-2">
                 <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Bio</label>
                 {editing ? (
@@ -263,10 +241,8 @@ export default function AdminProfile() {
             </div>
           </div>
 
-          {/* Right column */}
           <div className="space-y-4">
 
-            {/* Quick stats */}
             <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
               <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Quick Stats</h2>
               <div className="space-y-3">
@@ -285,7 +261,6 @@ export default function AdminProfile() {
               </div>
             </div>
 
-            {/* Security */}
             <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
               <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Security</h2>
 
@@ -333,7 +308,6 @@ export default function AdminProfile() {
               )}
             </div>
 
-            {/* Danger zone */}
             <div className="bg-white rounded-2xl border border-red-100 p-5 shadow-sm">
               <h2 className="text-sm font-bold text-red-400 uppercase tracking-widest mb-4">Session</h2>
               <button
@@ -348,7 +322,6 @@ export default function AdminProfile() {
         </div>
       </div>
 
-      {/* ── Logout Confirm Modal ── */}
       {logoutConfirm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
@@ -378,7 +351,6 @@ export default function AdminProfile() {
   );
 }
 
-// ── Helper components ──
 function Field({ label, icon, editing, value, onChange, type = "text", placeholder = "" }) {
   return (
     <div>

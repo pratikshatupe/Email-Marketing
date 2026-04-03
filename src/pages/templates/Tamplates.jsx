@@ -113,6 +113,18 @@ const THUMBNAIL_ICONS = {
   reengagement: "💌",
 };
 
+// ─── Toast Notification ───────────────────────────────────────────────────────
+// Simple toast shown when "Use in Campaign" is clicked
+function Toast({ message, onClose }) {
+  return (
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 bg-gray-900 text-white px-5 py-3 rounded-2xl shadow-xl animate-fade-in">
+      <span className="text-base">✅</span>
+      <span className="text-sm font-semibold">{message}</span>
+      <button onClick={onClose} className="ml-2 text-gray-400 hover:text-white text-xs">✕</button>
+    </div>
+  );
+}
+
 // ─── Badge ────────────────────────────────────────────────────────────────────
 function Badge({ text }) {
   const colors = {
@@ -217,35 +229,168 @@ function TemplateCard({ template, onPreview, onEdit, onDelete, onDuplicate }) {
 }
 
 // ─── Preview Modal ────────────────────────────────────────────────────────────
-function PreviewModal({ template, onClose }) {
+// UPDATED: Added device toggle (desktop/mobile preview) + Use in Campaign logic
+function PreviewModal({ template, onClose, onUseInCampaign }) {
+  // "desktop" | "mobile"
+  const [device, setDevice] = useState("desktop");
+
   if (!template) return null;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col overflow-hidden" style={{ maxHeight: "90vh" }}>
+      <div
+        className="bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+        style={{ width: "100%", maxWidth: "720px", maxHeight: "92vh" }}
+      >
+        {/* ── Header ── */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 flex-shrink-0">
-          <div>
-            <h2 className="text-base font-bold text-gray-900">{template.name}</h2>
-            <p className="text-xs text-gray-400 mt-0.5 truncate max-w-xs">Subject: {template.subject}</p>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-base font-bold text-gray-900">{template.name}</h2>
+              <Badge text={template.category} />
+              <Badge text={template.status} />
+            </div>
+            {/* Subject line */}
+            <p className="text-xs text-gray-400 mt-1 truncate">
+              <span className="font-semibold text-gray-500">Subject:</span> {template.subject}
+            </p>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-500 transition flex-shrink-0">
+          <button
+            onClick={onClose}
+            className="ml-4 p-2 rounded-xl hover:bg-gray-100 text-gray-500 transition flex-shrink-0"
+          >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <div dangerouslySetInnerHTML={{ __html: template.htmlContent }} />
+
+        {/* ── Device Toggle Bar ── */}
+        <div className="flex items-center justify-between px-6 py-3 bg-gray-50 border-b border-gray-100 flex-shrink-0">
+          {/* Left: metadata */}
+          <div className="flex items-center gap-4 text-xs text-gray-400">
+            <span>📅 Last edited: <strong className="text-gray-600">{template.lastEdited}</strong></span>
+            <span>🚀 Used in <strong className="text-gray-600">{template.usedInCampaigns}</strong> campaigns</span>
+          </div>
+
+          {/* Right: Desktop / Mobile toggle */}
+          <div className="flex border border-gray-200 rounded-xl overflow-hidden text-xs">
+            <button
+              onClick={() => setDevice("desktop")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 font-semibold transition ${
+                device === "desktop" ? "bg-indigo-600 text-white" : "text-gray-500 hover:bg-gray-100"
+              }`}
+            >
+              {/* Desktop icon */}
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              Desktop
+            </button>
+            <button
+              onClick={() => setDevice("mobile")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 font-semibold transition ${
+                device === "mobile" ? "bg-indigo-600 text-white" : "text-gray-500 hover:bg-gray-100"
+              }`}
+            >
+              {/* Mobile icon */}
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+              Mobile
+            </button>
           </div>
         </div>
-        <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 flex-shrink-0">
-          <button onClick={onClose} className="px-4 py-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm font-medium transition">
-            Close
-          </button>
-          <button className="px-5 py-2 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
-            Use in Campaign
-          </button>
+
+        {/* ── Preview Area ── */}
+        <div className="flex-1 overflow-y-auto p-6 bg-gray-100 flex items-start justify-center">
+          {device === "desktop" ? (
+            // Desktop preview — full width card
+            <div className="w-full bg-white rounded-xl shadow-sm border border-gray-200 p-6 overflow-x-auto">
+              <div dangerouslySetInnerHTML={{ __html: template.htmlContent }} />
+            </div>
+          ) : (
+            // Mobile preview — narrow phone-like frame
+            <div
+              className="bg-white rounded-3xl border-4 border-gray-300 shadow-xl overflow-hidden"
+              style={{ width: "375px", minHeight: "500px" }}
+            >
+              {/* Fake phone status bar */}
+              <div className="h-8 bg-gray-100 flex items-center justify-between px-4 border-b border-gray-200">
+                <span className="text-xs text-gray-400 font-medium">9:41</span>
+                <div className="flex gap-1">
+                  <div className="w-2.5 h-2.5 rounded-full bg-gray-300" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-gray-300" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-gray-300" />
+                </div>
+              </div>
+              {/* Email content */}
+              <div className="p-3 overflow-x-hidden text-sm">
+                <div dangerouslySetInnerHTML={{ __html: template.htmlContent }} />
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* ── Footer ── */}
+        <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between gap-3 flex-shrink-0 bg-white">
+          {/* Left: stats / hint */}
+          <p className="text-xs text-gray-400 hidden sm:block">
+            Use {"{{name}}"} and {"{{company_name}}"} for personalization
+          </p>
+
+          {/* Right: action buttons */}
+          <div className="flex gap-3 ml-auto">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm font-medium transition"
+            >
+              Close
+            </button>
+            {/* ✅ USE IN CAMPAIGN — the key button */}
+            <button
+              onClick={() => onUseInCampaign(template)}
+              className="px-5 py-2 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 active:scale-95 transition-all flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+              Use in Campaign
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Campaign Selected Banner ─────────────────────────────────────────────────
+// Shows at top of page after "Use in Campaign" is clicked — confirming selection
+function CampaignBanner({ template, onDismiss, onGoToCampaign }) {
+  return (
+    <div className="mx-4 sm:mx-6 mb-3 flex items-center justify-between gap-3 bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-3">
+      <div className="flex items-center gap-3">
+        <span className="text-xl">🚀</span>
+        <div>
+          <p className="text-sm font-bold text-indigo-800">Template selected for campaign!</p>
+          <p className="text-xs text-indigo-500">
+            <span className="font-semibold">{template.name}</span> is ready to use
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <button
+          onClick={onGoToCampaign}
+          className="text-xs px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition"
+        >
+          Go to Campaign →
+        </button>
+        <button
+          onClick={onDismiss}
+          className="text-xs px-2 py-1.5 rounded-lg text-indigo-400 hover:text-indigo-600 hover:bg-indigo-100 transition"
+        >
+          ✕
+        </button>
       </div>
     </div>
   );
@@ -257,7 +402,14 @@ function CreateEditModal({ template, onClose, onSave }) {
   const [form, setForm] = useState(
     template
       ? { ...template }
-      : { name: "", category: "Promotional", subject: "", status: "active", htmlContent: "<p>Hello {{name}},</p>\n<p>Your message here.</p>", thumbnail: "welcome" }
+      : {
+          name: "",
+          category: "Promotional",
+          subject: "",
+          status: "active",
+          htmlContent: "<p>Hello {{name}},</p>\n<p>Your message here.</p>",
+          thumbnail: "welcome",
+        }
   );
   const handleChange = (field, value) => setForm((f) => ({ ...f, [field]: value }));
 
@@ -309,7 +461,14 @@ function CreateEditModal({ template, onClose, onSave }) {
               <div className="flex gap-4 pt-2">
                 {["active", "draft"].map((s) => (
                   <label key={s} className="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" name="status" value={s} checked={form.status === s} onChange={() => handleChange("status", s)} className="accent-indigo-600" />
+                    <input
+                      type="radio"
+                      name="status"
+                      value={s}
+                      checked={form.status === s}
+                      onChange={() => handleChange("status", s)}
+                      className="accent-indigo-600"
+                    />
                     <span className="text-sm text-gray-700 capitalize">{s}</span>
                   </label>
                 ))}
@@ -336,7 +495,10 @@ function CreateEditModal({ template, onClose, onSave }) {
             <div className="border border-gray-200 rounded-xl overflow-hidden">
               <div className="flex gap-1.5 px-3 py-2 bg-gray-50 border-b border-gray-200 flex-wrap">
                 {["B", "I", "U", "Link", "Img"].map((btn) => (
-                  <button key={btn} className="text-xs px-2 py-1 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-300 transition font-medium">
+                  <button
+                    key={btn}
+                    className="text-xs px-2 py-1 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-300 transition font-medium"
+                  >
                     {btn}
                   </button>
                 ))}
@@ -369,7 +531,10 @@ function CreateEditModal({ template, onClose, onSave }) {
 
         {/* Footer */}
         <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 flex-shrink-0">
-          <button onClick={onClose} className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm font-medium transition">
+          <button
+            onClick={onClose}
+            className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm font-medium transition"
+          >
             Cancel
           </button>
           <button
@@ -395,10 +560,16 @@ function DeleteConfirmModal({ template, onClose, onConfirm }) {
           Are you sure you want to delete <strong>{template?.name}</strong>? This cannot be undone.
         </p>
         <div className="flex gap-3 justify-center pt-2">
-          <button onClick={onClose} className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm font-medium transition">
+          <button
+            onClick={onClose}
+            className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm font-medium transition"
+          >
             Cancel
           </button>
-          <button onClick={onConfirm} className="px-5 py-2.5 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition">
+          <button
+            onClick={onConfirm}
+            className="px-5 py-2.5 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition"
+          >
             Delete
           </button>
         </div>
@@ -409,15 +580,21 @@ function DeleteConfirmModal({ template, onClose, onConfirm }) {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function Templates() {
-  const [templates,       setTemplates]       = useState(MOCK_TEMPLATES);
-  const [search,          setSearch]          = useState("");
-  const [activeCategory,  setActiveCategory]  = useState("All");
-  const [sortBy,          setSortBy]          = useState("lastEdited");
-  const [viewMode,        setViewMode]        = useState("grid");
-  const [previewTemplate, setPreviewTemplate] = useState(null);
-  const [editTemplate,    setEditTemplate]    = useState(null);
-  const [createOpen,      setCreateOpen]      = useState(false);
-  const [deleteTarget,    setDeleteTarget]    = useState(null);
+  const [templates,          setTemplates]          = useState(MOCK_TEMPLATES);
+  const [search,             setSearch]             = useState("");
+  const [activeCategory,     setActiveCategory]     = useState("All");
+  const [sortBy,             setSortBy]             = useState("lastEdited");
+  const [viewMode,           setViewMode]           = useState("grid");
+  const [previewTemplate,    setPreviewTemplate]    = useState(null);
+  const [editTemplate,       setEditTemplate]       = useState(null);
+  const [createOpen,         setCreateOpen]         = useState(false);
+  const [deleteTarget,       setDeleteTarget]       = useState(null);
+
+  // ── "Use in Campaign" state ────────────────────────────────────────────────
+  // Stores the template that was selected for a campaign
+  const [campaignTemplate,   setCampaignTemplate]   = useState(null);
+  // Toast notification state
+  const [toast,              setToast]              = useState(null);
 
   // ── Filter + Sort ──────────────────────────────────────────────────────────
   const filtered = templates
@@ -478,46 +655,59 @@ export default function Templates() {
     ]);
   };
 
+  // ── "Use in Campaign" handler ──────────────────────────────────────────────
+  // Called when user clicks "Use in Campaign" inside the Preview modal
+  const handleUseInCampaign = (template) => {
+    // 1. Store selected template in state (or localStorage if you prefer)
+    setCampaignTemplate(template);
+
+    // 2. Optionally persist to localStorage so Campaign page can read it
+    try {
+      localStorage.setItem(
+        "selectedCampaignTemplate",
+        JSON.stringify({ id: template.id, name: template.name, subject: template.subject })
+      );
+    } catch (_) {
+      // localStorage unavailable — no-op
+    }
+
+    // 3. Increment usedInCampaigns count for this template
+    setTemplates((ts) =>
+      ts.map((t) =>
+        t.id === template.id ? { ...t, usedInCampaigns: t.usedInCampaigns + 1 } : t
+      )
+    );
+
+    // 4. Close preview modal
+    setPreviewTemplate(null);
+
+    // 5. Show toast notification
+    setToast(`"${template.name}" added to campaign!`);
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  // "Go to Campaign" — replace with your router.push("/campaigns/new") or navigate()
+  const handleGoToCampaign = () => {
+    // Example with react-router:
+    // navigate("/campaigns/new");
+    // Example with Next.js:
+    // router.push("/campaigns/new");
+    alert(`Navigating to Campaign page with template: ${campaignTemplate?.name}\n\nYou can replace this alert with:\nnavigate("/campaigns/new")\nor\nrouter.push("/campaigns/new")`);
+  };
+
   // ── Stats ──────────────────────────────────────────────────────────────────
   const stats = [
-    { label: "Total",     value: templates.length,                                        icon: "📄", color: "from-indigo-500 to-purple-500" },
-    { label: "Active",    value: templates.filter((t) => t.status === "active").length,   icon: "✅", color: "from-emerald-400 to-teal-500"  },
-    { label: "Draft",     value: templates.filter((t) => t.status === "draft").length,    icon: "📝", color: "from-amber-400 to-orange-500"  },
-    { label: "Campaigns", value: templates.reduce((a, t) => a + t.usedInCampaigns, 0),    icon: "🚀", color: "from-sky-400 to-cyan-500"      },
+    { label: "Total",     value: templates.length,                                       icon: "📄", color: "from-indigo-500 to-purple-500" },
+    { label: "Active",    value: templates.filter((t) => t.status === "active").length,  icon: "✅", color: "from-emerald-400 to-teal-500"  },
+    { label: "Draft",     value: templates.filter((t) => t.status === "draft").length,   icon: "📝", color: "from-amber-400 to-orange-500"  },
+    { label: "Campaigns", value: templates.reduce((a, t) => a + t.usedInCampaigns, 0),   icon: "🚀", color: "from-sky-400 to-cyan-500"      },
   ];
 
   // ── Render ─────────────────────────────────────────────────────────────────
-  /*
-    LAYOUT EXPLANATION — fixes the overlap bug:
-
-    AdminLayout renders:
-      <main className="flex-1 overflow-y-auto p-4 md:p-6">
-        <Templates />          ← this component
-      </main>
-
-    Problem was: Templates used min-h-screen + sticky header inside a
-    scrolling parent, so the sticky header would scroll with the content.
-
-    Fix:
-      1. Remove min-h-screen from wrapper — use h-full instead
-      2. Make wrapper flex flex-col
-      3. Header: flex-shrink-0  (never shrinks, sticks to top of flex container)
-      4. Content: flex-1 overflow-y-auto  (only this part scrolls)
-
-    But AdminLayout's <main> already has overflow-y-auto + padding.
-    We need the INNER scroll, not the outer one.
-    So we set the wrapper to h-full and let the inner div scroll.
-
-    If AdminLayout adds padding (p-4 md:p-6), we compensate with -m tricks
-    or simply accept the padding. The header will still be "stuck" at the
-    top of the flex column — which is the top of the <main> content area.
-    That is visually correct: it scrolls within the admin panel, not the page.
-  */
   return (
     <div className="flex flex-col bg-gray-50 rounded-xl overflow-hidden" style={{ height: "calc(100vh - 57px - 48px)" }}>
-      {/* ─────────────────────────────────────────────────────────────────────
-          STICKY HEADER  (flex-shrink-0 = never shrinks, stays at top)
-      ───────────────────────────────────────────────────────────────────── */}
+
+      {/* ── STICKY HEADER ── */}
       <div className="flex-shrink-0 bg-white border-b border-gray-200 shadow-sm rounded-t-xl">
 
         {/* Title row */}
@@ -559,7 +749,6 @@ export default function Templates() {
 
         {/* Filter row */}
         <div className="px-4 sm:px-6 pb-4 space-y-3">
-          {/* Search + Sort + View toggle */}
           <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative flex-1">
               <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -626,10 +815,17 @@ export default function Templates() {
       </div>
       {/* ── END STICKY HEADER ── */}
 
-      {/* ─────────────────────────────────────────────────────────────────────
-          SCROLLABLE CONTENT  (flex-1 + overflow-y-auto = only this scrolls)
-      ───────────────────────────────────────────────────────────────────── */}
+      {/* ── SCROLLABLE CONTENT ── */}
       <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4">
+
+        {/* Campaign selected banner — shown after "Use in Campaign" */}
+        {campaignTemplate && (
+          <CampaignBanner
+            template={campaignTemplate}
+            onDismiss={() => setCampaignTemplate(null)}
+            onGoToCampaign={handleGoToCampaign}
+          />
+        )}
 
         {/* Results count */}
         <p className="text-xs text-gray-500">
@@ -690,18 +886,30 @@ export default function Templates() {
                 <div className="col-span-1 text-center text-sm font-bold text-gray-700">{t.usedInCampaigns}</div>
                 <div className="col-span-1 flex sm:justify-center"><Badge text={t.status} /></div>
                 <div className="col-span-1 flex justify-end gap-1.5">
-                  <button onClick={() => setPreviewTemplate(t)} className="p-1.5 rounded-lg hover:bg-indigo-50 text-indigo-500 transition" title="Preview">
+                  <button
+                    onClick={() => setPreviewTemplate(t)}
+                    className="p-1.5 rounded-lg hover:bg-indigo-50 text-indigo-500 transition"
+                    title="Preview"
+                  >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
                   </button>
-                  <button onClick={() => setEditTemplate(t)} className="p-1.5 rounded-lg hover:bg-indigo-50 text-indigo-500 transition" title="Edit">
+                  <button
+                    onClick={() => setEditTemplate(t)}
+                    className="p-1.5 rounded-lg hover:bg-indigo-50 text-indigo-500 transition"
+                    title="Edit"
+                  >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                   </button>
-                  <button onClick={() => setDeleteTarget(t)} className="p-1.5 rounded-lg hover:bg-red-50 text-red-400 transition" title="Delete">
+                  <button
+                    onClick={() => setDeleteTarget(t)}
+                    className="p-1.5 rounded-lg hover:bg-red-50 text-red-400 transition"
+                    title="Delete"
+                  >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
@@ -726,7 +934,11 @@ export default function Templates() {
 
       {/* ── Modals ── */}
       {previewTemplate && (
-        <PreviewModal template={previewTemplate} onClose={() => setPreviewTemplate(null)} />
+        <PreviewModal
+          template={previewTemplate}
+          onClose={() => setPreviewTemplate(null)}
+          onUseInCampaign={handleUseInCampaign}
+        />
       )}
       {(createOpen || editTemplate) && (
         <CreateEditModal
@@ -741,6 +953,11 @@ export default function Templates() {
           onClose={() => setDeleteTarget(null)}
           onConfirm={handleDelete}
         />
+      )}
+
+      {/* ── Toast Notification ── */}
+      {toast && (
+        <Toast message={toast} onClose={() => setToast(null)} />
       )}
     </div>
   );

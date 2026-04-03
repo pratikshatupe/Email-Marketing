@@ -1,8 +1,5 @@
 import { useState } from "react";
 
-/* ─────────────────────────────────────────────
-   MOCK DATA
-───────────────────────────────────────────── */
 const mockCampaigns = [
   {
     id: 1,
@@ -47,12 +44,12 @@ const mockCampaigns = [
 ];
 
 const STATUS_CONFIG = {
-  draft:            { label: "Draft",            bg: "bg-gray-100",   text: "text-gray-600",   dot: "bg-gray-400" },
-  pending_approval: { label: "Pending Approval",  bg: "bg-yellow-50",  text: "text-yellow-700", dot: "bg-yellow-400" },
-  scheduled:        { label: "Scheduled",         bg: "bg-blue-50",    text: "text-blue-700",   dot: "bg-blue-400" },
-  sending:          { label: "Sending",           bg: "bg-purple-50",  text: "text-purple-700", dot: "bg-purple-400" },
-  sent:             { label: "Sent",              bg: "bg-green-50",   text: "text-green-700",  dot: "bg-green-500" },
-  rejected:         { label: "Rejected",          bg: "bg-red-50",     text: "text-red-700",    dot: "bg-red-500" },
+  draft: { label: "Draft", bg: "bg-gray-100", text: "text-gray-600", dot: "bg-gray-400" },
+  pending_approval: { label: "Pending Approval", bg: "bg-yellow-50", text: "text-yellow-700", dot: "bg-yellow-400" },
+  scheduled: { label: "Scheduled", bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-400" },
+  sending: { label: "Sending", bg: "bg-purple-50", text: "text-purple-700", dot: "bg-purple-400" },
+  sent: { label: "Sent", bg: "bg-green-50", text: "text-green-700", dot: "bg-green-500" },
+  rejected: { label: "Rejected", bg: "bg-red-50", text: "text-red-700", dot: "bg-red-500" },
 };
 
 const SEGMENTS = [
@@ -63,18 +60,13 @@ const SEGMENTS = [
   "Returning Customers",
 ];
 
-/* ─────────────────────────────────────────────
-   WHATSAPP ICON (reusable)
-───────────────────────────────────────────── */
 const WaIcon = ({ className = "w-5 h-5" }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 24 24">
     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
   </svg>
 );
 
-/* ─────────────────────────────────────────────
-   STATUS BADGE
-───────────────────────────────────────────── */
+
 function StatusBadge({ status }) {
   const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.draft;
   return (
@@ -85,9 +77,7 @@ function StatusBadge({ status }) {
   );
 }
 
-/* ─────────────────────────────────────────────
-   TOAST
-───────────────────────────────────────────── */
+
 function Toast({ toasts }) {
   return (
     <div className="fixed top-5 right-5 z-[999] flex flex-col gap-2 pointer-events-none">
@@ -108,15 +98,12 @@ function Toast({ toasts }) {
   );
 }
 
-/* ─────────────────────────────────────────────
-   SUBMIT CONFIRM MODAL
-───────────────────────────────────────────── */
+
 function SubmitConfirmModal({ campaign, onConfirm, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
 
-        {/* Header */}
         <div className="p-6 border-b border-gray-100 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center flex-shrink-0">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,9 +116,7 @@ function SubmitConfirmModal({ campaign, onConfirm, onClose }) {
           </div>
         </div>
 
-        {/* Body */}
         <div className="p-6">
-          {/* Campaign preview */}
           <div className="bg-indigo-50 rounded-xl p-4 mb-5 border border-indigo-100">
             <p className="text-sm font-semibold text-indigo-800 mb-1">💬 {campaign.name}</p>
             <p className="text-xs text-indigo-600 mb-3 line-clamp-2">{campaign.message}</p>
@@ -140,14 +125,13 @@ function SubmitConfirmModal({ campaign, onConfirm, onClose }) {
             </span>
           </div>
 
-          {/* Flow steps */}
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Approval Flow</p>
           <div className="space-y-2 mb-5">
             {[
-              { icon: "✍️", label: "Draft",                desc: "Your current status",        active: true  },
-              { icon: "⏳", label: "Pending Approval",      desc: "Admin will review it",           active: true  },
-              { icon: "✅", label: "Approved / Scheduled",  desc: "Campaign will be added to queue",   active: false },
-              { icon: "📤", label: "Messages Sent",         desc: "Messages will be sent to contacts on WhatsApp", active: false },
+              { icon: "✍️", label: "Draft", desc: "Your current status", active: true },
+              { icon: "⏳", label: "Pending Approval", desc: "Admin will review it", active: true },
+              { icon: "✅", label: "Approved / Scheduled", desc: "Campaign will be added to queue", active: false },
+              { icon: "📤", label: "Messages Sent", desc: "Messages will be sent to contacts on WhatsApp", active: false },
             ].map((step, i) => (
               <div key={i} className="flex items-center gap-3">
                 <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm flex-shrink-0
@@ -165,10 +149,9 @@ function SubmitConfirmModal({ campaign, onConfirm, onClose }) {
           </div>
 
           <p className="text-xs text-gray-500 bg-yellow-50 border border-yellow-100 rounded-lg px-3 py-2">
-⚠️ After submitting, the campaign will appear in the Admin Dashboard under the Campaigns section, and the admin will be able to approve or reject it.          </p>
+            ⚠️ After submitting, the campaign will appear in the Admin Dashboard under the Campaigns section, and the admin will be able to approve or reject it.          </p>
         </div>
 
-        {/* Footer */}
         <div className="flex gap-3 p-6 pt-0">
           <button
             onClick={onClose}
@@ -191,9 +174,7 @@ function SubmitConfirmModal({ campaign, onConfirm, onClose }) {
   );
 }
 
-/* ─────────────────────────────────────────────
-   DELETE CONFIRM MODAL
-───────────────────────────────────────────── */
+
 function DeleteConfirmModal({ campaign, onConfirm, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
@@ -208,7 +189,7 @@ function DeleteConfirmModal({ campaign, onConfirm, onClose }) {
           <p className="text-sm text-gray-500 mb-1">
             <span className="font-semibold text-gray-700">"{campaign.name}"</span> permanently delete .
           </p>
-<p className="text-xs text-red-500 mb-6">This action cannot be undone.</p>
+          <p className="text-xs text-red-500 mb-6">This action cannot be undone.</p>
           <div className="flex gap-3">
             <button
               onClick={onClose}
@@ -229,16 +210,14 @@ function DeleteConfirmModal({ campaign, onConfirm, onClose }) {
   );
 }
 
-/* ─────────────────────────────────────────────
-   CREATE / EDIT MODAL (shared)
-───────────────────────────────────────────── */
+
 function CampaignFormModal({ onClose, onSave, editData = null }) {
   const isEdit = !!editData;
 
   const [form, setForm] = useState({
-    name:         editData?.name         || "",
-    message:      editData?.message      || "",
-    segment_id:   editData?.segment_name || "",
+    name: editData?.name || "",
+    message: editData?.message || "",
+    segment_id: editData?.segment_name || "",
     scheduled_at: editData?.scheduled_at || "",
   });
 
@@ -251,7 +230,6 @@ function CampaignFormModal({ onClose, onSave, editData = null }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
 
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
           <div className="flex items-center gap-3">
             <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-white ${isEdit ? "bg-amber-500" : "bg-green-500"}`}>
@@ -282,10 +260,8 @@ function CampaignFormModal({ onClose, onSave, editData = null }) {
           </button>
         </div>
 
-        {/* Form */}
         <div className="p-6 space-y-5">
 
-          {/* Campaign Name */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1.5">
               Campaign Name <span className="text-red-500">*</span>
@@ -299,7 +275,6 @@ function CampaignFormModal({ onClose, onSave, editData = null }) {
             />
           </div>
 
-          {/* Message */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1.5">
               WhatsApp Message <span className="text-red-500">*</span>
@@ -309,11 +284,10 @@ function CampaignFormModal({ onClose, onSave, editData = null }) {
                 rows={5}
                 value={form.message}
                 onChange={e => set("message", e.target.value)}
-placeholder={"Hello {{name}}, we have a special offer for you! 🎉\n\nYou can use variables: {{name}}, {{link}}"}                className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent transition resize-none"
+                placeholder={"Hello {{name}}, we have a special offer for you! 🎉\n\nYou can use variables: {{name}}, {{link}}"} className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent transition resize-none"
               />
               <span className={`absolute bottom-2 right-3 text-xs ${charColor}`}>{charCount}/1024</span>
             </div>
-            {/* Variable chips */}
             <div className="mt-2 flex flex-wrap gap-1.5">
               {["{{name}}", "{{link}}", "{{company}}", "{{offer}}"].map(v => (
                 <button
@@ -327,7 +301,6 @@ placeholder={"Hello {{name}}, we have a special offer for you! 🎉\n\nYou can u
             </div>
           </div>
 
-          {/* WA Preview */}
           {form.message && (
             <div className="rounded-xl bg-[#e5ddd5] p-3">
               <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">WhatsApp Preview</p>
@@ -338,7 +311,6 @@ placeholder={"Hello {{name}}, we have a special offer for you! 🎉\n\nYou can u
             </div>
           )}
 
-          {/* Segment */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1.5">Target Segment</label>
             <select
@@ -351,7 +323,6 @@ placeholder={"Hello {{name}}, we have a special offer for you! 🎉\n\nYou can u
             </select>
           </div>
 
-          {/* Schedule */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1.5">Schedule Date & Time</label>
             <input
@@ -364,7 +335,6 @@ placeholder={"Hello {{name}}, we have a special offer for you! 🎉\n\nYou can u
           </div>
         </div>
 
-        {/* Footer */}
         <div className="flex items-center gap-3 p-6 pt-0">
           <button
             onClick={onClose}
@@ -389,34 +359,29 @@ placeholder={"Hello {{name}}, we have a special offer for you! 🎉\n\nYou can u
   );
 }
 
-/* ─────────────────────────────────────────────
-   MAIN PAGE
-───────────────────────────────────────────── */
+
 export default function WhatsAppCampaigns() {
-  const [campaigns,    setCampaigns]    = useState(mockCampaigns);
-  const [showCreate,   setShowCreate]   = useState(false);
-  const [editTarget,   setEditTarget]   = useState(null);
+  const [campaigns, setCampaigns] = useState(mockCampaigns);
+  const [showCreate, setShowCreate] = useState(false);
+  const [editTarget, setEditTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [submitTarget, setSubmitTarget] = useState(null);
-  const [search,       setSearch]       = useState("");
+  const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [toasts,       setToasts]       = useState([]);
+  const [toasts, setToasts] = useState([]);
 
-  /* ── Toast helper ── */
   const addToast = (message, type = "success") => {
     const id = Date.now();
     setToasts(prev => [...prev, { id, message, type }]);
     setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3500);
   };
 
-  /* ── Filtered list ── */
   const filtered = campaigns.filter(c => {
     const matchSearch = c.name.toLowerCase().includes(search.toLowerCase());
     const matchStatus = filterStatus === "all" || c.status === filterStatus;
     return matchSearch && matchStatus;
   });
 
-  /* ── Create ── */
   const handleCreate = (form) => {
     setCampaigns(prev => [{
       id: Date.now(),
@@ -428,33 +393,31 @@ export default function WhatsAppCampaigns() {
       scheduled_at: form.scheduled_at || null,
       created_at: new Date().toISOString(),
     }, ...prev]);
-addToast("Campaign successfully saved as a draft! ✍️", "success");  };
+    addToast("Campaign successfully saved as a draft! ✍️", "success");
+  };
 
-  /* ── Edit ── */
   const handleEdit = (form) => {
     setCampaigns(prev => prev.map(c =>
       c.id === editTarget.id
         ? {
-            ...c,
-            name:         form.name,
-            message:      form.message,
-            segment_name: form.segment_id || "All Contacts",
-            scheduled_at: form.scheduled_at || null,
-          }
+          ...c,
+          name: form.name,
+          message: form.message,
+          segment_name: form.segment_id || "All Contacts",
+          scheduled_at: form.scheduled_at || null,
+        }
         : c
     ));
     addToast("Campaign successfully update! ✅", "success");
     setEditTarget(null);
   };
 
-  /* ── Delete ── */
   const handleDelete = () => {
     setCampaigns(prev => prev.filter(c => c.id !== deleteTarget.id));
     addToast(`"${deleteTarget.name}" delete 🗑️`, "error");
     setDeleteTarget(null);
   };
 
-  /* ── Submit for Approval ── */
   const handleSubmit = () => {
     setCampaigns(prev => prev.map(c =>
       c.id === submitTarget.id ? { ...c, status: "pending_approval" } : c
@@ -466,7 +429,6 @@ addToast("Campaign successfully saved as a draft! ✍️", "success");  };
     setSubmitTarget(null);
   };
 
-  /* ── Approve ── */
   const handleApprove = (campaign) => {
     setCampaigns(prev => prev.map(c =>
       c.id === campaign.id
@@ -476,7 +438,6 @@ addToast("Campaign successfully saved as a draft! ✍️", "success");  };
     addToast(`"${campaign.name}" approved! ${campaign.scheduled_at ? "Scheduled ✅" : "Sending shuru 📤"}`, "success");
   };
 
-  /* ── Reject ── */
   const handleReject = (campaign) => {
     setCampaigns(prev => prev.map(c =>
       c.id === campaign.id ? { ...c, status: "rejected" } : c
@@ -484,7 +445,6 @@ addToast("Campaign successfully saved as a draft! ✍️", "success");  };
     addToast(`"${campaign.name}" rejected ❌`, "error");
   };
 
-  /* ── Send Now ── */
   const handleSendNow = (campaign) => {
     setCampaigns(prev => prev.map(c =>
       c.id === campaign.id ? { ...c, status: "sending" } : c
@@ -492,26 +452,21 @@ addToast("Campaign successfully saved as a draft! ✍️", "success");  };
     addToast(`"${campaign.name}" sending start! 📤`, "info");
   };
 
-  /* ── Stats ── */
   const stats = {
-    total:     campaigns.length,
-    sent:      campaigns.filter(c => c.status === "sent").length,
+    total: campaigns.length,
+    sent: campaigns.filter(c => c.status === "sent").length,
     totalSent: campaigns.reduce((a, c) => a + c.total_sent, 0),
     scheduled: campaigns.filter(c => c.status === "scheduled").length,
   };
 
-  /* ─────────────────────────────────────────────
-     RENDER
-  ───────────────────────────────────────────── */
+
   return (
     <div className="min-h-screen bg-gray-50">
 
-      {/* Toast */}
       <Toast toasts={toasts} />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
 
-        {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-green-500 flex items-center justify-center shadow-lg shadow-green-200">
@@ -533,13 +488,12 @@ addToast("Campaign successfully saved as a draft! ✍️", "success");  };
           </button>
         </div>
 
-        {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           {[
-            { label: "Total Campaigns",    value: stats.total,                      icon: "📋" },
-            { label: "Sent",               value: stats.sent,                       icon: "✅" },
+            { label: "Total Campaigns", value: stats.total, icon: "📋" },
+            { label: "Sent", value: stats.sent, icon: "✅" },
             { label: "Messages Delivered", value: stats.totalSent.toLocaleString(), icon: "📤" },
-            { label: "Scheduled",          value: stats.scheduled,                  icon: "🕐" },
+            { label: "Scheduled", value: stats.scheduled, icon: "🕐" },
           ].map(s => (
             <div key={s.label} className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition-shadow">
               <div className="text-2xl mb-1">{s.icon}</div>
@@ -549,7 +503,6 @@ addToast("Campaign successfully saved as a draft! ✍️", "success");  };
           ))}
         </div>
 
-        {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1">
             <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -575,7 +528,6 @@ addToast("Campaign successfully saved as a draft! ✍️", "success");  };
           </select>
         </div>
 
-        {/* Campaign List */}
         {filtered.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">
             <div className="text-5xl mb-3">💬</div>
@@ -593,7 +545,6 @@ addToast("Campaign successfully saved as a draft! ✍️", "success");  };
               <div key={c.id} className="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition-shadow">
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
 
-                  {/* Left — campaign info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
                       <h3 className="text-base font-bold text-gray-900 truncate">{c.name}</h3>
@@ -624,10 +575,8 @@ addToast("Campaign successfully saved as a draft! ✍️", "success");  };
                     </div>
                   </div>
 
-                  {/* Right — Action buttons */}
                   <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
 
-                    {/* Submit */}
                     {c.status === "draft" && (
                       <button
                         onClick={() => setSubmitTarget(c)}
@@ -637,7 +586,6 @@ addToast("Campaign successfully saved as a draft! ✍️", "success");  };
                       </button>
                     )}
 
-                    {/* Approve / Reject */}
                     {c.status === "pending_approval" && (
                       <>
                         <button
@@ -655,7 +603,6 @@ addToast("Campaign successfully saved as a draft! ✍️", "success");  };
                       </>
                     )}
 
-                    {/* Send Now */}
                     {c.status === "scheduled" && (
                       <button
                         onClick={() => handleSendNow(c)}
@@ -665,14 +612,12 @@ addToast("Campaign successfully saved as a draft! ✍️", "success");  };
                       </button>
                     )}
 
-                    {/* Analytics */}
                     {c.status === "sent" && (
                       <button className="px-3 py-1.5 rounded-lg bg-gray-50 text-gray-600 text-xs font-semibold hover:bg-gray-100 transition-colors">
                         Analytics
                       </button>
                     )}
 
-                    {/* Edit — only non-sent/sending */}
                     {!["sent", "sending"].includes(c.status) && (
                       <button
                         onClick={() => setEditTarget(c)}
@@ -685,7 +630,6 @@ addToast("Campaign successfully saved as a draft! ✍️", "success");  };
                       </button>
                     )}
 
-                    {/* Delete — only non-sent/sending */}
                     {!["sent", "sending"].includes(c.status) && (
                       <button
                         onClick={() => setDeleteTarget(c)}
@@ -705,13 +649,11 @@ addToast("Campaign successfully saved as a draft! ✍️", "success");  };
         )}
       </div>
 
-      {/* Modals */}
-      {showCreate   && <CampaignFormModal  onClose={() => setShowCreate(false)}   onSave={handleCreate} />}
-      {editTarget   && <CampaignFormModal  onClose={() => setEditTarget(null)}    onSave={handleEdit}   editData={editTarget} />}
-      {deleteTarget && <DeleteConfirmModal onClose={() => setDeleteTarget(null)}  onConfirm={handleDelete}  campaign={deleteTarget} />}
-      {submitTarget && <SubmitConfirmModal onClose={() => setSubmitTarget(null)}  onConfirm={handleSubmit}  campaign={submitTarget} />}
+      {showCreate && <CampaignFormModal onClose={() => setShowCreate(false)} onSave={handleCreate} />}
+      {editTarget && <CampaignFormModal onClose={() => setEditTarget(null)} onSave={handleEdit} editData={editTarget} />}
+      {deleteTarget && <DeleteConfirmModal onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} campaign={deleteTarget} />}
+      {submitTarget && <SubmitConfirmModal onClose={() => setSubmitTarget(null)} onConfirm={handleSubmit} campaign={submitTarget} />}
 
-      {/* Animation */}
       <style>{`
         @keyframes slideInRight {
           from { opacity: 0; transform: translateX(40px); }

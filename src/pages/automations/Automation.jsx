@@ -1,25 +1,23 @@
-// frontend/pages/automation/Automation.jsx
 
 import { useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
 const TRIGGER_LABELS = {
-  user_signup:       "User Signup",
-  cart_abandoned:    "Cart Abandoned",
-  user_inactive:     "User Inactive",
+  user_signup: "User Signup",
+  cart_abandoned: "Cart Abandoned",
+  user_inactive: "User Inactive",
   purchase_complete: "Purchase Complete",
-  link_clicked:      "Link Clicked",
-  form_submitted:    "Form Submitted",
+  link_clicked: "Link Clicked",
+  form_submitted: "Form Submitted",
 };
 
 const TRIGGER_COLORS = {
-  user_signup:       { bg: "#d1fae5", text: "#065f46" },
-  cart_abandoned:    { bg: "#ffedd5", text: "#9a3412" },
-  user_inactive:     { bg: "#f1f5f9", text: "#475569" },
+  user_signup: { bg: "#d1fae5", text: "#065f46" },
+  cart_abandoned: { bg: "#ffedd5", text: "#9a3412" },
+  user_inactive: { bg: "#f1f5f9", text: "#475569" },
   purchase_complete: { bg: "#dbeafe", text: "#1e40af" },
-  link_clicked:      { bg: "#ede9fe", text: "#5b21b6" },
-  form_submitted:    { bg: "#fce7f3", text: "#9d174d" },
+  link_clicked: { bg: "#ede9fe", text: "#5b21b6" },
+  form_submitted: { bg: "#fce7f3", text: "#9d174d" },
 };
 
 const STEP_TYPES = ["Send Email", "Wait", "Condition"];
@@ -34,9 +32,9 @@ const INITIAL_AUTOMATIONS = [
     created_by_name: "Rahul Sharma",
     steps: [
       { type: "Send Email", value: "Welcome Email Template" },
-      { type: "Wait",       value: "3" },
+      { type: "Wait", value: "3" },
       { type: "Send Email", value: "Product Recommendation" },
-      { type: "Wait",       value: "7" },
+      { type: "Wait", value: "7" },
       { type: "Send Email", value: "Discount Offer" },
     ],
     emails_sent: 1240,
@@ -49,9 +47,9 @@ const INITIAL_AUTOMATIONS = [
     created_at: "2026-03-10",
     created_by_name: "Priya Mehta",
     steps: [
-      { type: "Wait",       value: "1" },
+      { type: "Wait", value: "1" },
       { type: "Send Email", value: "Cart Reminder" },
-      { type: "Wait",       value: "3" },
+      { type: "Wait", value: "3" },
       { type: "Send Email", value: "Discount Offer" },
     ],
     emails_sent: 530,
@@ -65,8 +63,8 @@ const INITIAL_AUTOMATIONS = [
     created_by_name: "Amit Joshi",
     steps: [
       { type: "Send Email", value: "We Miss You" },
-      { type: "Wait",       value: "5" },
-      { type: "Condition",  value: "If not opened" },
+      { type: "Wait", value: "5" },
+      { type: "Condition", value: "If not opened" },
       { type: "Send Email", value: "Final Offer" },
     ],
     emails_sent: 320,
@@ -80,14 +78,13 @@ const INITIAL_AUTOMATIONS = [
     created_by_name: "Sneha Patil",
     steps: [
       { type: "Send Email", value: "Thank You Email" },
-      { type: "Wait",       value: "7" },
+      { type: "Wait", value: "7" },
       { type: "Send Email", value: "Review Request" },
     ],
     emails_sent: 870,
   },
 ];
 
-// ─── Stat Card ────────────────────────────────────────────────────────────────
 function StatCard({ icon, value, label, change, up }) {
   return (
     <div className="bg-white rounded-2xl p-3 md:p-4 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
@@ -107,7 +104,6 @@ function StatCard({ icon, value, label, change, up }) {
   );
 }
 
-// ─── Toggle ───────────────────────────────────────────────────────────────────
 function Toggle({ checked, onChange, disabled }) {
   return (
     <button
@@ -124,7 +120,6 @@ function Toggle({ checked, onChange, disabled }) {
   );
 }
 
-// ─── Workflow Step Viewer ─────────────────────────────────────────────────────
 function WorkflowViewer({ steps }) {
   return (
     <div className="flex flex-col gap-2 py-1">
@@ -135,8 +130,8 @@ function WorkflowViewer({ steps }) {
               className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
               style={{
                 background:
-                  step.type === "Wait"      ? "#f59e0b" :
-                  step.type === "Condition" ? "#8b5cf6" : "#6366f1",
+                  step.type === "Wait" ? "#f59e0b" :
+                    step.type === "Condition" ? "#8b5cf6" : "#6366f1",
               }}
             >
               {step.type === "Wait" ? "⏱" : step.type === "Condition" ? "?" : i + 1}
@@ -148,7 +143,7 @@ function WorkflowViewer({ steps }) {
               className="text-xs font-semibold px-2 py-0.5 rounded-full"
               style={{
                 background: step.type === "Wait" ? "#fef3c7" : step.type === "Condition" ? "#ede9fe" : "#e0e7ff",
-                color:      step.type === "Wait" ? "#92400e"  : step.type === "Condition" ? "#5b21b6"  : "#3730a3",
+                color: step.type === "Wait" ? "#92400e" : step.type === "Condition" ? "#5b21b6" : "#3730a3",
               }}
             >
               {step.type}
@@ -165,7 +160,6 @@ function WorkflowViewer({ steps }) {
   );
 }
 
-// ─── Create / Edit Modal ──────────────────────────────────────────────────────
 function AutomationModal({ automation, onClose, onSave }) {
   const isEdit = !!automation?.id;
 
@@ -177,12 +171,12 @@ function AutomationModal({ automation, onClose, onSave }) {
   const [steps, setSteps] = useState(
     automation?.steps || [
       { type: "Send Email", value: "" },
-      { type: "Wait",       value: "3" },
+      { type: "Wait", value: "3" },
       { type: "Send Email", value: "" },
     ]
   );
 
-  const addStep    = () => setSteps(p => [...p, { type: "Send Email", value: "" }]);
+  const addStep = () => setSteps(p => [...p, { type: "Send Email", value: "" }]);
   const removeStep = (i) => setSteps(p => p.filter((_, idx) => idx !== i));
   const updateStep = (i, field, val) =>
     setSteps(p => p.map((s, idx) => idx === i ? { ...s, [field]: val } : s));
@@ -201,7 +195,6 @@ function AutomationModal({ automation, onClose, onSave }) {
         className="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col"
         style={{ maxHeight: "90vh" }}
       >
-        {/* Header */}
         <div className="flex items-center justify-between px-5 md:px-6 py-4 border-b border-slate-100 flex-shrink-0">
           <h3 className="font-black text-slate-800 text-base">
             {isEdit ? "Edit Automation" : "Create Automation"}
@@ -209,9 +202,7 @@ function AutomationModal({ automation, onClose, onSave }) {
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-xl transition-colors">✕</button>
         </div>
 
-        {/* Body */}
         <div className="overflow-y-auto p-5 md:p-6 space-y-4 flex-1">
-          {/* Name */}
           <div>
             <label className="block text-xs font-semibold text-slate-500 mb-1.5">
               Automation Name <span className="text-red-400">*</span>
@@ -225,7 +216,6 @@ function AutomationModal({ automation, onClose, onSave }) {
             />
           </div>
 
-          {/* Trigger */}
           <div>
             <label className="block text-xs font-semibold text-slate-500 mb-1.5">Trigger Event</label>
             <select
@@ -239,20 +229,18 @@ function AutomationModal({ automation, onClose, onSave }) {
             </select>
           </div>
 
-          {/* Workflow Steps */}
           <div>
             <label className="block text-xs font-semibold text-slate-500 mb-3">Workflow Steps</label>
             <div className="space-y-3">
               {steps.map((step, i) => (
                 <div key={i} className="flex items-start gap-2">
-                  {/* Step indicator */}
                   <div className="flex flex-col items-center pt-2 flex-shrink-0">
                     <div
                       className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
                       style={{
                         background:
-                          step.type === "Wait"      ? "#f59e0b" :
-                          step.type === "Condition" ? "#8b5cf6" : "#6366f1",
+                          step.type === "Wait" ? "#f59e0b" :
+                            step.type === "Condition" ? "#8b5cf6" : "#6366f1",
                       }}
                     >
                       {i + 1}
@@ -260,7 +248,6 @@ function AutomationModal({ automation, onClose, onSave }) {
                     {i < steps.length - 1 && <div className="w-px h-4 bg-slate-200 mt-1" />}
                   </div>
 
-                  {/* Input row */}
                   <div className="flex-1 flex flex-wrap gap-2">
                     <select
                       value={step.type}
@@ -291,7 +278,6 @@ function AutomationModal({ automation, onClose, onSave }) {
                     )}
                   </div>
 
-                  {/* Remove */}
                   <button
                     onClick={() => removeStep(i)}
                     className="text-slate-300 hover:text-red-400 transition-colors pt-2 flex-shrink-0"
@@ -312,7 +298,6 @@ function AutomationModal({ automation, onClose, onSave }) {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="flex gap-3 px-5 md:px-6 py-4 border-t border-slate-100 flex-shrink-0">
           <button
             onClick={onClose}
@@ -333,7 +318,6 @@ function AutomationModal({ automation, onClose, onSave }) {
   );
 }
 
-// ─── Delete Modal ─────────────────────────────────────────────────────────────
 function DeleteModal({ name, onClose, onConfirm }) {
   return (
     <div
@@ -364,20 +348,17 @@ function DeleteModal({ name, onClose, onConfirm }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-//  MAIN COMPONENT
-// ═══════════════════════════════════════════════════════════════════════════════
+
 export default function Automation() {
   const { hasPerm } = useAuth();
   const canEdit = hasPerm("view_campaigns");
 
-  const [automations,  setAutomations]  = useState(INITIAL_AUTOMATIONS);
-  const [search,       setSearch]       = useState("");
+  const [automations, setAutomations] = useState(INITIAL_AUTOMATIONS);
+  const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [expandedId,   setExpandedId]   = useState(null);
-  const [modal,        setModal]        = useState(null);
+  const [expandedId, setExpandedId] = useState(null);
+  const [modal, setModal] = useState(null);
 
-  // ── Filtered list ──
   const filtered = automations.filter(a => {
     const q = search.toLowerCase();
     const matchSearch =
@@ -385,20 +366,18 @@ export default function Automation() {
       (TRIGGER_LABELS[a.trigger_event] || "").toLowerCase().includes(q);
     const matchStatus =
       filterStatus === "all" ||
-      (filterStatus === "active"   && a.is_active) ||
+      (filterStatus === "active" && a.is_active) ||
       (filterStatus === "inactive" && !a.is_active);
     return matchSearch && matchStatus;
   });
 
-  // ── Stats ──
   const stats = {
-    total:      automations.length,
-    active:     automations.filter(a => a.is_active).length,
-    inactive:   automations.filter(a => !a.is_active).length,
+    total: automations.length,
+    active: automations.filter(a => a.is_active).length,
+    inactive: automations.filter(a => !a.is_active).length,
     emailsSent: automations.reduce((s, a) => s + a.emails_sent, 0),
   };
 
-  // ── Handlers ──
   const toggleActive = (id) =>
     setAutomations(p => p.map(a => a.id === id ? { ...a, is_active: !a.is_active } : a));
 
@@ -409,11 +388,11 @@ export default function Automation() {
       setAutomations(p => [
         {
           ...data,
-          id:              Date.now(),
-          is_active:       true,
-          created_at:      new Date().toISOString().split("T")[0],
+          id: Date.now(),
+          is_active: true,
+          created_at: new Date().toISOString().split("T")[0],
           created_by_name: "You",
-          emails_sent:     0,
+          emails_sent: 0,
         },
         ...p,
       ]);
@@ -426,16 +405,14 @@ export default function Automation() {
     setModal(null);
   };
 
-  // ─────────────────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-5">
 
-      {/* ── Page Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-4">
         <div>
           <h1 className="text-xl md:text-2xl font-black text-slate-800">Automation</h1>
           <p className="text-sm text-slate-400 mt-0.5">
-            Trigger-based automated email sequences manage 
+            Trigger-based automated email sequences manage
           </p>
         </div>
         {canEdit && (
@@ -449,15 +426,13 @@ export default function Automation() {
         )}
       </div>
 
-      {/* ── Stats ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
-        <StatCard icon="⚙️" value={stats.total}                        label="Total Automations" />
-        <StatCard icon="✅" value={stats.active}                       label="Active"             change="active" up />
-        <StatCard icon="⏸️" value={stats.inactive}                     label="Inactive" />
-        <StatCard icon="📧" value={stats.emailsSent.toLocaleString()}  label="Total Emails Sent"  change="12%" up />
+        <StatCard icon="⚙️" value={stats.total} label="Total Automations" />
+        <StatCard icon="✅" value={stats.active} label="Active" change="active" up />
+        <StatCard icon="⏸️" value={stats.inactive} label="Inactive" />
+        <StatCard icon="📧" value={stats.emailsSent.toLocaleString()} label="Total Emails Sent" change="12%" up />
       </div>
 
-      {/* ── How it works banner ── */}
       <div
         className="relative rounded-2xl overflow-hidden p-4 md:p-5 text-white"
         style={{ background: "linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%)" }}
@@ -472,7 +447,6 @@ export default function Automation() {
         </p>
       </div>
 
-      {/* ── Search + Filter ── */}
       <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-3 md:p-4 flex flex-col sm:flex-row gap-3">
         <input
           type="text"
@@ -486,11 +460,10 @@ export default function Automation() {
             <button
               key={s}
               onClick={() => setFilterStatus(s)}
-              className={`px-3 md:px-4 py-2 rounded-lg text-xs font-semibold border-2 capitalize transition-all ${
-                filterStatus === s
+              className={`px-3 md:px-4 py-2 rounded-lg text-xs font-semibold border-2 capitalize transition-all ${filterStatus === s
                   ? "border-indigo-400 bg-indigo-50 text-indigo-700"
                   : "border-slate-100 text-slate-500 hover:border-slate-200"
-              }`}
+                }`}
             >
               {s}
             </button>
@@ -498,7 +471,6 @@ export default function Automation() {
         </div>
       </div>
 
-      {/* ── Empty State ── */}
       {filtered.length === 0 && (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-12 text-center">
           <div className="text-5xl mb-4">⚙️</div>
@@ -518,7 +490,6 @@ export default function Automation() {
         </div>
       )}
 
-      {/* ── Desktop Table ── */}
       {filtered.length > 0 && (
         <div className="hidden md:block bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
           <table className="w-full text-sm">
@@ -533,9 +504,9 @@ export default function Automation() {
             </thead>
             <tbody>
               {filtered.map((a, i) => {
-                const tc       = TRIGGER_COLORS[a.trigger_event] || TRIGGER_COLORS.user_inactive;
+                const tc = TRIGGER_COLORS[a.trigger_event] || TRIGGER_COLORS.user_inactive;
                 const expanded = expandedId === a.id;
-                const isLast   = i === filtered.length - 1;
+                const isLast = i === filtered.length - 1;
 
                 return (
                   <>
@@ -544,7 +515,6 @@ export default function Automation() {
                       onClick={() => setExpandedId(expanded ? null : a.id)}
                       className={`border-b transition-colors hover:bg-slate-50 cursor-pointer ${isLast && !expanded ? "border-b-0" : "border-slate-50"}`}
                     >
-                      {/* Name + step count */}
                       <td className="px-4 md:px-5 py-3">
                         <div className="flex items-center gap-2">
                           <span className="text-slate-300 text-xs select-none">{expanded ? "▼" : "▶"}</span>
@@ -555,7 +525,6 @@ export default function Automation() {
                         </div>
                       </td>
 
-                      {/* Trigger */}
                       <td className="px-4 md:px-5 py-3">
                         <span
                           className="px-2 py-1 rounded-full text-xs font-semibold"
@@ -565,21 +534,16 @@ export default function Automation() {
                         </span>
                       </td>
 
-                      {/* Steps count */}
                       <td className="px-4 md:px-5 py-3 text-slate-500 text-xs">{a.steps.length}</td>
 
-                      {/* Emails */}
                       <td className="px-4 md:px-5 py-3 font-semibold text-slate-700 text-xs">
                         {a.emails_sent.toLocaleString()}
                       </td>
 
-                      {/* Created by */}
                       <td className="px-4 md:px-5 py-3 text-slate-400 text-xs">{a.created_by_name}</td>
 
-                      {/* Date */}
                       <td className="px-4 md:px-5 py-3 text-slate-400 text-xs">{a.created_at}</td>
 
-                      {/* Toggle */}
                       <td className="px-4 md:px-5 py-3" onClick={e => e.stopPropagation()}>
                         <Toggle
                           checked={a.is_active}
@@ -588,7 +552,6 @@ export default function Automation() {
                         />
                       </td>
 
-                      {/* Actions */}
                       {canEdit && (
                         <td className="px-4 md:px-5 py-3" onClick={e => e.stopPropagation()}>
                           <div className="flex gap-2">
@@ -609,7 +572,6 @@ export default function Automation() {
                       )}
                     </tr>
 
-                    {/* Expandable workflow row */}
                     {expanded && (
                       <tr key={`${a.id}-wf`} className="bg-indigo-50/40">
                         <td
@@ -631,15 +593,13 @@ export default function Automation() {
         </div>
       )}
 
-      {/* ── Mobile Cards ── */}
       {filtered.length > 0 && (
         <div className="md:hidden space-y-3">
           {filtered.map(a => {
-            const tc       = TRIGGER_COLORS[a.trigger_event] || TRIGGER_COLORS.user_inactive;
+            const tc = TRIGGER_COLORS[a.trigger_event] || TRIGGER_COLORS.user_inactive;
             const expanded = expandedId === a.id;
             return (
               <div key={a.id} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                {/* Card header — tap to expand */}
                 <div
                   className="flex items-start justify-between p-4 cursor-pointer"
                   onClick={() => setExpandedId(expanded ? null : a.id)}
@@ -679,7 +639,6 @@ export default function Automation() {
                   </div>
                 </div>
 
-                {/* Expanded workflow */}
                 {expanded && (
                   <div className="px-5 pb-4 bg-indigo-50/40 border-t border-indigo-100">
                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-3 pt-3">
@@ -689,7 +648,6 @@ export default function Automation() {
                   </div>
                 )}
 
-                {/* Actions */}
                 {canEdit && (
                   <div className="flex gap-2 p-3 border-t border-slate-50">
                     <button
@@ -712,7 +670,6 @@ export default function Automation() {
         </div>
       )}
 
-      {/* ── Modals ── */}
       {modal?.type === "create" && (
         <AutomationModal
           onClose={() => setModal(null)}

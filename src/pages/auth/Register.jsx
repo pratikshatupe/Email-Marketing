@@ -23,9 +23,9 @@ export default function Register() {
 
   const strengthConfig = [
     { label: "", color: "bg-slate-200" },
-    { label: "Weak",   color: "bg-red-500" },
-    { label: "Fair",   color: "bg-amber-500" },
-    { label: "Good",   color: "bg-emerald-500" },
+    { label: "Weak", color: "bg-red-500" },
+    { label: "Fair", color: "bg-amber-500" },
+    { label: "Good", color: "bg-emerald-500" },
     { label: "Strong", color: "bg-indigo-600" },
   ][passwordStrength];
 
@@ -41,7 +41,6 @@ export default function Register() {
 
   return (
     <div className="flex min-h-screen">
-      {/* Left Panel */}
       <div className="hidden lg:flex flex-1 flex-col justify-between bg-gradient-to-br from-indigo-950 via-indigo-800 to-indigo-600 p-14 relative overflow-hidden">
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-white/5 rounded-full" />
         <div className="absolute bottom-10 -right-20 w-72 h-72 bg-white/5 rounded-full" />
@@ -60,7 +59,6 @@ export default function Register() {
         </div>
       </div>
 
-      {/* Right Panel */}
       <div className="flex flex-1 lg:w-[520px] lg:flex-none items-center justify-center bg-slate-50 px-6 py-10 overflow-y-auto">
         <div className="w-full max-w-md">
           <div className="flex items-center gap-2 mb-8 lg:hidden">
@@ -74,7 +72,6 @@ export default function Register() {
             </div>
             {error && <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm mb-5">{error}</div>}
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Name */}
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Full Name</label>
                 <div className="flex items-center border border-slate-200 rounded-xl bg-slate-50 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-100 transition-all">
@@ -83,7 +80,6 @@ export default function Register() {
                     className="flex-1 bg-transparent px-3 py-3 text-sm text-slate-800 outline-none placeholder:text-slate-400" />
                 </div>
               </div>
-              {/* Email */}
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Work Email</label>
                 <div className="flex items-center border border-slate-200 rounded-xl bg-slate-50 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-100 transition-all">
@@ -92,7 +88,6 @@ export default function Register() {
                     className="flex-1 bg-transparent px-3 py-3 text-sm text-slate-800 outline-none placeholder:text-slate-400" />
                 </div>
               </div>
-              {/* Company */}
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Company Name (Optional)</label>
                 <div className="flex items-center border border-slate-200 rounded-xl bg-slate-50 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-100 transition-all">
@@ -101,7 +96,6 @@ export default function Register() {
                     className="flex-1 bg-transparent px-3 py-3 text-sm text-slate-800 outline-none placeholder:text-slate-400" />
                 </div>
               </div>
-              {/* Password */}
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Password</label>
                 <div className="flex items-center border border-slate-200 rounded-xl bg-slate-50 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-100 transition-all">
@@ -125,7 +119,6 @@ export default function Register() {
                   </div>
                 )}
               </div>
-              {/* Confirm Password */}
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Confirm Password</label>
                 <div className="flex items-center border border-slate-200 rounded-xl bg-slate-50 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-100 transition-all">
@@ -141,7 +134,7 @@ export default function Register() {
               </p>
               <button type="submit" disabled={loading}
                 className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-70 text-white font-bold py-3 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer">
-                {loading ? (<><svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>Creating account...</>) : "Create Free Account →"}
+                {loading ? (<><svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>Creating account...</>) : "Create Free Account →"}
               </button>
             </form>
             <p className="text-center text-sm text-slate-500 mt-5">

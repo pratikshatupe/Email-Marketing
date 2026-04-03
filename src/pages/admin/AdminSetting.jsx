@@ -1,4 +1,3 @@
-// src/admin/AdminSetting.jsx
 import React, { useState } from "react";
 import { Save, Eye, EyeOff, Bell, Moon, Globe, Shield } from "lucide-react";
 import { useLanguage } from "../admin/Languagecontext";
@@ -60,7 +59,6 @@ export default function AdminSetting() {
           </div>
         </div>
 
-        {/* Notifications */}
         <div className="bg-white rounded-2xl border shadow-sm p-4 sm:p-5">
           <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-1.5">
             <Bell size={12} /> {t("notifications_lbl")}
@@ -147,7 +145,6 @@ export default function AdminSetting() {
           </div>
         </div>
 
-        {/* Save */}
         <button onClick={handleSave}
           className={`w-full py-3 rounded-2xl font-bold text-sm text-white transition-all cursor-pointer flex items-center justify-center gap-2
             ${saved ? "bg-emerald-500" : "bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-500/20"}`}>

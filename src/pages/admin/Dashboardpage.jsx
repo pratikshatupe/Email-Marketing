@@ -1,4 +1,3 @@
-// admin/dashboard/DashboardPage.jsx
 
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
@@ -12,15 +11,14 @@ import {
 export default function DashboardPage() {
   const { user, hasPerm } = useAuth();
   const navigate = useNavigate();
-  const role     = user?.role || "VIEWER";
-  const banner   = roleBanners[role];
-  const stats    = MOCK_STATS[role] || [];
-  const rc       = roleConfig[role] || roleConfig.VIEWER;
+  const role = user?.role || "VIEWER";
+  const banner = roleBanners[role];
+  const stats = MOCK_STATS[role] || [];
+  const rc = roleConfig[role] || roleConfig.VIEWER;
   const campaigns = role === "MARKETING_MANAGER" ? MOCK_CAMPAIGNS.slice(0, 3) : MOCK_CAMPAIGNS;
 
   return (
     <div className="space-y-5">
-      {/* Banner */}
       <div
         className="relative rounded-2xl overflow-hidden p-5 md:p-6 text-white"
         style={{ background: banner.gradient }}
@@ -33,7 +31,6 @@ export default function DashboardPage() {
         <p className="text-sm opacity-70 max-w-xs">{banner.subtitle}</p>
       </div>
 
-      {/* Stats */}
       <div className={`grid gap-3 md:gap-4 ${stats.length <= 4 ? "grid-cols-2 md:grid-cols-4" : "grid-cols-2 md:grid-cols-3 lg:grid-cols-6"}`}>
         {stats.map((s, i) => (
           <div key={i} className="bg-white rounded-2xl p-3 md:p-4 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
@@ -54,7 +51,6 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Campaign Quick Access */}
       {hasPerm("view_campaigns") && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
           <button
@@ -82,7 +78,6 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Charts */}
       {hasPerm("view_charts") && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
           <div className="md:col-span-2 bg-white rounded-2xl p-4 md:p-5 border border-slate-100 shadow-sm">
@@ -94,10 +89,10 @@ export default function DashboardPage() {
               <span className="text-xs bg-indigo-50 text-indigo-600 font-semibold px-2 md:px-3 py-1 rounded-full">This Year</span>
             </div>
             <div className="flex items-end gap-0.5 md:gap-1 h-16 md:h-20">
-              {[65,78,55,90,72,88,95,60,82,74,91,85].map((v, i) => (
+              {[65, 78, 55, 90, 72, 88, 95, 60, 82, 74, 91, 85].map((v, i) => (
                 <div key={i} className="flex-1 rounded-t transition-all duration-300 hover:opacity-80"
                   style={{
-                    height: `${(v/95)*100}%`,
+                    height: `${(v / 95) * 100}%`,
                     background: i === new Date().getMonth()
                       ? "linear-gradient(180deg,#6366f1,#8b5cf6)"
                       : "linear-gradient(180deg,#e0e7ff,#c7d2fe)",
@@ -106,7 +101,7 @@ export default function DashboardPage() {
               ))}
             </div>
             <div className="flex mt-2">
-              {["J","F","M","A","M","J","J","A","S","O","N","D"].map((m, i) => (
+              {["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"].map((m, i) => (
                 <span key={i} className="flex-1 text-center text-[9px] text-slate-300">{m}</span>
               ))}
             </div>
@@ -119,7 +114,7 @@ export default function DashboardPage() {
               <DonutChart opened={5488} sent={12400} />
               <div className="w-full space-y-2">
                 {[
-                  { label: "Opened",     value: "5,488", color: "#6366f1" },
+                  { label: "Opened", value: "5,488", color: "#6366f1" },
                   { label: "Not Opened", value: "6,912", color: "#e0e7ff" },
                 ].map((row, i) => (
                   <div key={i} className="flex items-center justify-between">
@@ -136,7 +131,6 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Recent Campaigns + Audit */}
       <div className={`grid gap-3 md:gap-4 ${role === "SUPER_ADMIN" ? "grid-cols-1 lg:grid-cols-3" : "grid-cols-1"}`}>
         {hasPerm("view_last_campaigns") && (
           <div className={`bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden ${role === "SUPER_ADMIN" ? "lg:col-span-2" : ""}`}>
@@ -148,7 +142,7 @@ export default function DashboardPage() {
               <table className="w-full text-sm min-w-[480px]">
                 <thead>
                   <tr className="border-b border-slate-50 bg-slate-50">
-                    {["Campaign","Status","Sent","Opened","CTR","Date"].map(h => (
+                    {["Campaign", "Status", "Sent", "Opened", "CTR", "Date"].map(h => (
                       <th key={h} className="px-4 md:px-5 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wide whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
@@ -199,7 +193,6 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* Team — Business Admin */}
       {role === "BUSINESS_ADMIN" && (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
           <div className="px-4 md:px-5 py-3 md:py-4 border-b border-slate-50">
@@ -232,7 +225,6 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Revenue */}
       {hasPerm("view_purchase") && (
         <div className="bg-white rounded-2xl p-4 md:p-5 border border-slate-100 shadow-sm">
           <h3 className="font-bold text-slate-800 mb-4 text-sm md:text-base">Revenue Overview</h3>
@@ -246,8 +238,8 @@ export default function DashboardPage() {
           <div className="space-y-2">
             {[
               { label: "New subscriptions", value: "₹1,84,000", pct: 44 },
-              { label: "Renewals",          value: "₹2,10,000", pct: 50 },
-              { label: "Add-ons",           value: "₹27,800",   pct: 6  },
+              { label: "Renewals", value: "₹2,10,000", pct: 50 },
+              { label: "Add-ons", value: "₹27,800", pct: 6 },
             ].map((row, i) => (
               <div key={i} className="flex items-center gap-2 md:gap-3 text-xs">
                 <div className="w-28 md:w-32 text-slate-500 flex-shrink-0">{row.label}</div>
@@ -261,7 +253,6 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Viewer notice */}
       {role === "VIEWER" && (
         <div className="bg-pink-50 border border-pink-100 rounded-2xl p-4 md:p-5 flex items-center gap-4">
           <div className="w-10 h-10 rounded-xl bg-pink-100 flex items-center justify-center text-xl flex-shrink-0">👁️</div>

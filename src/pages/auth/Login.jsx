@@ -4,9 +4,9 @@ import { useAuth } from "./AuthContext";
 
 const USER_ROLE_MAP = {
   "superadmin@test.com": "SUPER_ADMIN",
-  "admin@test.com":      "BUSINESS_ADMIN",
-  "manager@test.com":    "MARKETING_MANAGER",
-  "viewer@test.com":     "VIEWER",
+  "admin@test.com": "BUSINESS_ADMIN",
+  "manager@test.com": "MARKETING_MANAGER",
+  "viewer@test.com": "VIEWER",
 };
 
 const DEMO_PASSWORD = "123456";
@@ -15,9 +15,9 @@ const inputCls =
   "w-full border border-slate-200 bg-slate-50 px-4 py-3 rounded-xl text-sm outline-none focus:border-indigo-400 transition-all placeholder-slate-400";
 
 export default function Login() {
-  const navigate   = useNavigate();
-  const location   = useLocation();
-  const { login }  = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
 
   const urlMode = new URLSearchParams(location.search).get("mode");
 
@@ -27,10 +27,10 @@ export default function Login() {
     if (urlMode === "forgot") setMode("forgot");
   }, [urlMode]);
 
-  const [form,         setForm]         = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
-  const [loading,      setLoading]      = useState(false);
-  const [error,        setError]        = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -64,19 +64,19 @@ export default function Login() {
     }, 800);
   }
 
-  const [fpEmail,      setFpEmail]      = useState("");
-  const [fpError,      setFpError]      = useState("");
-  const [fpLoading,    setFpLoading]    = useState(false);
+  const [fpEmail, setFpEmail] = useState("");
+  const [fpError, setFpError] = useState("");
+  const [fpLoading, setFpLoading] = useState(false);
   const [generatedOtp, setGeneratedOtp] = useState("");
 
-  const [otp,      setOtp]      = useState(["", "", "", "", "", ""]);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [otpError, setOtpError] = useState("");
 
-  const [newPassword,     setNewPassword]     = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showNew,         setShowNew]         = useState(false);
-  const [showConfirm,     setShowConfirm]     = useState(false);
-  const [resetError,      setResetError]      = useState("");
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [resetError, setResetError] = useState("");
 
   function handleSendOtp(e) {
     e.preventDefault();
@@ -148,12 +148,11 @@ export default function Login() {
   function getStrength(pw) {
     if (!pw) return { level: 0, label: "", color: "" };
     if (pw.length < 4) return { level: 1, label: " ⚠️", color: "bg-red-400" };
-    if (pw.length < 7) return { level: 2, label: "🔶",    color: "bg-yellow-400" };
-    if (pw.length < 10) return { level: 3, label: "🔵",    color: "bg-blue-400" };
-    return { level: 4, label: " ✅",                         color: "bg-green-400" };
+    if (pw.length < 7) return { level: 2, label: "🔶", color: "bg-yellow-400" };
+    if (pw.length < 10) return { level: 3, label: "🔵", color: "bg-blue-400" };
+    return { level: 4, label: " ✅", color: "bg-green-400" };
   }
 
-  // ── Reset everything → back to login ────────────────────────
   function goBackToLogin() {
     setMode("login");
     setFpEmail(""); setFpError(""); setFpLoading(false); setGeneratedOtp("");
@@ -164,7 +163,6 @@ export default function Login() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-indigo-50">
 
-      {/* Background blobs */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-32 -left-32 w-80 h-80 rounded-full blur-3xl opacity-20 bg-indigo-300" />
         <div className="absolute -bottom-32 -right-32 w-80 h-80 rounded-full blur-3xl opacity-20 bg-purple-200" />
@@ -182,7 +180,6 @@ export default function Login() {
               <p className="text-xs text-slate-400">Role-based Access System</p>
             </div>
 
-            {/* Demo credentials hint */}
             <div className="mb-5 p-3 rounded-xl text-[11px] bg-indigo-50 border border-indigo-100 text-indigo-600 space-y-1">
               <div className="font-bold mb-1">Demo (password: 123456)</div>
               {Object.entries(USER_ROLE_MAP).map(([email, role]) => (
@@ -237,13 +234,13 @@ export default function Login() {
             </form>
 
             <p className="text-sm mt-5 text-center text-slate-400">
-               no Account {" "}
+              no Account {" "}
               <Link to="/register" className="text-indigo-500 font-semibold hover:underline">Register</Link>
             </p>
           </>
         )}
 
-       
+
         {mode === "forgot" && (
           <>
             <div className="text-center mb-7">
@@ -277,12 +274,12 @@ export default function Login() {
 
             <button onClick={goBackToLogin}
               className="w-full mt-4 text-xs text-slate-400 hover:text-indigo-500 transition-colors font-medium text-center block">
-              ← Login 
+              ← Login
             </button>
           </>
         )}
 
-     
+
         {mode === "otp" && (
           <>
             <div className="text-center mb-7">
@@ -291,7 +288,7 @@ export default function Login() {
               </div>
               <h2 className="text-2xl font-bold text-slate-800 mb-1">OTP Verify </h2>
               <p className="text-xs text-slate-400">
-                <span className="font-semibold text-slate-600">{fpEmail}</span> otp send 
+                <span className="font-semibold text-slate-600">{fpEmail}</span> otp send
               </p>
             </div>
 
@@ -328,18 +325,18 @@ export default function Login() {
             <div className="mt-4 text-center">
               <button onClick={handleResendOtp}
                 className="text-xs text-indigo-500 hover:underline font-semibold">
-                OTP  Resend 
+                OTP  Resend
               </button>
             </div>
 
             <button onClick={() => setMode("forgot")}
               className="w-full mt-3 text-xs text-slate-400 hover:text-indigo-500 transition-colors font-medium text-center block">
-              ← return 
+              ← return
             </button>
           </>
         )}
 
-        
+
         {mode === "reset" && (
           <>
             <div className="text-center mb-7">
@@ -357,7 +354,6 @@ export default function Login() {
             )}
 
             <form onSubmit={handleResetPassword} className="space-y-4">
-              {/* New Password */}
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-1.5">New Password</label>
                 <div className="relative">
@@ -374,16 +370,14 @@ export default function Login() {
                   </button>
                 </div>
 
-                {/* Strength bar */}
                 {newPassword && (() => {
                   const s = getStrength(newPassword);
                   return (
                     <div className="mt-2 space-y-1">
                       <div className="flex gap-1">
                         {[1, 2, 3, 4].map(i => (
-                          <div key={i} className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
-                            i <= s.level ? s.color : "bg-slate-200"
-                          }`} />
+                          <div key={i} className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${i <= s.level ? s.color : "bg-slate-200"
+                            }`} />
                         ))}
                       </div>
                       <p className="text-xs text-slate-400">{s.label}</p>
@@ -392,7 +386,6 @@ export default function Login() {
                 })()}
               </div>
 
-              {/* Confirm Password */}
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-1.5">Confirm Password</label>
                 <div className="relative">
@@ -426,7 +419,7 @@ export default function Login() {
           </>
         )}
 
-        
+
         {mode === "success" && (
           <div className="text-center py-4">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-100 mb-5 relative">
@@ -443,12 +436,12 @@ export default function Login() {
 
             <div className="bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-3 text-xs text-indigo-600 mb-6 text-left">
               💡 <strong>Demo Note:</strong> Password change save <br />
-              Login <strong>123456</strong> 
+              Login <strong>123456</strong>
             </div>
 
             <button onClick={goBackToLogin}
               className="w-full py-3 rounded-xl font-bold text-sm text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg transition-all cursor-pointer">
-              Login Page 
+              Login Page
             </button>
           </div>
         )}

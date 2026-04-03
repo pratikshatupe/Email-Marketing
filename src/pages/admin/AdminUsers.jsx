@@ -11,7 +11,6 @@ function AdminUsers() {
   return (
     <div className="flex min-h-screen bg-gray-100">
 
-      {/* Sidebar */}
       <div className="w-64 bg-[#0F0E2A] text-white p-5 flex flex-col justify-between">
         <div>
           <h2 className="text-2xl font-bold mb-6">MailDoll</h2>
@@ -24,7 +23,6 @@ function AdminUsers() {
           </ul>
         </div>
 
-        {/* Logout */}
         <button
           onClick={handleLogout}
           className="bg-red-500 hover:bg-red-600 text-white py-2 rounded"
@@ -33,12 +31,10 @@ function AdminUsers() {
         </button>
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 p-6">
 
         <h1 className="text-2xl font-bold mb-6">Customer Dashboard</h1>
 
-        {/* Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 
           <div className="bg-white p-4 rounded shadow">

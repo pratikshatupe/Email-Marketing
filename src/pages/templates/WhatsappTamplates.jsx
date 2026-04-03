@@ -195,19 +195,58 @@ function Badge({ text, type = "category" }) {
   );
 }
 
+// ─── Toast Notification ───────────────────────────────────────────────────────
+function Toast({ message, onClose }) {
+  return (
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 bg-gray-900 text-white px-5 py-3 rounded-2xl shadow-xl">
+      <span className="text-base">✅</span>
+      <span className="text-sm font-semibold">{message}</span>
+      <button onClick={onClose} className="ml-2 text-gray-400 hover:text-white text-xs">✕</button>
+    </div>
+  );
+}
+
+// ─── Campaign Selected Banner ─────────────────────────────────────────────────
+function CampaignBanner({ template, onDismiss, onGoToCampaign }) {
+  return (
+    <div className="mx-4 sm:mx-6 mb-3 flex items-center justify-between gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+      <div className="flex items-center gap-3">
+        <span className="text-xl">🚀</span>
+        <div>
+          <p className="text-sm font-bold text-green-800">Template selected for campaign!</p>
+          <p className="text-xs text-green-500">
+            <span className="font-semibold">{template.name}</span> is ready to use
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <button
+          onClick={onGoToCampaign}
+          className="text-xs px-3 py-1.5 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 transition"
+        >
+          Go to Campaign →
+        </button>
+        <button
+          onClick={onDismiss}
+          className="text-xs px-2 py-1.5 rounded-lg text-green-400 hover:text-green-600 hover:bg-green-100 transition"
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── WhatsApp Phone Preview ───────────────────────────────────────────────────
 function WhatsAppPreview({ template }) {
   const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   return (
     <div className="flex flex-col items-center">
-      {/* Phone shell */}
       <div className="w-64 rounded-3xl border-4 border-gray-800 bg-gray-800 shadow-2xl overflow-hidden">
-        {/* Status bar */}
         <div className="bg-gray-800 flex justify-between items-center px-4 py-1 text-white text-xs">
           <span>9:41</span>
           <span>●●●</span>
         </div>
-        {/* WhatsApp header */}
         <div className="bg-green-700 px-3 py-2 flex items-center gap-2">
           <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-white text-xs font-bold">
             {template.name[0]}
@@ -221,11 +260,8 @@ function WhatsAppPreview({ template }) {
             <span className="text-xs">⋮</span>
           </div>
         </div>
-        {/* Chat area */}
         <div className="bg-[#e5ddd5] min-h-48 p-3 flex flex-col gap-2">
-          {/* Message bubble */}
           <div className="bg-white rounded-xl rounded-tl-none shadow-sm max-w-full overflow-hidden">
-            {/* Header */}
             {template.headerType === "image" && (
               <div className="bg-gradient-to-br from-gray-200 to-gray-300 h-24 flex items-center justify-center text-3xl">
                 {template.headerContent}
@@ -233,29 +269,21 @@ function WhatsAppPreview({ template }) {
             )}
             {template.headerType === "text" && template.headerContent && (
               <div className="px-3 pt-3 pb-1">
-                <p className="text-gray-900 text-xs font-bold leading-snug">
-                  {template.headerContent}
-                </p>
+                <p className="text-gray-900 text-xs font-bold leading-snug">{template.headerContent}</p>
               </div>
             )}
-            {/* Body */}
             <div className="px-3 py-2">
-              <p className="text-gray-700 text-xs leading-relaxed whitespace-pre-line">
-                {template.body}
-              </p>
+              <p className="text-gray-700 text-xs leading-relaxed whitespace-pre-line">{template.body}</p>
             </div>
-            {/* Footer */}
             {template.footer && (
               <div className="px-3 pb-2">
                 <p className="text-gray-400 text-xs">{template.footer}</p>
               </div>
             )}
-            {/* Timestamp */}
             <div className="px-3 pb-2 flex justify-end">
               <span className="text-gray-400 text-xs">{time} ✓✓</span>
             </div>
           </div>
-          {/* Buttons */}
           {template.buttons && template.buttons.length > 0 && (
             <div className="flex flex-col gap-1">
               {template.buttons.map((btn, i) => (
@@ -269,7 +297,6 @@ function WhatsAppPreview({ template }) {
             </div>
           )}
         </div>
-        {/* Input bar */}
         <div className="bg-gray-100 px-2 py-2 flex items-center gap-1.5">
           <div className="flex-1 bg-white rounded-full px-3 py-1">
             <span className="text-gray-400 text-xs">Type a message</span>
@@ -289,18 +316,14 @@ function TemplateCard({ template, onPreview, onEdit, onDelete, onDuplicate }) {
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col">
-      {/* Thumbnail */}
       <div className={`h-36 bg-gradient-to-br ${THUMBNAIL_GRADIENTS[template.thumbnail]} flex items-center justify-center relative`}>
         <span className="text-5xl drop-shadow-lg select-none">{THUMBNAIL_ICONS[template.thumbnail]}</span>
-        {/* WhatsApp branding */}
         <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-white/20 backdrop-blur-sm rounded-lg px-2 py-0.5">
           <span className="text-white text-xs font-semibold">WhatsApp</span>
         </div>
-        {/* Status badge */}
         <div className="absolute top-3 left-3">
           <Badge text={template.status} type="status" />
         </div>
-        {/* 3-dot menu */}
         <div className="absolute top-3 right-3">
           <div className="relative">
             <button
@@ -336,14 +359,12 @@ function TemplateCard({ template, onPreview, onEdit, onDelete, onDuplicate }) {
         </div>
       </div>
 
-      {/* Body */}
       <div className="p-4 flex flex-col flex-1 gap-2">
         <div className="flex items-start justify-between gap-2">
           <h3 className="font-bold text-gray-900 text-sm leading-tight">{template.name}</h3>
           <Badge text={template.category} type="category" />
         </div>
         <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">{template.body}</p>
-        {/* Buttons preview */}
         {template.buttons && template.buttons.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1">
             {template.buttons.slice(0, 2).map((btn, i) => (
@@ -362,7 +383,6 @@ function TemplateCard({ template, onPreview, onEdit, onDelete, onDuplicate }) {
         </div>
       </div>
 
-      {/* Actions */}
       <div className="px-4 pb-4 flex gap-2">
         <button
           onClick={() => onPreview(template)}
@@ -382,11 +402,15 @@ function TemplateCard({ template, onPreview, onEdit, onDelete, onDuplicate }) {
 }
 
 // ─── Preview Modal ────────────────────────────────────────────────────────────
-function PreviewModal({ template, onClose }) {
+// UPDATED: onUseInCampaign prop added
+function PreviewModal({ template, onClose, onUseInCampaign }) {
   if (!template) return null;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl flex flex-col overflow-hidden" style={{ maxHeight: "92vh" }}>
+
+        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 flex-shrink-0">
           <div>
             <h2 className="text-base font-bold text-gray-900">{template.name}</h2>
@@ -401,9 +425,12 @@ function PreviewModal({ template, onClose }) {
             </svg>
           </button>
         </div>
+
+        {/* Body */}
         <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
           <div className="flex flex-col items-center gap-6">
             <WhatsAppPreview template={template} />
+
             {/* Template details */}
             <div className="w-full bg-white rounded-xl border border-gray-200 p-4 space-y-3">
               <h3 className="text-sm font-bold text-gray-800">Template Details</h3>
@@ -425,7 +452,8 @@ function PreviewModal({ template, onClose }) {
                   <p className="text-gray-700 mt-0.5 font-semibold">{template.usedInCampaigns} campaigns</p>
                 </div>
               </div>
-              {/* Variables */}
+
+              {/* Variables used */}
               {template.body.includes("{{") && (
                 <div className="pt-2 border-t border-gray-100">
                   <p className="text-xs font-semibold text-gray-500 mb-2">Variables Used</p>
@@ -436,16 +464,48 @@ function PreviewModal({ template, onClose }) {
                   </div>
                 </div>
               )}
+
+              {/* Status note for non-approved */}
+              {template.status !== "approved" && (
+                <div className="pt-2 border-t border-gray-100">
+                  <p className="text-xs text-amber-600 font-medium">
+                    ⚠️ Only <strong>approved</strong> templates can be used in campaigns.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
-        <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 flex-shrink-0">
-          <button onClick={onClose} className="px-4 py-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm font-medium transition">
-            Close
-          </button>
-          <button className="px-5 py-2 rounded-xl bg-green-600 text-white text-sm font-semibold hover:bg-green-700 transition">
-            Use in Campaign
-          </button>
+
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between gap-3 flex-shrink-0 bg-white">
+          <p className="text-xs text-gray-400 hidden sm:block">
+            Template ID: <span className="font-mono">#{template.id}</span>
+          </p>
+          <div className="flex gap-3 ml-auto">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm font-medium transition"
+            >
+              Close
+            </button>
+            {/* ✅ USE IN CAMPAIGN BUTTON */}
+            <button
+              onClick={() => onUseInCampaign(template)}
+              disabled={template.status !== "approved"}
+              className={`px-5 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2 ${
+                template.status === "approved"
+                  ? "bg-green-600 text-white hover:bg-green-700 active:scale-95"
+                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
+              }`}
+              title={template.status !== "approved" ? "Only approved templates can be used in campaigns" : ""}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+              Use in Campaign
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -517,7 +577,6 @@ function CreateEditModal({ template, onClose, onSave }) {
         <div className="flex flex-1 overflow-hidden">
           {/* Form */}
           <div className={`${previewOpen ? "w-1/2" : "w-full"} flex-shrink-0 overflow-y-auto p-6 space-y-4`}>
-            {/* Name */}
             <div>
               <label className="block text-xs font-semibold text-gray-600 mb-1.5">Template Name *</label>
               <input
@@ -528,8 +587,6 @@ function CreateEditModal({ template, onClose, onSave }) {
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-400 transition"
               />
             </div>
-
-            {/* Category + Language */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-gray-600 mb-1.5">Category *</label>
@@ -556,8 +613,6 @@ function CreateEditModal({ template, onClose, onSave }) {
                 </select>
               </div>
             </div>
-
-            {/* Header */}
             <div>
               <label className="block text-xs font-semibold text-gray-600 mb-1.5">Header</label>
               <div className="flex gap-2 mb-2">
@@ -591,8 +646,6 @@ function CreateEditModal({ template, onClose, onSave }) {
                 </div>
               )}
             </div>
-
-            {/* Body */}
             <div>
               <label className="block text-xs font-semibold text-gray-600 mb-1.5">Message Body *</label>
               <textarea
@@ -608,7 +661,6 @@ function CreateEditModal({ template, onClose, onSave }) {
                 </p>
                 <span className="text-xs text-gray-400">{form.body.length}/1024</span>
               </div>
-              {/* Quick insert */}
               <div className="flex flex-wrap gap-1.5 mt-2">
                 {["{{name}}", "{{order_id}}", "{{amount}}", "{{date}}", "{{company_name}}", "{{otp_code}}"].map((v) => (
                   <button
@@ -621,8 +673,6 @@ function CreateEditModal({ template, onClose, onSave }) {
                 ))}
               </div>
             </div>
-
-            {/* Footer */}
             <div>
               <label className="block text-xs font-semibold text-gray-600 mb-1.5">Footer <span className="font-normal text-gray-400">(optional)</span></label>
               <input
@@ -634,8 +684,6 @@ function CreateEditModal({ template, onClose, onSave }) {
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-400 transition"
               />
             </div>
-
-            {/* Buttons */}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="block text-xs font-semibold text-gray-600">Buttons <span className="font-normal text-gray-400">(max 3)</span></label>
@@ -692,8 +740,6 @@ function CreateEditModal({ template, onClose, onSave }) {
                 )}
               </div>
             </div>
-
-            {/* Status */}
             <div>
               <label className="block text-xs font-semibold text-gray-600 mb-1.5">Status</label>
               <div className="flex gap-4">
@@ -758,15 +804,19 @@ function DeleteConfirmModal({ template, onClose, onConfirm }) {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function WhatsAppTemplates() {
-  const [templates,       setTemplates]       = useState(MOCK_TEMPLATES);
-  const [search,          setSearch]          = useState("");
-  const [activeCategory,  setActiveCategory]  = useState("All");
-  const [sortBy,          setSortBy]          = useState("lastEdited");
-  const [viewMode,        setViewMode]        = useState("grid");
-  const [previewTemplate, setPreviewTemplate] = useState(null);
-  const [editTemplate,    setEditTemplate]    = useState(null);
-  const [createOpen,      setCreateOpen]      = useState(false);
-  const [deleteTarget,    setDeleteTarget]    = useState(null);
+  const [templates,        setTemplates]        = useState(MOCK_TEMPLATES);
+  const [search,           setSearch]           = useState("");
+  const [activeCategory,   setActiveCategory]   = useState("All");
+  const [sortBy,           setSortBy]           = useState("lastEdited");
+  const [viewMode,         setViewMode]         = useState("grid");
+  const [previewTemplate,  setPreviewTemplate]  = useState(null);
+  const [editTemplate,     setEditTemplate]     = useState(null);
+  const [createOpen,       setCreateOpen]       = useState(false);
+  const [deleteTarget,     setDeleteTarget]     = useState(null);
+
+  // ── "Use in Campaign" state ────────────────────────────────────────────────
+  const [campaignTemplate, setCampaignTemplate] = useState(null);
+  const [toast,            setToast]            = useState(null);
 
   // ── Filter + Sort ──────────────────────────────────────────────────────────
   const filtered = templates
@@ -829,22 +879,63 @@ export default function WhatsAppTemplates() {
     ]);
   };
 
+  // ── "Use in Campaign" handler ──────────────────────────────────────────────
+  const handleUseInCampaign = (template) => {
+    // 1. Set selected campaign template in state
+    setCampaignTemplate(template);
+
+    // 2. Persist to localStorage so Campaign page can read it
+    try {
+      localStorage.setItem(
+        "selectedCampaignTemplate",
+        JSON.stringify({
+          id:       template.id,
+          name:     template.name,
+          category: template.category,
+          language: template.language,
+          buttons:  template.buttons,
+        })
+      );
+    } catch (_) {
+      // localStorage unavailable — no-op
+    }
+
+    // 3. Increment usedInCampaigns count
+    setTemplates((ts) =>
+      ts.map((t) =>
+        t.id === template.id ? { ...t, usedInCampaigns: t.usedInCampaigns + 1 } : t
+      )
+    );
+
+    // 4. Close preview modal
+    setPreviewTemplate(null);
+
+    // 5. Show toast
+    setToast(`"${template.name}" added to campaign!`);
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  // "Go to Campaign" — replace with your router
+  const handleGoToCampaign = () => {
+    // navigate("/campaigns/new");   ← React Router
+    // router.push("/campaigns/new"); ← Next.js
+    alert(`Navigating to Campaign page with template: ${campaignTemplate?.name}\n\nReplace this alert with:\nnavigate("/campaigns/new")`);
+  };
+
   // ── Stats ──────────────────────────────────────────────────────────────────
   const stats = [
-    { label: "Total",    value: templates.length,                                          icon: "📱", color: "from-green-500 to-teal-500"    },
-    { label: "Approved", value: templates.filter((t) => t.status === "approved").length,   icon: "✅", color: "from-emerald-400 to-teal-500"  },
-    { label: "Pending",  value: templates.filter((t) => t.status === "pending").length,    icon: "⏳", color: "from-amber-400 to-orange-500"  },
-    { label: "Sent",     value: templates.reduce((a, t) => a + t.usedInCampaigns, 0),      icon: "🚀", color: "from-sky-400 to-cyan-500"      },
+    { label: "Total",    value: templates.length,                                        icon: "📱", color: "from-green-500 to-teal-500"    },
+    { label: "Approved", value: templates.filter((t) => t.status === "approved").length, icon: "✅", color: "from-emerald-400 to-teal-500"  },
+    { label: "Pending",  value: templates.filter((t) => t.status === "pending").length,  icon: "⏳", color: "from-amber-400 to-orange-500"  },
+    { label: "Sent",     value: templates.reduce((a, t) => a + t.usedInCampaigns, 0),    icon: "🚀", color: "from-sky-400 to-cyan-500"      },
   ];
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col bg-gray-50 rounded-xl overflow-hidden" style={{ height: "calc(100vh - 57px - 48px)" }}>
 
-      {/* STICKY HEADER */}
+      {/* ── STICKY HEADER ── */}
       <div className="flex-shrink-0 bg-white border-b border-gray-200 shadow-sm rounded-t-xl">
-
-        {/* Title row */}
         <div className="px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
           <div>
             <h1 className="text-lg sm:text-xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
@@ -866,7 +957,6 @@ export default function WhatsAppTemplates() {
           </button>
         </div>
 
-        {/* Stats row */}
         <div className="px-4 sm:px-6 pb-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
           {stats.map((stat) => (
             <div key={stat.label} className="bg-gray-50 rounded-xl px-4 py-3 flex items-center gap-3 border border-gray-100">
@@ -881,7 +971,6 @@ export default function WhatsAppTemplates() {
           ))}
         </div>
 
-        {/* Filter row */}
         <div className="px-4 sm:px-6 pb-4 space-y-3">
           <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative flex-1">
@@ -929,7 +1018,6 @@ export default function WhatsAppTemplates() {
             </div>
           </div>
 
-          {/* Category tabs */}
           <div className="flex gap-1.5 flex-wrap">
             {CATEGORIES.map((cat) => (
               <button
@@ -947,12 +1035,20 @@ export default function WhatsAppTemplates() {
           </div>
         </div>
       </div>
-      {/* END STICKY HEADER */}
+      {/* ── END STICKY HEADER ── */}
 
-      {/* SCROLLABLE CONTENT */}
+      {/* ── SCROLLABLE CONTENT ── */}
       <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4">
 
-        {/* Results count */}
+        {/* Campaign selected banner */}
+        {campaignTemplate && (
+          <CampaignBanner
+            template={campaignTemplate}
+            onDismiss={() => setCampaignTemplate(null)}
+            onGoToCampaign={handleGoToCampaign}
+          />
+        )}
+
         <p className="text-xs text-gray-500">
           Showing <span className="font-semibold text-gray-800">{filtered.length}</span> template{filtered.length !== 1 && "s"}
         </p>
@@ -1044,11 +1140,15 @@ export default function WhatsAppTemplates() {
 
         <div className="h-4" />
       </div>
-      {/* END SCROLLABLE CONTENT */}
+      {/* ── END SCROLLABLE CONTENT ── */}
 
-      {/* Modals */}
+      {/* ── Modals ── */}
       {previewTemplate && (
-        <PreviewModal template={previewTemplate} onClose={() => setPreviewTemplate(null)} />
+        <PreviewModal
+          template={previewTemplate}
+          onClose={() => setPreviewTemplate(null)}
+          onUseInCampaign={handleUseInCampaign}
+        />
       )}
       {(createOpen || editTemplate) && (
         <CreateEditModal
@@ -1063,6 +1163,11 @@ export default function WhatsAppTemplates() {
           onClose={() => setDeleteTarget(null)}
           onConfirm={handleDelete}
         />
+      )}
+
+      {/* ── Toast ── */}
+      {toast && (
+        <Toast message={toast} onClose={() => setToast(null)} />
       )}
     </div>
   );

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 
-// ─── Mock Data ────────────────────────────────────────────────────────────────
 const MOCK_STATS = {
   SUPER_ADMIN: [
     { label: "Total Companies",  value: "142",    change: "+12",  up: true,  icon: "🏢", color: "#6366f1" },
@@ -60,7 +59,6 @@ const MOCK_AUDIT = [
 const CHART_DATA = [65, 78, 55, 90, 72, 88, 95, 60, 82, 74, 91, 85];
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
 const statusColors = {
   Sent:      { bg: "#d1fae5", text: "#065f46" },
   Active:    { bg: "#dbeafe", text: "#1e40af" },
@@ -76,7 +74,6 @@ const roleColors = {
   VIEWER:            { bg: "#fce7f3", text: "#9d174d", label: "Viewer" },
 };
 
-// ─── Mini Bar Chart ───────────────────────────────────────────────────────────
 function MiniBarChart() {
   const max = Math.max(...CHART_DATA);
   return (
@@ -98,7 +95,6 @@ function MiniBarChart() {
   );
 }
 
-// ─── Donut Chart ─────────────────────────────────────────────────────────────
 function DonutChart({ opened, sent }) {
   const pct    = sent > 0 ? Math.round((opened / sent) * 100) : 0;
   const r      = 36;
@@ -116,7 +112,6 @@ function DonutChart({ opened, sent }) {
   );
 }
 
-// ─── Stat Card ────────────────────────────────────────────────────────────────
 function StatCard({ stat }) {
   return (
     <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition-shadow duration-200">
@@ -139,7 +134,6 @@ function StatCard({ stat }) {
   );
 }
 
-// ─── Role Banner ─────────────────────────────────────────────────────────────
 const roleBanners = {
   SUPER_ADMIN: {
     title: "Platform Overview",
@@ -167,9 +161,7 @@ const roleBanners = {
   },
 };
 
-// ═════════════════════════════════════════════════════════════════════════════
-// MAIN DASHBOARD COMPONENT
-// ═════════════════════════════════════════════════════════════════════════════
+
 export default function Dashboard() {
   const { user, hasPerm } = useAuth();
   const role   = user?.role || "VIEWER";
@@ -184,7 +176,6 @@ export default function Dashboard() {
   return (
     <div className="space-y-6 p-1">
 
-      {/* ── Role Banner ───────────────────────────────────────────── */}
       <div className="relative rounded-2xl overflow-hidden p-6 text-white"
         style={{ background: banner.gradient }}>
         <div className="absolute right-6 top-1/2 -translate-y-1/2 text-6xl opacity-20 select-none">
@@ -197,7 +188,6 @@ export default function Dashboard() {
         <p className="text-sm opacity-75">{banner.subtitle}</p>
       </div>
 
-      {/* ── Stat Cards ────────────────────────────────────────────── */}
       <div className={`grid gap-4 ${
         stats.length <= 4
           ? "grid-cols-2 md:grid-cols-4"
@@ -206,7 +196,6 @@ export default function Dashboard() {
         {stats.map((s, i) => <StatCard key={i} stat={s} />)}
       </div>
 
-      {/* ── Charts Row ────────────────────────────────────────────── */}
       {hasPerm("view_charts") && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
@@ -229,7 +218,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Open Rate Donut */}
           <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col">
             <h3 className="font-bold text-slate-800 mb-1">Open Rate</h3>
             <p className="text-xs text-slate-400 mb-4">Last campaign average</p>
@@ -254,14 +242,12 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ── Campaigns + Audit Row ─────────────────────────────────── */}
       <div className={`grid gap-4 ${
         hasPerm("view_last_campaigns") && role === "SUPER_ADMIN"
           ? "grid-cols-1 lg:grid-cols-3"
           : "grid-cols-1"
       }`}>
 
-        {/* Recent Campaigns Table */}
         {hasPerm("view_last_campaigns") && (
           <div className={`bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden ${
             role === "SUPER_ADMIN" ? "lg:col-span-2" : ""
@@ -308,7 +294,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Audit Log — Super Admin only */}
         {role === "SUPER_ADMIN" && (
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
@@ -337,7 +322,6 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* ── Team Members — Business Admin only ───────────────────── */}
       {role === "BUSINESS_ADMIN" && (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
@@ -379,7 +363,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ── Subscription Info — Super Admin / Business Admin ─────── */}
       {hasPerm("view_purchase") && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
@@ -437,7 +420,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ── Viewer: Read-only notice ──────────────────────────────── */}
       {role === "VIEWER" && (
         <div className="bg-pink-50 border border-pink-100 rounded-2xl p-5 flex items-center gap-4">
           <div className="w-10 h-10 rounded-xl bg-pink-100 flex items-center justify-center text-xl flex-shrink-0">

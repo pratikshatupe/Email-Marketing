@@ -1,4 +1,3 @@
-// frontend/pages/admin/AdminLayout.jsx
 
 import { useState } from "react";
 import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
@@ -23,6 +22,7 @@ import Automation           from "../automations/Automation";
 import Segments             from "../segments/Segments";
 import AnalyticsDashboard   from "../analytics/AnalyticsDashboard";
 import Subscription         from "../subscription/Subscription";
+import AuditLogs           from "../admin/Auditlogs";           // ✅ Audit Logs
 
 export default function AdminLayout() {
   const { user, hasPerm } = useAuth();
@@ -42,12 +42,10 @@ export default function AdminLayout() {
         />
       )}
 
-      {/* Sidebar — Desktop */}
       <div className="hidden md:flex h-full">
         <AdminSidebar collapsed={collapsed} />
       </div>
 
-      {/* Sidebar — Mobile Drawer */}
       <div
         className={`fixed left-0 top-0 h-full z-50 md:hidden transition-transform duration-300 ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
@@ -57,7 +55,6 @@ export default function AdminLayout() {
         <AdminSidebar collapsed={false} />
       </div>
 
-      {/* Main content */}
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <TopHeader
           onMenuToggle={() => {
@@ -69,13 +66,10 @@ export default function AdminLayout() {
         <main className="flex-1 overflow-y-auto p-3 md:p-4 lg:p-6">
           <Routes>
 
-            {/* ── Dashboard ── */}
             <Route index element={<DashboardPage />} />
 
-            {/* ── Profile (all logged-in users) ── */}
             <Route path="profile" element={<AdminProfile />} />
 
-            {/* ── Campaigns ── */}
             <Route path="campaigns" element={
               hasPerm("view_campaigns")
                 ? <Navigate to="/admin/campaigns/email" replace />
@@ -88,7 +82,6 @@ export default function AdminLayout() {
               hasPerm("view_campaigns") ? <WhatsAppCampaigns /> : <AccessDenied />
             } />
 
-            {/* ── Templates ── */}
             <Route path="templates" element={
               hasPerm("sidebar_templates")
                 ? <Navigate to="/admin/templates/email" replace />
@@ -101,32 +94,30 @@ export default function AdminLayout() {
               hasPerm("sidebar_templates") ? <WhatsAppTemplates /> : <AccessDenied />
             } />
 
-            {/* ── Contacts ── */}
             <Route path="contacts" element={
               hasPerm("sidebar_subscribers") ? <Contacts /> : <AccessDenied />
             } />
 
-            {/* ── Segments ── */}
             <Route path="segments" element={
               hasPerm("sidebar_subscribers") ? <Segments /> : <AccessDenied />
             } />
 
-            {/* ── Automation ── */}
             <Route path="automation" element={
               hasPerm("view_campaigns") ? <Automation /> : <AccessDenied />
             } />
 
-            {/* ── Analytics / Reports ── */}
             <Route path="reports" element={
               hasPerm("sidebar_reports") ? <AnalyticsDashboard /> : <AccessDenied />
             } />
 
-            {/* ── Subscription ── */}
+            <Route path="audit" element={
+              hasPerm("sidebar_roles") ? <AuditLogs /> : <AccessDenied />
+            } />
+
             <Route path="subscription" element={
               hasPerm("view_purchase") ? <Subscription /> : <AccessDenied />
             } />
 
-            {/* ── Administration ── */}
             <Route path="users" element={
               hasPerm("sidebar_roles") ? <UserManagementPage /> : <AccessDenied />
             } />
@@ -137,7 +128,6 @@ export default function AdminLayout() {
               hasPerm("sidebar_settings") ? <Settings /> : <AccessDenied />
             } />
 
-            {/* ── 404 inside admin ── */}
             <Route path="*" element={<AccessDenied />} />
 
           </Routes>

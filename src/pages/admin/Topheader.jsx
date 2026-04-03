@@ -1,5 +1,3 @@
-// admin/components/Topheader.jsx
-// Profile avatar → dropdown with "View Profile" + "Logout"
 
 import { useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -7,37 +5,37 @@ import { useAuth } from "../auth/AuthContext";
 import { roleConfig } from "../admin/AdminSidebar";
 
 const PATH_TITLES = {
-  "/admin":                    "Dashboard",
-  "/admin/campaigns":          "Campaigns",
-  "/admin/campaigns/email":    "Email Campaigns",
+  "/admin": "Dashboard",
+  "/admin/campaigns": "Campaigns",
+  "/admin/campaigns/email": "Email Campaigns",
   "/admin/campaigns/whatsapp": "WhatsApp Campaigns",
-  "/admin/templates":          "Templates",
-  "/admin/templates/email":    "Email Templates",
+  "/admin/templates": "Templates",
+  "/admin/templates/email": "Email Templates",
   "/admin/templates/whatsapp": "WhatsApp Templates",
-  "/admin/contacts":           "Contacts",
-  "/admin/segments":           "Segments",
-  "/admin/automation":         "Automation",
-  "/admin/reports":            "Reports",
-  "/admin/users":              "User Management",
-  "/admin/roles":              "Roles & Permissions",
-  "/admin/subscription":       "Subscription",
-  "/admin/settings":           "Settings",
-  "/admin/profile":            "My Profile",
+  "/admin/contacts": "Contacts",
+  "/admin/segments": "Segments",
+  "/admin/automation": "Automation",
+  "/admin/reports": "Reports",
+  "/admin/audit": "Audit Logs",
+  "/admin/users": "User Management",
+  "/admin/roles": "Roles & Permissions",
+  "/admin/subscription": "Subscription",
+  "/admin/settings": "Settings",
+  "/admin/profile": "My Profile",
 };
 
 export default function TopHeader({ onMenuToggle }) {
-  const { user, logout }  = useAuth();
-  const location          = useLocation();
-  const navigate          = useNavigate();
-  const role              = user?.role || "VIEWER";
-  const rc                = roleConfig[role] || roleConfig.VIEWER;
-  const title             = PATH_TITLES[location.pathname] || "Dashboard";
+  const { user, logout } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const role = user?.role || "VIEWER";
+  const rc = roleConfig[role] || roleConfig.VIEWER;
+  const title = PATH_TITLES[location.pathname] || "Dashboard";
 
   const [dropOpen, setDropOpen] = useState(false);
   const [logoutConfirm, setLogoutConfirm] = useState(false);
   const dropRef = useRef(null);
 
-  // Close dropdown on outside click
   useEffect(() => {
     function handleClick(e) {
       if (dropRef.current && !dropRef.current.contains(e.target)) {
@@ -48,7 +46,6 @@ export default function TopHeader({ onMenuToggle }) {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  // Close dropdown on route change
   useEffect(() => { setDropOpen(false); }, [location.pathname]);
 
   function goProfile() {
@@ -72,7 +69,6 @@ export default function TopHeader({ onMenuToggle }) {
   return (
     <>
       <header className="flex items-center justify-between px-4 md:px-5 py-3 bg-white border-b border-slate-100 sticky top-0 z-30 flex-shrink-0">
-        {/* Left: hamburger + page title */}
         <div className="flex items-center gap-2 md:gap-3">
           <button
             onClick={onMenuToggle}
@@ -85,30 +81,25 @@ export default function TopHeader({ onMenuToggle }) {
           </h1>
         </div>
 
-        {/* Right: notification + profile */}
         <div className="flex items-center gap-1.5 md:gap-2">
 
-          {/* Notification bell */}
           <button className="relative w-8 h-8 md:w-9 md:h-9 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-100 transition-all text-base">
             🔔
             <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500" />
           </button>
 
-          {/* Profile dropdown trigger */}
           <div className="relative" ref={dropRef}>
             <button
               onClick={() => setDropOpen((o) => !o)}
               className={`flex items-center gap-2 px-2 md:px-3 py-1.5 rounded-xl transition-all cursor-pointer
                 ${dropOpen ? "bg-indigo-50 ring-2 ring-indigo-200" : "hover:bg-slate-50"}`}
             >
-              {/* Avatar circle */}
               <div
                 className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 shadow"
                 style={{ background: `linear-gradient(135deg,${rc.color},${rc.color}99)` }}
               >
                 {avatarLetter}
               </div>
-              {/* Name + role (hidden on mobile) */}
               <div className="hidden sm:block text-left">
                 <p className="text-[11px] font-bold text-slate-700 leading-none truncate max-w-[100px]">
                   {displayName}
@@ -117,17 +108,14 @@ export default function TopHeader({ onMenuToggle }) {
                   {rc.label}
                 </p>
               </div>
-              {/* Chevron */}
               <span className={`text-slate-400 text-[10px] transition-transform duration-200 ${dropOpen ? "rotate-180" : ""}`}>
                 ▼
               </span>
             </button>
 
-            {/* ── Dropdown menu ── */}
             {dropOpen && (
               <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50 animate-fadeIn">
 
-                {/* User info header */}
                 <div className="px-4 py-3 bg-gradient-to-br from-slate-50 to-slate-100 border-b border-slate-100">
                   <div className="flex items-center gap-3">
                     <div
@@ -145,7 +133,6 @@ export default function TopHeader({ onMenuToggle }) {
                   </div>
                 </div>
 
-                {/* Menu items */}
                 <div className="p-1.5">
                   <DropItem
                     icon="👤"
@@ -161,7 +148,6 @@ export default function TopHeader({ onMenuToggle }) {
                   />
                 </div>
 
-                {/* Logout */}
                 <div className="p-1.5 border-t border-slate-100">
                   <button
                     onClick={handleLogout}
@@ -182,7 +168,6 @@ export default function TopHeader({ onMenuToggle }) {
         </div>
       </header>
 
-      {/* ── Logout confirm modal ── */}
       {logoutConfirm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">

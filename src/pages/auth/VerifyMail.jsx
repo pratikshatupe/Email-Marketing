@@ -60,7 +60,6 @@ export default function VerifyEmail() {
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-10 flex flex-col items-center text-center">
 
-          {/* Logo */}
           <div className="flex items-center gap-2 mb-8">
             <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-lg">M</div>
             <span className="text-slate-800 text-xl font-bold">MailDoll</span>
@@ -76,7 +75,6 @@ export default function VerifyEmail() {
           {resent && <div className="w-full bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-xl px-4 py-3 text-sm mb-5">✅ Code resent successfully!</div>}
 
           <form onSubmit={handleSubmit} className="w-full space-y-6" onPaste={handlePaste}>
-            {/* OTP Boxes */}
             <div className="flex gap-2.5 justify-center">
               {otp.map((digit, i) => (
                 <input key={i} ref={(el) => (inputs.current[i] = el)}
@@ -94,7 +92,7 @@ export default function VerifyEmail() {
 
             <button type="submit" disabled={loading || filled < 6}
               className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer">
-              {loading ? (<><svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>Verifying...</>) : "Verify Email →"}
+              {loading ? (<><svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>Verifying...</>) : "Verify Email →"}
             </button>
           </form>
 

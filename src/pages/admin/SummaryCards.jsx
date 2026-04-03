@@ -43,7 +43,6 @@ export default function SummaryCards() {
             key={index}
             className={`relative p-5 rounded-2xl shadow-sm border ${card.bg} hover:shadow-lg transition-all duration-300`}
           >
-            {/* Top Section */}
             <div className="flex justify-between items-center mb-4">
               <div
                 className={`w-11 h-11 flex items-center justify-center rounded-xl bg-gradient-to-br ${card.color} text-white shadow-md`}
@@ -56,7 +55,6 @@ export default function SummaryCards() {
               </span>
             </div>
 
-            {/* Text */}
             <h4 className="text-sm text-slate-500 font-medium">
               {card.title}
             </h4>
@@ -64,7 +62,6 @@ export default function SummaryCards() {
               {card.value}
             </h2>
 
-            {/* Bottom line */}
             <div className="mt-4 h-1 w-full bg-white rounded-full overflow-hidden">
               <div className={`h-full bg-gradient-to-r ${card.color} w-3/4`} />
             </div>

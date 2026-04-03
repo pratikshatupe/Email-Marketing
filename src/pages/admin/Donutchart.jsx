@@ -1,4 +1,3 @@
-// admin/components/DonutChart.jsx
 
 export default function DonutChart({ opened, sent }) {
   const pct   = sent > 0 ? Math.round((opened / sent) * 100) : 0;

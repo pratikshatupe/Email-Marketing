@@ -1,4 +1,3 @@
-// src/pages/contacts/UploadContacts.jsx
 import React, { useState, useRef } from 'react';
 import { useAuth } from '../auth/AuthContext';
 
@@ -7,14 +6,14 @@ const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 export default function UploadContacts({ onSuccess }) {
   const { user } = useAuth();
   const token = localStorage.getItem('token');
-  const [file, setFile]         = useState(null);
+  const [file, setFile] = useState(null);
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [result, setResult]     = useState(null);
-  const [error, setError]       = useState('');
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
   const fileRef = useRef();
 
-  const canUpload = ['SUPER_ADMIN','BUSINESS_ADMIN','MARKETING_MANAGER'].includes(user?.role);
+  const canUpload = ['SUPER_ADMIN', 'BUSINESS_ADMIN', 'MARKETING_MANAGER'].includes(user?.role);
 
   function handleDrop(e) {
     e.preventDefault();
@@ -92,17 +91,14 @@ export default function UploadContacts({ onSuccess }) {
         )}
       </div>
 
-      {/* CSV Format Info */}
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
         <p className="text-sm font-medium text-blue-800 mb-1">📋 CSV Format</p>
         <p className="text-xs text-blue-600">Required columns: <code className="bg-blue-100 px-1 rounded">email</code></p>
         <p className="text-xs text-blue-600 mt-0.5">Optional: <code className="bg-blue-100 px-1 rounded">name</code>, <code className="bg-blue-100 px-1 rounded">phone</code>, <code className="bg-blue-100 px-1 rounded">tags</code></p>
       </div>
 
-      {/* Error */}
       {error && <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-600">{error}</div>}
 
-      {/* Success Result */}
       {result && (
         <div className="bg-green-50 border border-green-200 rounded-xl p-4">
           <p className="text-sm font-medium text-green-800">✅ Upload Successful!</p>
@@ -114,7 +110,6 @@ export default function UploadContacts({ onSuccess }) {
         </div>
       )}
 
-      {/* Upload Button */}
       <button
         onClick={handleUpload}
         disabled={!file || uploading}

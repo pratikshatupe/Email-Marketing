@@ -475,7 +475,6 @@ export default function Contacts() {
           );
         })}
 
-        {/* Mobile Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between pt-2">
             <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
@@ -501,7 +500,6 @@ export default function Contacts() {
         </Modal>
       )}
 
-      {/* Delete Confirm */}
       {deleteId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: "rgba(15,14,42,0.6)", backdropFilter: "blur(4px)" }}>
@@ -519,7 +517,6 @@ export default function Contacts() {
         </div>
       )}
 
-      {/* Upload Modal */}
       {showUpload && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: "rgba(15,14,42,0.65)", backdropFilter: "blur(6px)" }}>
@@ -549,7 +546,7 @@ export default function Contacts() {
                 className={`border-2 border-dashed rounded-2xl transition-all duration-150 cursor-pointer select-none
                   ${isDragging ? "border-indigo-400 bg-indigo-50 scale-[1.01]"
                     : currentFile ? "border-emerald-300 bg-emerald-50/60"
-                    : "border-slate-200 bg-slate-50 hover:border-indigo-300 hover:bg-indigo-50/40"}`}
+                      : "border-slate-200 bg-slate-50 hover:border-indigo-300 hover:bg-indigo-50/40"}`}
                 onClick={() => inputRefs[activeTab]?.current?.click()}
                 onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
                 onDragLeave={() => setIsDragging(false)}

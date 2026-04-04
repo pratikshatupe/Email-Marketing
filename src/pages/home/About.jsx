@@ -52,7 +52,6 @@ function About() {
     <div className="font-sans" style={{ background: '#F8F9FF' }}>
       <Navbar />
 
-      {/* SECTION 1 */}
       <section className="flex flex-col md:flex-row items-center justify-between px-10 md:px-20 py-20 gap-10 relative overflow-hidden"
         style={{ background: 'linear-gradient(160deg, #F8F9FF 0%, #EEF0FF 60%, #E4E7FF 100%)' }}>
         <div className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-10 pointer-events-none"
@@ -125,7 +124,6 @@ function About() {
         </div>
       </section>
 
-      {/* SECTION 2 */}
       <section className="flex flex-col md:flex-row items-center justify-between px-10 md:px-20 py-20 gap-10 relative overflow-hidden"
         style={{ background: '#EEF0FF' }}>
         <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full opacity-10 pointer-events-none"
@@ -179,7 +177,6 @@ function About() {
         </div>
       </section>
 
-      {/* SECTION 3 */}
       <section className="flex flex-col md:flex-row items-center justify-between px-10 md:px-20 py-20 gap-10 relative overflow-hidden"
         style={{ background: 'linear-gradient(160deg, #F8F9FF 0%, #EEF0FF 60%, #E4E7FF 100%)' }}>
         <div className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-10 pointer-events-none"
@@ -239,7 +236,6 @@ function About() {
         </div>
       </section>
 
-      {/* SECTION 4 */}
       <section className="flex flex-col md:flex-row items-center justify-between px-10 md:px-20 py-20 gap-10 relative overflow-hidden"
         style={{ background: '#EEF0FF' }}>
         <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full opacity-10 pointer-events-none"

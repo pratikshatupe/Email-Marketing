@@ -1,6 +1,4 @@
 import { useState } from "react";
-
-// ─── Mock Data ────────────────────────────────────────────────────────────────
 const MOCK_TEMPLATES = [
   {
     id: 1,
@@ -150,42 +148,41 @@ const MOCK_TEMPLATES = [
 const CATEGORIES = ["All", "Utility", "Transactional", "Marketing", "Authentication"];
 
 const THUMBNAIL_GRADIENTS = {
-  welcome:      "from-green-500 to-teal-600",
-  order:        "from-blue-500 to-indigo-600",
-  sale:         "from-orange-400 to-red-500",
-  otp:          "from-purple-500 to-violet-600",
-  reminder:     "from-sky-400 to-cyan-500",
-  feedback:     "from-amber-400 to-yellow-500",
-  shipping:     "from-teal-500 to-green-600",
+  welcome: "from-green-500 to-teal-600",
+  order: "from-blue-500 to-indigo-600",
+  sale: "from-orange-400 to-red-500",
+  otp: "from-purple-500 to-violet-600",
+  reminder: "from-sky-400 to-cyan-500",
+  feedback: "from-amber-400 to-yellow-500",
+  shipping: "from-teal-500 to-green-600",
   reengagement: "from-pink-400 to-fuchsia-600",
 };
 
 const THUMBNAIL_ICONS = {
-  welcome:      "👋",
-  order:        "🛒",
-  sale:         "🔥",
-  otp:          "🔑",
-  reminder:     "📅",
-  feedback:     "⭐",
-  shipping:     "🚚",
+  welcome: "👋",
+  order: "🛒",
+  sale: "🔥",
+  otp: "🔑",
+  reminder: "📅",
+  feedback: "⭐",
+  shipping: "🚚",
   reengagement: "💌",
 };
 
 const STATUS_COLORS = {
   approved: "bg-emerald-100 text-emerald-700",
-  pending:  "bg-amber-100 text-amber-700",
+  pending: "bg-amber-100 text-amber-700",
   rejected: "bg-red-100 text-red-700",
-  draft:    "bg-gray-100 text-gray-500",
+  draft: "bg-gray-100 text-gray-500",
 };
 
 const CATEGORY_COLORS = {
-  Utility:        "bg-sky-100 text-sky-700",
-  Transactional:  "bg-blue-100 text-blue-700",
-  Marketing:      "bg-orange-100 text-orange-700",
+  Utility: "bg-sky-100 text-sky-700",
+  Transactional: "bg-blue-100 text-blue-700",
+  Marketing: "bg-orange-100 text-orange-700",
   Authentication: "bg-purple-100 text-purple-700",
 };
 
-// ─── Badge ────────────────────────────────────────────────────────────────────
 function Badge({ text, type = "category" }) {
   const colors = type === "status" ? STATUS_COLORS : CATEGORY_COLORS;
   return (
@@ -195,7 +192,6 @@ function Badge({ text, type = "category" }) {
   );
 }
 
-// ─── Toast Notification ───────────────────────────────────────────────────────
 function Toast({ message, onClose }) {
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 bg-gray-900 text-white px-5 py-3 rounded-2xl shadow-xl">
@@ -206,7 +202,6 @@ function Toast({ message, onClose }) {
   );
 }
 
-// ─── Campaign Selected Banner ─────────────────────────────────────────────────
 function CampaignBanner({ template, onDismiss, onGoToCampaign }) {
   return (
     <div className="mx-4 sm:mx-6 mb-3 flex items-center justify-between gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
@@ -237,7 +232,6 @@ function CampaignBanner({ template, onDismiss, onGoToCampaign }) {
   );
 }
 
-// ─── WhatsApp Phone Preview ───────────────────────────────────────────────────
 function WhatsAppPreview({ template }) {
   const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   return (
@@ -310,7 +304,6 @@ function WhatsAppPreview({ template }) {
   );
 }
 
-// ─── Template Card ────────────────────────────────────────────────────────────
 function TemplateCard({ template, onPreview, onEdit, onDelete, onDuplicate }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -339,10 +332,10 @@ function TemplateCard({ template, onPreview, onEdit, onDelete, onDuplicate }) {
                 <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
                 <div className="absolute right-0 top-9 bg-white border border-gray-200 rounded-xl shadow-xl z-20 w-40 py-1 text-sm">
                   {[
-                    { label: "✏️ Edit",      action: () => { onEdit(template);      setMenuOpen(false); } },
-                    { label: "👁️ Preview",   action: () => { onPreview(template);   setMenuOpen(false); } },
+                    { label: "✏️ Edit", action: () => { onEdit(template); setMenuOpen(false); } },
+                    { label: "👁️ Preview", action: () => { onPreview(template); setMenuOpen(false); } },
                     { label: "📋 Duplicate", action: () => { onDuplicate(template); setMenuOpen(false); } },
-                    { label: "🗑️ Delete",   action: () => { onDelete(template);    setMenuOpen(false); }, danger: true },
+                    { label: "🗑️ Delete", action: () => { onDelete(template); setMenuOpen(false); }, danger: true },
                   ].map((item) => (
                     <button
                       key={item.label}
@@ -401,8 +394,6 @@ function TemplateCard({ template, onPreview, onEdit, onDelete, onDuplicate }) {
   );
 }
 
-// ─── Preview Modal ────────────────────────────────────────────────────────────
-// UPDATED: onUseInCampaign prop added
 function PreviewModal({ template, onClose, onUseInCampaign }) {
   if (!template) return null;
 
@@ -426,12 +417,10 @@ function PreviewModal({ template, onClose, onUseInCampaign }) {
           </button>
         </div>
 
-        {/* Body */}
         <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
           <div className="flex flex-col items-center gap-6">
             <WhatsAppPreview template={template} />
 
-            {/* Template details */}
             <div className="w-full bg-white rounded-xl border border-gray-200 p-4 space-y-3">
               <h3 className="text-sm font-bold text-gray-800">Template Details</h3>
               <div className="grid grid-cols-2 gap-3 text-xs">
@@ -453,7 +442,6 @@ function PreviewModal({ template, onClose, onUseInCampaign }) {
                 </div>
               </div>
 
-              {/* Variables used */}
               {template.body.includes("{{") && (
                 <div className="pt-2 border-t border-gray-100">
                   <p className="text-xs font-semibold text-gray-500 mb-2">Variables Used</p>
@@ -465,7 +453,6 @@ function PreviewModal({ template, onClose, onUseInCampaign }) {
                 </div>
               )}
 
-              {/* Status note for non-approved */}
               {template.status !== "approved" && (
                 <div className="pt-2 border-t border-gray-100">
                   <p className="text-xs text-amber-600 font-medium">
@@ -477,7 +464,6 @@ function PreviewModal({ template, onClose, onUseInCampaign }) {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between gap-3 flex-shrink-0 bg-white">
           <p className="text-xs text-gray-400 hidden sm:block">
             Template ID: <span className="font-mono">#{template.id}</span>
@@ -489,15 +475,13 @@ function PreviewModal({ template, onClose, onUseInCampaign }) {
             >
               Close
             </button>
-            {/* ✅ USE IN CAMPAIGN BUTTON */}
             <button
               onClick={() => onUseInCampaign(template)}
               disabled={template.status !== "approved"}
-              className={`px-5 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2 ${
-                template.status === "approved"
+              className={`px-5 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2 ${template.status === "approved"
                   ? "bg-green-600 text-white hover:bg-green-700 active:scale-95"
                   : "bg-gray-200 text-gray-400 cursor-not-allowed"
-              }`}
+                }`}
               title={template.status !== "approved" ? "Only approved templates can be used in campaigns" : ""}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -512,24 +496,23 @@ function PreviewModal({ template, onClose, onUseInCampaign }) {
   );
 }
 
-// ─── Create / Edit Modal ──────────────────────────────────────────────────────
 function CreateEditModal({ template, onClose, onSave }) {
   const isEdit = !!template;
   const [form, setForm] = useState(
     template
       ? { ...template, buttons: template.buttons ? [...template.buttons] : [] }
       : {
-          name: "",
-          category: "Utility",
-          language: "English",
-          status: "draft",
-          thumbnail: "welcome",
-          headerType: "text",
-          headerContent: "",
-          body: "Hi {{name}},\n\nYour message here.",
-          footer: "",
-          buttons: [],
-        }
+        name: "",
+        category: "Utility",
+        language: "English",
+        status: "draft",
+        thumbnail: "welcome",
+        headerType: "text",
+        headerContent: "",
+        body: "Hi {{name}},\n\nYour message here.",
+        footer: "",
+        buttons: [],
+      }
   );
   const [previewOpen, setPreviewOpen] = useState(false);
 
@@ -573,9 +556,7 @@ function CreateEditModal({ template, onClose, onSave }) {
           </div>
         </div>
 
-        {/* Body */}
         <div className="flex flex-1 overflow-hidden">
-          {/* Form */}
           <div className={`${previewOpen ? "w-1/2" : "w-full"} flex-shrink-0 overflow-y-auto p-6 space-y-4`}>
             <div>
               <label className="block text-xs font-semibold text-gray-600 mb-1.5">Template Name *</label>
@@ -620,11 +601,10 @@ function CreateEditModal({ template, onClose, onSave }) {
                   <button
                     key={t}
                     onClick={() => handleChange("headerType", t)}
-                    className={`text-xs px-3 py-1.5 rounded-xl border font-semibold capitalize transition ${
-                      form.headerType === t
+                    className={`text-xs px-3 py-1.5 rounded-xl border font-semibold capitalize transition ${form.headerType === t
                         ? "bg-green-600 text-white border-green-600"
                         : "border-gray-300 text-gray-600 hover:border-green-300"
-                    }`}
+                      }`}
                   >
                     {t}
                   </button>
@@ -753,7 +733,6 @@ function CreateEditModal({ template, onClose, onSave }) {
             </div>
           </div>
 
-          {/* Live Preview Panel */}
           {previewOpen && (
             <div className="w-1/2 flex-shrink-0 border-l border-gray-200 bg-gray-50 overflow-y-auto flex flex-col items-center justify-start p-6">
               <p className="text-xs font-semibold text-gray-500 mb-4 text-center">Live Preview</p>
@@ -762,7 +741,6 @@ function CreateEditModal({ template, onClose, onSave }) {
           )}
         </div>
 
-        {/* Footer */}
         <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 flex-shrink-0">
           <button onClick={onClose} className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm font-medium transition">
             Cancel
@@ -779,7 +757,6 @@ function CreateEditModal({ template, onClose, onSave }) {
   );
 }
 
-// ─── Delete Confirm Modal ─────────────────────────────────────────────────────
 function DeleteConfirmModal({ template, onClose, onConfirm }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
@@ -802,38 +779,34 @@ function DeleteConfirmModal({ template, onClose, onConfirm }) {
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
 export default function WhatsAppTemplates() {
-  const [templates,        setTemplates]        = useState(MOCK_TEMPLATES);
-  const [search,           setSearch]           = useState("");
-  const [activeCategory,   setActiveCategory]   = useState("All");
-  const [sortBy,           setSortBy]           = useState("lastEdited");
-  const [viewMode,         setViewMode]         = useState("grid");
-  const [previewTemplate,  setPreviewTemplate]  = useState(null);
-  const [editTemplate,     setEditTemplate]     = useState(null);
-  const [createOpen,       setCreateOpen]       = useState(false);
-  const [deleteTarget,     setDeleteTarget]     = useState(null);
+  const [templates, setTemplates] = useState(MOCK_TEMPLATES);
+  const [search, setSearch] = useState("");
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [sortBy, setSortBy] = useState("lastEdited");
+  const [viewMode, setViewMode] = useState("grid");
+  const [previewTemplate, setPreviewTemplate] = useState(null);
+  const [editTemplate, setEditTemplate] = useState(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
-  // ── "Use in Campaign" state ────────────────────────────────────────────────
   const [campaignTemplate, setCampaignTemplate] = useState(null);
-  const [toast,            setToast]            = useState(null);
+  const [toast, setToast] = useState(null);
 
-  // ── Filter + Sort ──────────────────────────────────────────────────────────
   const filtered = templates
     .filter((t) => {
-      const matchCat    = activeCategory === "All" || t.category === activeCategory;
-      const q           = search.toLowerCase();
+      const matchCat = activeCategory === "All" || t.category === activeCategory;
+      const q = search.toLowerCase();
       const matchSearch = t.name.toLowerCase().includes(q) || t.body.toLowerCase().includes(q);
       return matchCat && matchSearch;
     })
     .sort((a, b) => {
       if (sortBy === "lastEdited") return new Date(b.lastEdited) - new Date(a.lastEdited);
-      if (sortBy === "name")       return a.name.localeCompare(b.name);
-      if (sortBy === "campaigns")  return b.usedInCampaigns - a.usedInCampaigns;
+      if (sortBy === "name") return a.name.localeCompare(b.name);
+      if (sortBy === "campaigns") return b.usedInCampaigns - a.usedInCampaigns;
       return 0;
     });
 
-  // ── Handlers ───────────────────────────────────────────────────────────────
   const handleSave = (form) => {
     if (editTemplate) {
       setTemplates((ts) =>
@@ -879,62 +852,49 @@ export default function WhatsAppTemplates() {
     ]);
   };
 
-  // ── "Use in Campaign" handler ──────────────────────────────────────────────
   const handleUseInCampaign = (template) => {
-    // 1. Set selected campaign template in state
     setCampaignTemplate(template);
 
-    // 2. Persist to localStorage so Campaign page can read it
     try {
       localStorage.setItem(
         "selectedCampaignTemplate",
         JSON.stringify({
-          id:       template.id,
-          name:     template.name,
+          id: template.id,
+          name: template.name,
           category: template.category,
           language: template.language,
-          buttons:  template.buttons,
+          buttons: template.buttons,
         })
       );
     } catch (_) {
-      // localStorage unavailable — no-op
     }
 
-    // 3. Increment usedInCampaigns count
     setTemplates((ts) =>
       ts.map((t) =>
         t.id === template.id ? { ...t, usedInCampaigns: t.usedInCampaigns + 1 } : t
       )
     );
 
-    // 4. Close preview modal
     setPreviewTemplate(null);
 
-    // 5. Show toast
     setToast(`"${template.name}" added to campaign!`);
     setTimeout(() => setToast(null), 3500);
   };
 
-  // "Go to Campaign" — replace with your router
   const handleGoToCampaign = () => {
-    // navigate("/campaigns/new");   ← React Router
-    // router.push("/campaigns/new"); ← Next.js
     alert(`Navigating to Campaign page with template: ${campaignTemplate?.name}\n\nReplace this alert with:\nnavigate("/campaigns/new")`);
   };
 
-  // ── Stats ──────────────────────────────────────────────────────────────────
   const stats = [
-    { label: "Total",    value: templates.length,                                        icon: "📱", color: "from-green-500 to-teal-500"    },
-    { label: "Approved", value: templates.filter((t) => t.status === "approved").length, icon: "✅", color: "from-emerald-400 to-teal-500"  },
-    { label: "Pending",  value: templates.filter((t) => t.status === "pending").length,  icon: "⏳", color: "from-amber-400 to-orange-500"  },
-    { label: "Sent",     value: templates.reduce((a, t) => a + t.usedInCampaigns, 0),    icon: "🚀", color: "from-sky-400 to-cyan-500"      },
+    { label: "Total", value: templates.length, icon: "📱", color: "from-green-500 to-teal-500" },
+    { label: "Approved", value: templates.filter((t) => t.status === "approved").length, icon: "✅", color: "from-emerald-400 to-teal-500" },
+    { label: "Pending", value: templates.filter((t) => t.status === "pending").length, icon: "⏳", color: "from-amber-400 to-orange-500" },
+    { label: "Sent", value: templates.reduce((a, t) => a + t.usedInCampaigns, 0), icon: "🚀", color: "from-sky-400 to-cyan-500" },
   ];
 
-  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col bg-gray-50 rounded-xl overflow-hidden" style={{ height: "calc(100vh - 57px - 48px)" }}>
 
-      {/* ── STICKY HEADER ── */}
       <div className="flex-shrink-0 bg-white border-b border-gray-200 shadow-sm rounded-t-xl">
         <div className="px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
           <div>
@@ -1023,11 +983,10 @@ export default function WhatsAppTemplates() {
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
-                  activeCategory === cat
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${activeCategory === cat
                     ? "bg-green-600 text-white shadow-sm"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
+                  }`}
               >
                 {cat}
               </button>
@@ -1035,12 +994,9 @@ export default function WhatsAppTemplates() {
           </div>
         </div>
       </div>
-      {/* ── END STICKY HEADER ── */}
 
-      {/* ── SCROLLABLE CONTENT ── */}
       <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4">
 
-        {/* Campaign selected banner */}
         {campaignTemplate && (
           <CampaignBanner
             template={campaignTemplate}
@@ -1053,7 +1009,6 @@ export default function WhatsAppTemplates() {
           Showing <span className="font-semibold text-gray-800">{filtered.length}</span> template{filtered.length !== 1 && "s"}
         </p>
 
-        {/* Grid View */}
         {viewMode === "grid" && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filtered.map((t) => (
@@ -1076,7 +1031,6 @@ export default function WhatsAppTemplates() {
           </div>
         )}
 
-        {/* List View */}
         {viewMode === "list" && (
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="hidden sm:grid grid-cols-12 gap-4 px-6 py-3 bg-gray-50 border-b border-gray-200 text-xs font-bold text-gray-500 uppercase tracking-wide">
@@ -1137,12 +1091,9 @@ export default function WhatsAppTemplates() {
             )}
           </div>
         )}
-
         <div className="h-4" />
       </div>
-      {/* ── END SCROLLABLE CONTENT ── */}
 
-      {/* ── Modals ── */}
       {previewTemplate && (
         <PreviewModal
           template={previewTemplate}
@@ -1164,8 +1115,6 @@ export default function WhatsAppTemplates() {
           onConfirm={handleDelete}
         />
       )}
-
-      {/* ── Toast ── */}
       {toast && (
         <Toast message={toast} onClose={() => setToast(null)} />
       )}

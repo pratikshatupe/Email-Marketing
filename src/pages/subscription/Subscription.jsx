@@ -1,4 +1,3 @@
-// src/pages/subscription/Subscription.jsx
 import React, { useState } from 'react';
 
 const PLANS = [
@@ -102,7 +101,6 @@ export default function Subscription() {
         .sub-user-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.10); }
       `}</style>
 
-      {/* Toast */}
       {toast && (
         <div className={`rounded-xl px-4 py-3 text-sm border flex items-center justify-between ${toast.type === 'error' ? 'bg-red-50 border-red-200 text-red-700' : 'bg-green-50 border-green-200 text-green-700'}`}>
           <span>{toast.type === 'error' ? '⚠️' : '✅'} {toast.msg}</span>
@@ -110,7 +108,6 @@ export default function Subscription() {
         </div>
       )}
 
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-slate-800">Subscription</h1>
@@ -122,7 +119,6 @@ export default function Subscription() {
         </button>
       </div>
 
-      {/* Current Plan Banner */}
       <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 text-white">
         <p className="text-indigo-200 text-sm font-medium">Your Current Plan</p>
         <h2 className="text-2xl font-bold mt-1">{MY_SUB.plan_name}</h2>
@@ -137,7 +133,6 @@ export default function Subscription() {
         </div>
       </div>
 
-      {/* Admin Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { icon: '✅', label: 'Active Subscriptions', value: STATS.active_count },
@@ -153,7 +148,6 @@ export default function Subscription() {
         ))}
       </div>
 
-      {/* Tabs */}
       <div className="flex gap-2 border-b border-slate-200">
         {tabs.map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)}
@@ -163,7 +157,6 @@ export default function Subscription() {
         ))}
       </div>
 
-      {/* Plans Grid */}
       {activeTab === 'plans' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {PLANS.map(plan => {
@@ -194,10 +187,8 @@ export default function Subscription() {
         </div>
       )}
 
-      {/* Manage Tab */}
       {activeTab === 'manage' && (
         <>
-          {/* ── DESKTOP TABLE ── */}
           <div className="sub-manage-table bg-white rounded-2xl border border-slate-200 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm min-w-[680px]">
@@ -237,11 +228,9 @@ export default function Subscription() {
             </div>
           </div>
 
-          {/* ── MOBILE CARDS ── */}
           <div className="sub-manage-cards flex-col gap-3">
             {subs.map(sub => (
               <div key={sub.id} className="sub-user-card">
-                {/* Header */}
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div>
                     <p className="font-bold text-slate-800 text-sm">{sub.user_name}</p>
@@ -252,7 +241,6 @@ export default function Subscription() {
                   </span>
                 </div>
 
-                {/* Details */}
                 <div className="flex flex-wrap gap-2 mb-3">
                   <div className="flex items-center gap-1.5 bg-indigo-50 rounded-lg px-2.5 py-1.5">
                     <span className="text-indigo-400 text-xs">📦</span>
@@ -289,7 +277,6 @@ export default function Subscription() {
         </>
       )}
 
-      {/* Assign Modal */}
       {assignModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl">

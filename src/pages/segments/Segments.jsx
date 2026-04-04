@@ -1,4 +1,3 @@
-// src/pages/segments/Segments.jsx
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
 
@@ -11,16 +10,16 @@ export default function Segments() {
   const token = localStorage.getItem('token');
 
   const [segments, setSegments] = useState([]);
-  const [loading, setLoading]   = useState(true);
-  const [error, setError]       = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [editing, setEditing]   = useState(null);
-  const [form, setForm]         = useState(initialForm);
-  const [saving, setSaving]     = useState(false);
-  const [search, setSearch]     = useState('');
+  const [editing, setEditing] = useState(null);
+  const [form, setForm] = useState(initialForm);
+  const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState('');
 
-  const canEdit = ['SUPER_ADMIN','BUSINESS_ADMIN','MARKETING_MANAGER'].includes(user?.role);
-  const canDelete = ['SUPER_ADMIN','BUSINESS_ADMIN'].includes(user?.role);
+  const canEdit = ['SUPER_ADMIN', 'BUSINESS_ADMIN', 'MARKETING_MANAGER'].includes(user?.role);
+  const canDelete = ['SUPER_ADMIN', 'BUSINESS_ADMIN'].includes(user?.role);
 
   const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
 
@@ -55,9 +54,9 @@ export default function Segments() {
     if (!form.name.trim()) return;
     setSaving(true);
     try {
-      const url    = editing ? `${API}/segments/${editing.id}` : `${API}/segments`;
+      const url = editing ? `${API}/segments/${editing.id}` : `${API}/segments`;
       const method = editing ? 'PUT' : 'POST';
-      const res    = await fetch(url, { method, headers, body: JSON.stringify(form) });
+      const res = await fetch(url, { method, headers, body: JSON.stringify(form) });
       if (res.ok) {
         setShowModal(false);
         fetchSegments();
@@ -98,7 +97,6 @@ export default function Segments() {
         )}
       </div>
 
-      {/* Search */}
       <div className="bg-white rounded-2xl border border-slate-200 p-4">
         <input
           value={search}
@@ -108,10 +106,8 @@ export default function Segments() {
         />
       </div>
 
-      {/* Error */}
       {error && <div className="bg-red-50 text-red-600 rounded-xl p-3 text-sm">{error}</div>}
 
-      {/* Segments Grid */}
       {loading ? (
         <div className="flex items-center justify-center h-40">
           <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
@@ -156,7 +152,6 @@ export default function Segments() {
         </div>
       )}
 
-      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl">

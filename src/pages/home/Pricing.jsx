@@ -35,13 +35,13 @@ const plans = [
 
 const CloudIllustration = () => (
   <svg viewBox="0 0 300 200" className="w-full h-48" xmlns="http://www.w3.org/2000/svg">
-    <ellipse cx="130" cy="80" rx="70" ry="50" fill="#EEF0FF" opacity="0.9"/>
-    <ellipse cx="160" cy="90" rx="80" ry="55" fill="#E0E3FF" opacity="0.7"/>
-    <rect x="80" y="95" width="110" height="75" rx="6" fill="#0F0E2A" opacity="0.9"/>
-    <rect x="82" y="97" width="106" height="63" rx="4" fill="#06B6D4" opacity="0.8"/>
-    <rect x="60" y="162" width="150" height="8" rx="3" fill="#4F46E5" opacity="0.3"/>
-    <circle cx="220" cy="130" r="22" fill="#4F46E5" opacity="0.5"/>
-    <ellipse cx="225" cy="60" rx="20" ry="18" fill="#06B6D4" opacity="0.4"/>
+    <ellipse cx="130" cy="80" rx="70" ry="50" fill="#EEF0FF" opacity="0.9" />
+    <ellipse cx="160" cy="90" rx="80" ry="55" fill="#E0E3FF" opacity="0.7" />
+    <rect x="80" y="95" width="110" height="75" rx="6" fill="#0F0E2A" opacity="0.9" />
+    <rect x="82" y="97" width="106" height="63" rx="4" fill="#06B6D4" opacity="0.8" />
+    <rect x="60" y="162" width="150" height="8" rx="3" fill="#4F46E5" opacity="0.3" />
+    <circle cx="220" cy="130" r="22" fill="#4F46E5" opacity="0.5" />
+    <ellipse cx="225" cy="60" rx="20" ry="18" fill="#06B6D4" opacity="0.4" />
   </svg>
 )
 
@@ -49,9 +49,9 @@ const DashedConnector = ({ flip = false }) => (
   <div className="flex justify-center py-3">
     <svg width="70%" height="60" viewBox="0 0 600 60">
       {flip ? (
-        <path d="M100,55 Q100,10 300,10 Q500,10 500,55" fill="none" stroke="#4F46E5" strokeWidth="2" strokeDasharray="8,6"/>
+        <path d="M100,55 Q100,10 300,10 Q500,10 500,55" fill="none" stroke="#4F46E5" strokeWidth="2" strokeDasharray="8,6" />
       ) : (
-        <path d="M500,5 Q500,45 300,45 Q100,45 100,5" fill="none" stroke="#4F46E5" strokeWidth="2" strokeDasharray="8,6"/>
+        <path d="M500,5 Q500,45 300,45 Q100,45 100,5" fill="none" stroke="#4F46E5" strokeWidth="2" strokeDasharray="8,6" />
       )}
       <text x="480" y={flip ? "14" : "10"} fontSize="18">✈</text>
     </svg>

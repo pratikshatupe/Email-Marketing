@@ -168,7 +168,6 @@ export default function Dashboard() {
   const banner = roleBanners[role];
   const stats  = MOCK_STATS[role] || [];
 
-  // Which campaigns to show
   const campaigns = role === "MARKETING_MANAGER"
     ? MOCK_CAMPAIGNS.slice(0, 3)
     : MOCK_CAMPAIGNS;
@@ -199,7 +198,6 @@ export default function Dashboard() {
       {hasPerm("view_charts") && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-          {/* Email Performance Bar Chart */}
           <div className="md:col-span-2 bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
             <div className="flex items-center justify-between mb-1">
               <div>

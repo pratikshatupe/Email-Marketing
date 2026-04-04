@@ -1,6 +1,4 @@
 import { useState } from "react";
-
-// ─── Mock Data ────────────────────────────────────────────────────────────────
 const MOCK_TEMPLATES = [
   {
     id: 1,
@@ -96,25 +94,23 @@ const MOCK_TEMPLATES = [
 const CATEGORIES = ["All", "Onboarding", "Promotional", "Automated", "Transactional", "Newsletter"];
 
 const THUMBNAIL_GRADIENTS = {
-  welcome:      "from-indigo-500 to-purple-600",
-  sale:         "from-orange-400 to-red-500",
-  product:      "from-sky-400 to-cyan-500",
-  reset:        "from-red-400 to-rose-600",
-  newsletter:   "from-violet-500 to-purple-700",
+  welcome: "from-indigo-500 to-purple-600",
+  sale: "from-orange-400 to-red-500",
+  product: "from-sky-400 to-cyan-500",
+  reset: "from-red-400 to-rose-600",
+  newsletter: "from-violet-500 to-purple-700",
   reengagement: "from-pink-400 to-fuchsia-600",
 };
 
 const THUMBNAIL_ICONS = {
-  welcome:      "👋",
-  sale:         "☀️",
-  product:      "🛍️",
-  reset:        "🔑",
-  newsletter:   "📰",
+  welcome: "👋",
+  sale: "☀️",
+  product: "🛍️",
+  reset: "🔑",
+  newsletter: "📰",
   reengagement: "💌",
 };
 
-// ─── Toast Notification ───────────────────────────────────────────────────────
-// Simple toast shown when "Use in Campaign" is clicked
 function Toast({ message, onClose }) {
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 bg-gray-900 text-white px-5 py-3 rounded-2xl shadow-xl animate-fade-in">
@@ -125,16 +121,15 @@ function Toast({ message, onClose }) {
   );
 }
 
-// ─── Badge ────────────────────────────────────────────────────────────────────
 function Badge({ text }) {
   const colors = {
-    Onboarding:    "bg-indigo-100 text-indigo-700",
-    Promotional:   "bg-orange-100 text-orange-700",
-    Automated:     "bg-sky-100 text-sky-700",
+    Onboarding: "bg-indigo-100 text-indigo-700",
+    Promotional: "bg-orange-100 text-orange-700",
+    Automated: "bg-sky-100 text-sky-700",
     Transactional: "bg-red-100 text-red-700",
-    Newsletter:    "bg-violet-100 text-violet-700",
-    active:        "bg-emerald-100 text-emerald-700",
-    draft:         "bg-gray-100 text-gray-500",
+    Newsletter: "bg-violet-100 text-violet-700",
+    active: "bg-emerald-100 text-emerald-700",
+    draft: "bg-gray-100 text-gray-500",
   };
   return (
     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${colors[text] || "bg-gray-100 text-gray-600"}`}>
@@ -143,22 +138,18 @@ function Badge({ text }) {
   );
 }
 
-// ─── Template Card ────────────────────────────────────────────────────────────
 function TemplateCard({ template, onPreview, onEdit, onDelete, onDuplicate }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col">
-      {/* Thumbnail */}
       <div className={`h-36 bg-gradient-to-br ${THUMBNAIL_GRADIENTS[template.thumbnail]} flex items-center justify-center relative`}>
         <span className="text-5xl drop-shadow-lg select-none">{THUMBNAIL_ICONS[template.thumbnail]}</span>
 
-        {/* Status badge top-left */}
         <div className="absolute top-3 left-3">
           <Badge text={template.status} />
         </div>
 
-        {/* 3-dot menu top-right */}
         <div className="absolute top-3 right-3">
           <div className="relative">
             <button
@@ -174,10 +165,10 @@ function TemplateCard({ template, onPreview, onEdit, onDelete, onDuplicate }) {
                 <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
                 <div className="absolute right-0 top-9 bg-white border border-gray-200 rounded-xl shadow-xl z-20 w-40 py-1 text-sm">
                   {[
-                    { label: "✏️ Edit",      action: () => { onEdit(template);      setMenuOpen(false); } },
-                    { label: "👁️ Preview",   action: () => { onPreview(template);   setMenuOpen(false); } },
+                    { label: "✏️ Edit", action: () => { onEdit(template); setMenuOpen(false); } },
+                    { label: "👁️ Preview", action: () => { onPreview(template); setMenuOpen(false); } },
                     { label: "📋 Duplicate", action: () => { onDuplicate(template); setMenuOpen(false); } },
-                    { label: "🗑️ Delete",   action: () => { onDelete(template);    setMenuOpen(false); }, danger: true },
+                    { label: "🗑️ Delete", action: () => { onDelete(template); setMenuOpen(false); }, danger: true },
                   ].map((item) => (
                     <button
                       key={item.label}
@@ -194,7 +185,6 @@ function TemplateCard({ template, onPreview, onEdit, onDelete, onDuplicate }) {
         </div>
       </div>
 
-      {/* Body */}
       <div className="p-4 flex flex-col flex-1 gap-2">
         <div className="flex items-start justify-between gap-2">
           <h3 className="font-bold text-gray-900 text-sm leading-tight">{template.name}</h3>
@@ -209,7 +199,6 @@ function TemplateCard({ template, onPreview, onEdit, onDelete, onDuplicate }) {
         </div>
       </div>
 
-      {/* Actions */}
       <div className="px-4 pb-4 flex gap-2">
         <button
           onClick={() => onPreview(template)}
@@ -228,10 +217,7 @@ function TemplateCard({ template, onPreview, onEdit, onDelete, onDuplicate }) {
   );
 }
 
-// ─── Preview Modal ────────────────────────────────────────────────────────────
-// UPDATED: Added device toggle (desktop/mobile preview) + Use in Campaign logic
 function PreviewModal({ template, onClose, onUseInCampaign }) {
-  // "desktop" | "mobile"
   const [device, setDevice] = useState("desktop");
 
   if (!template) return null;
@@ -242,7 +228,6 @@ function PreviewModal({ template, onClose, onUseInCampaign }) {
         className="bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
         style={{ width: "100%", maxWidth: "720px", maxHeight: "92vh" }}
       >
-        {/* ── Header ── */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 flex-shrink-0">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
@@ -250,7 +235,6 @@ function PreviewModal({ template, onClose, onUseInCampaign }) {
               <Badge text={template.category} />
               <Badge text={template.status} />
             </div>
-            {/* Subject line */}
             <p className="text-xs text-gray-400 mt-1 truncate">
               <span className="font-semibold text-gray-500">Subject:</span> {template.subject}
             </p>
@@ -265,23 +249,18 @@ function PreviewModal({ template, onClose, onUseInCampaign }) {
           </button>
         </div>
 
-        {/* ── Device Toggle Bar ── */}
         <div className="flex items-center justify-between px-6 py-3 bg-gray-50 border-b border-gray-100 flex-shrink-0">
-          {/* Left: metadata */}
           <div className="flex items-center gap-4 text-xs text-gray-400">
             <span>📅 Last edited: <strong className="text-gray-600">{template.lastEdited}</strong></span>
             <span>🚀 Used in <strong className="text-gray-600">{template.usedInCampaigns}</strong> campaigns</span>
           </div>
 
-          {/* Right: Desktop / Mobile toggle */}
           <div className="flex border border-gray-200 rounded-xl overflow-hidden text-xs">
             <button
               onClick={() => setDevice("desktop")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 font-semibold transition ${
-                device === "desktop" ? "bg-indigo-600 text-white" : "text-gray-500 hover:bg-gray-100"
-              }`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 font-semibold transition ${device === "desktop" ? "bg-indigo-600 text-white" : "text-gray-500 hover:bg-gray-100"
+                }`}
             >
-              {/* Desktop icon */}
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
@@ -289,11 +268,9 @@ function PreviewModal({ template, onClose, onUseInCampaign }) {
             </button>
             <button
               onClick={() => setDevice("mobile")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 font-semibold transition ${
-                device === "mobile" ? "bg-indigo-600 text-white" : "text-gray-500 hover:bg-gray-100"
-              }`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 font-semibold transition ${device === "mobile" ? "bg-indigo-600 text-white" : "text-gray-500 hover:bg-gray-100"
+                }`}
             >
-              {/* Mobile icon */}
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
               </svg>
@@ -302,20 +279,16 @@ function PreviewModal({ template, onClose, onUseInCampaign }) {
           </div>
         </div>
 
-        {/* ── Preview Area ── */}
         <div className="flex-1 overflow-y-auto p-6 bg-gray-100 flex items-start justify-center">
           {device === "desktop" ? (
-            // Desktop preview — full width card
             <div className="w-full bg-white rounded-xl shadow-sm border border-gray-200 p-6 overflow-x-auto">
               <div dangerouslySetInnerHTML={{ __html: template.htmlContent }} />
             </div>
           ) : (
-            // Mobile preview — narrow phone-like frame
             <div
               className="bg-white rounded-3xl border-4 border-gray-300 shadow-xl overflow-hidden"
               style={{ width: "375px", minHeight: "500px" }}
             >
-              {/* Fake phone status bar */}
               <div className="h-8 bg-gray-100 flex items-center justify-between px-4 border-b border-gray-200">
                 <span className="text-xs text-gray-400 font-medium">9:41</span>
                 <div className="flex gap-1">
@@ -324,7 +297,6 @@ function PreviewModal({ template, onClose, onUseInCampaign }) {
                   <div className="w-2.5 h-2.5 rounded-full bg-gray-300" />
                 </div>
               </div>
-              {/* Email content */}
               <div className="p-3 overflow-x-hidden text-sm">
                 <div dangerouslySetInnerHTML={{ __html: template.htmlContent }} />
               </div>
@@ -332,14 +304,11 @@ function PreviewModal({ template, onClose, onUseInCampaign }) {
           )}
         </div>
 
-        {/* ── Footer ── */}
         <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between gap-3 flex-shrink-0 bg-white">
-          {/* Left: stats / hint */}
           <p className="text-xs text-gray-400 hidden sm:block">
             Use {"{{name}}"} and {"{{company_name}}"} for personalization
           </p>
 
-          {/* Right: action buttons */}
           <div className="flex gap-3 ml-auto">
             <button
               onClick={onClose}
@@ -347,7 +316,6 @@ function PreviewModal({ template, onClose, onUseInCampaign }) {
             >
               Close
             </button>
-            {/* ✅ USE IN CAMPAIGN — the key button */}
             <button
               onClick={() => onUseInCampaign(template)}
               className="px-5 py-2 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 active:scale-95 transition-all flex items-center gap-2"
@@ -364,8 +332,6 @@ function PreviewModal({ template, onClose, onUseInCampaign }) {
   );
 }
 
-// ─── Campaign Selected Banner ─────────────────────────────────────────────────
-// Shows at top of page after "Use in Campaign" is clicked — confirming selection
 function CampaignBanner({ template, onDismiss, onGoToCampaign }) {
   return (
     <div className="mx-4 sm:mx-6 mb-3 flex items-center justify-between gap-3 bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-3">
@@ -396,27 +362,25 @@ function CampaignBanner({ template, onDismiss, onGoToCampaign }) {
   );
 }
 
-// ─── Create / Edit Modal ──────────────────────────────────────────────────────
 function CreateEditModal({ template, onClose, onSave }) {
   const isEdit = !!template;
   const [form, setForm] = useState(
     template
       ? { ...template }
       : {
-          name: "",
-          category: "Promotional",
-          subject: "",
-          status: "active",
-          htmlContent: "<p>Hello {{name}},</p>\n<p>Your message here.</p>",
-          thumbnail: "welcome",
-        }
+        name: "",
+        category: "Promotional",
+        subject: "",
+        status: "active",
+        htmlContent: "<p>Hello {{name}},</p>\n<p>Your message here.</p>",
+        thumbnail: "welcome",
+      }
   );
   const handleChange = (field, value) => setForm((f) => ({ ...f, [field]: value }));
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col overflow-hidden" style={{ maxHeight: "92vh" }}>
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 flex-shrink-0">
           <h2 className="text-base font-bold text-gray-900">
             {isEdit ? "✏️ Edit Template" : "✨ Create New Template"}
@@ -428,9 +392,7 @@ function CreateEditModal({ template, onClose, onSave }) {
           </button>
         </div>
 
-        {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
-          {/* Name */}
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1.5">Template Name *</label>
             <input
@@ -442,7 +404,6 @@ function CreateEditModal({ template, onClose, onSave }) {
             />
           </div>
 
-          {/* Category + Status */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-600 mb-1.5">Category *</label>
@@ -476,7 +437,6 @@ function CreateEditModal({ template, onClose, onSave }) {
             </div>
           </div>
 
-          {/* Subject */}
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1.5">Subject Line *</label>
             <input
@@ -489,7 +449,6 @@ function CreateEditModal({ template, onClose, onSave }) {
             <p className="text-xs text-gray-400 mt-1">Use {"{{name}}"}, {"{{company_name}}"} for personalization</p>
           </div>
 
-          {/* HTML Editor */}
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1.5">HTML Content</label>
             <div className="border border-gray-200 rounded-xl overflow-hidden">
@@ -529,7 +488,6 @@ function CreateEditModal({ template, onClose, onSave }) {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 flex-shrink-0">
           <button
             onClick={onClose}
@@ -549,7 +507,6 @@ function CreateEditModal({ template, onClose, onSave }) {
   );
 }
 
-// ─── Delete Confirm Modal ─────────────────────────────────────────────────────
 function DeleteConfirmModal({ template, onClose, onConfirm }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
@@ -578,40 +535,34 @@ function DeleteConfirmModal({ template, onClose, onConfirm }) {
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
 export default function Templates() {
-  const [templates,          setTemplates]          = useState(MOCK_TEMPLATES);
-  const [search,             setSearch]             = useState("");
-  const [activeCategory,     setActiveCategory]     = useState("All");
-  const [sortBy,             setSortBy]             = useState("lastEdited");
-  const [viewMode,           setViewMode]           = useState("grid");
-  const [previewTemplate,    setPreviewTemplate]    = useState(null);
-  const [editTemplate,       setEditTemplate]       = useState(null);
-  const [createOpen,         setCreateOpen]         = useState(false);
-  const [deleteTarget,       setDeleteTarget]       = useState(null);
+  const [templates, setTemplates] = useState(MOCK_TEMPLATES);
+  const [search, setSearch] = useState("");
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [sortBy, setSortBy] = useState("lastEdited");
+  const [viewMode, setViewMode] = useState("grid");
+  const [previewTemplate, setPreviewTemplate] = useState(null);
+  const [editTemplate, setEditTemplate] = useState(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
-  // ── "Use in Campaign" state ────────────────────────────────────────────────
-  // Stores the template that was selected for a campaign
-  const [campaignTemplate,   setCampaignTemplate]   = useState(null);
-  // Toast notification state
-  const [toast,              setToast]              = useState(null);
+  const [campaignTemplate, setCampaignTemplate] = useState(null);
+  const [toast, setToast] = useState(null);
 
-  // ── Filter + Sort ──────────────────────────────────────────────────────────
   const filtered = templates
     .filter((t) => {
-      const matchCat    = activeCategory === "All" || t.category === activeCategory;
-      const q           = search.toLowerCase();
+      const matchCat = activeCategory === "All" || t.category === activeCategory;
+      const q = search.toLowerCase();
       const matchSearch = t.name.toLowerCase().includes(q) || t.subject.toLowerCase().includes(q);
       return matchCat && matchSearch;
     })
     .sort((a, b) => {
       if (sortBy === "lastEdited") return new Date(b.lastEdited) - new Date(a.lastEdited);
-      if (sortBy === "name")       return a.name.localeCompare(b.name);
-      if (sortBy === "campaigns")  return b.usedInCampaigns - a.usedInCampaigns;
+      if (sortBy === "name") return a.name.localeCompare(b.name);
+      if (sortBy === "campaigns") return b.usedInCampaigns - a.usedInCampaigns;
       return 0;
     });
 
-  // ── Handlers ───────────────────────────────────────────────────────────────
   const handleSave = (form) => {
     if (editTemplate) {
       setTemplates((ts) =>
@@ -655,62 +606,45 @@ export default function Templates() {
     ]);
   };
 
-  // ── "Use in Campaign" handler ──────────────────────────────────────────────
-  // Called when user clicks "Use in Campaign" inside the Preview modal
   const handleUseInCampaign = (template) => {
-    // 1. Store selected template in state (or localStorage if you prefer)
     setCampaignTemplate(template);
 
-    // 2. Optionally persist to localStorage so Campaign page can read it
     try {
       localStorage.setItem(
         "selectedCampaignTemplate",
         JSON.stringify({ id: template.id, name: template.name, subject: template.subject })
       );
     } catch (_) {
-      // localStorage unavailable — no-op
     }
 
-    // 3. Increment usedInCampaigns count for this template
     setTemplates((ts) =>
       ts.map((t) =>
         t.id === template.id ? { ...t, usedInCampaigns: t.usedInCampaigns + 1 } : t
       )
     );
 
-    // 4. Close preview modal
     setPreviewTemplate(null);
 
-    // 5. Show toast notification
     setToast(`"${template.name}" added to campaign!`);
     setTimeout(() => setToast(null), 3500);
   };
 
-  // "Go to Campaign" — replace with your router.push("/campaigns/new") or navigate()
   const handleGoToCampaign = () => {
-    // Example with react-router:
-    // navigate("/campaigns/new");
-    // Example with Next.js:
-    // router.push("/campaigns/new");
     alert(`Navigating to Campaign page with template: ${campaignTemplate?.name}\n\nYou can replace this alert with:\nnavigate("/campaigns/new")\nor\nrouter.push("/campaigns/new")`);
   };
 
-  // ── Stats ──────────────────────────────────────────────────────────────────
   const stats = [
-    { label: "Total",     value: templates.length,                                       icon: "📄", color: "from-indigo-500 to-purple-500" },
-    { label: "Active",    value: templates.filter((t) => t.status === "active").length,  icon: "✅", color: "from-emerald-400 to-teal-500"  },
-    { label: "Draft",     value: templates.filter((t) => t.status === "draft").length,   icon: "📝", color: "from-amber-400 to-orange-500"  },
-    { label: "Campaigns", value: templates.reduce((a, t) => a + t.usedInCampaigns, 0),   icon: "🚀", color: "from-sky-400 to-cyan-500"      },
+    { label: "Total", value: templates.length, icon: "📄", color: "from-indigo-500 to-purple-500" },
+    { label: "Active", value: templates.filter((t) => t.status === "active").length, icon: "✅", color: "from-emerald-400 to-teal-500" },
+    { label: "Draft", value: templates.filter((t) => t.status === "draft").length, icon: "📝", color: "from-amber-400 to-orange-500" },
+    { label: "Campaigns", value: templates.reduce((a, t) => a + t.usedInCampaigns, 0), icon: "🚀", color: "from-sky-400 to-cyan-500" },
   ];
 
-  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col bg-gray-50 rounded-xl overflow-hidden" style={{ height: "calc(100vh - 57px - 48px)" }}>
 
-      {/* ── STICKY HEADER ── */}
       <div className="flex-shrink-0 bg-white border-b border-gray-200 shadow-sm rounded-t-xl">
 
-        {/* Title row */}
         <div className="px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
           <div>
             <h1 className="text-lg sm:text-xl font-extrabold text-gray-900 tracking-tight">
@@ -732,7 +666,6 @@ export default function Templates() {
           </button>
         </div>
 
-        {/* Stats row */}
         <div className="px-4 sm:px-6 pb-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
           {stats.map((stat) => (
             <div key={stat.label} className="bg-gray-50 rounded-xl px-4 py-3 flex items-center gap-3 border border-gray-100">
@@ -747,7 +680,6 @@ export default function Templates() {
           ))}
         </div>
 
-        {/* Filter row */}
         <div className="px-4 sm:px-6 pb-4 space-y-3">
           <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative flex-1">
@@ -795,17 +727,15 @@ export default function Templates() {
             </div>
           </div>
 
-          {/* Category tabs */}
           <div className="flex gap-1.5 flex-wrap">
             {CATEGORIES.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
-                  activeCategory === cat
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${activeCategory === cat
                     ? "bg-indigo-600 text-white shadow-sm"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
+                  }`}
               >
                 {cat}
               </button>
@@ -813,12 +743,9 @@ export default function Templates() {
           </div>
         </div>
       </div>
-      {/* ── END STICKY HEADER ── */}
 
-      {/* ── SCROLLABLE CONTENT ── */}
       <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4">
 
-        {/* Campaign selected banner — shown after "Use in Campaign" */}
         {campaignTemplate && (
           <CampaignBanner
             template={campaignTemplate}
@@ -827,12 +754,10 @@ export default function Templates() {
           />
         )}
 
-        {/* Results count */}
         <p className="text-xs text-gray-500">
           Showing <span className="font-semibold text-gray-800">{filtered.length}</span> template{filtered.length !== 1 && "s"}
         </p>
 
-        {/* Grid View */}
         {viewMode === "grid" && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filtered.map((t) => (
@@ -855,7 +780,6 @@ export default function Templates() {
           </div>
         )}
 
-        {/* List View */}
         {viewMode === "list" && (
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="hidden sm:grid grid-cols-12 gap-4 px-6 py-3 bg-gray-50 border-b border-gray-200 text-xs font-bold text-gray-500 uppercase tracking-wide">
@@ -927,12 +851,9 @@ export default function Templates() {
           </div>
         )}
 
-        {/* Bottom breathing room */}
         <div className="h-4" />
       </div>
-      {/* ── END SCROLLABLE CONTENT ── */}
 
-      {/* ── Modals ── */}
       {previewTemplate && (
         <PreviewModal
           template={previewTemplate}
@@ -955,7 +876,6 @@ export default function Templates() {
         />
       )}
 
-      {/* ── Toast Notification ── */}
       {toast && (
         <Toast message={toast} onClose={() => setToast(null)} />
       )}

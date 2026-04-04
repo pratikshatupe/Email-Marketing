@@ -65,14 +65,12 @@ function Newsletter() {
     <div className="min-h-screen font-sans" style={{ background: '#0F0E2A' }}>
       <Navbar />
 
-      {/* ✅ Custom Success Popup */}
       {showPopup && (
         <div className="fixed inset-0 flex items-center justify-center z-50"
           style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
           <div className="relative rounded-3xl p-10 max-w-sm w-full mx-4 text-center shadow-2xl"
             style={{ background: 'linear-gradient(145deg, #1A1840, #0F0E2A)', border: '1.5px solid #4F46E5' }}>
 
-            {/* Glow Ring */}
             <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 relative"
               style={{ background: 'linear-gradient(135deg, #4F46E5, #06B6D4)' }}>
               <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
